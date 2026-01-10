@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vampir Köylü - Kahoot Mode</title>
+    <style>
+        body { background-color: #46178f; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .header { background: white; color: #46178f; padding: 10px; border-radius: 0 0 20px 20px; font-weight: bold; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .card { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; backdrop-filter: blur(5px); }
+        input { width: 80%; padding: 15px; border-radius: 10px; border: none; font-size: 18px; margin-bottom: 10px; }
+        .btn-kahoot { background-color: #26890c; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px #1a5e08; transition: 0.2s; }
+        .btn-kahoot:active { box-shadow: 0 0; transform: translateY(4px); }
+        .player-chip { display: inline-block; background: white; color: #46178f; padding: 10px 20px; border-radius: 20px; margin: 5px; font-weight: bold; animation: pop 0.3s ease; }
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        .role-alert { background: #eb1727; padding: 20px; border-radius: 15px; font-size: 24px; margin-top: 20px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">Oda PIN: 123456</div>
+
+    <div class="card" id="main-area">
+        <div id="join-section">
+            <h2>Oyuna Katıl!</h2>
+            <input type="text" id="nameInput" placeholder="Takma Adın">
+            <br>
+            <button class="btn-kahoot" onclick="joinGame()">Giriş Yap</button>
+        </div>
+
+        <div id="game-section" style="display:none;">
+            <div id="roleDisplay" class="role-alert"></div>
+            <h3>Katılanlar:</h3>
+            <div id="playerList"></div>
+            
+            <hr style="border: 0.5px solid rgba(255,255,255,0.2); margin: 20px 0;">
+            <button class="btn-kahoot" style="background-color: #1368ce; box-shadow: 0 4px #0a3d7a;" onclick="assignRoles()">Oyunu Başlat (Vampir Seç)</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBXkGLUFGXfQsXhZ8uKpJZf6Y5hTjdK-8",
+            authDomain: "vampir-koylu-oyunu.firebaseapp.com",
+            databaseURL: "https://vampir-koylu-oyunu-default-rtdb.firebaseio.com",
+            projectId: "vampir-koylu-oyunu",
+            storageBucket: "vampir-koylu-oyunu.firebasestorage.app",
+            messagingSenderId: "435524056346",
+            appId: "1:435524056346:web:5129bacb0ce26d970d68a3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const playerRef = ref(db, 'kahoot_players');
+        let myName = "";
+
+        window.joinGame = function() {
+            const name = document.getElementById("nameInput").value;
+            if(name) {
+                myName = name;
+                push(playerRef, { name: name, role: "Bekleniyor..." });
+                document.getElementById("join-section").style.display = "none";
+                document.getElementById("game-section").style.display = "block";
+            }
+        }
+
+        window.assignRoles = function() {
+            onValue(playerRef, (snap) => {
+                const keys = Object.keys(snap.val());
+                const vampKey = keys[Math.floor(Math.random() * keys.length)];
+                snap.forEach((child) => {
+                    set(ref(db, 'kahoot_players/' + child.key + '/role'), child.key === vampKey ? "VAMPİR! 🧛‍♂️" : "Köylü 🧑‍🌾");
+                });
+            }, { onlyOnce: true });
+        }
+
+        onValue(playerRef, (snap) => {
+            const listDiv = document.getElementById("playerList");
+            listDiv.innerHTML = "";
+            snap.forEach((child) => {
+                const data = child.val();
+                const span = document.createElement("span");
+                span.className = "player-chip";
+                span.textContent = data.name;
+                listDiv.appendChild(span);
+
+                if(data.name === myName && data.role !== "Bekleniyor...") {
+                    const alert = document.getElementById("roleDisplay");
+                    alert.style.display = "block";
+                    alert.textContent = "ROLÜN: " + data.role;
+                    alert.style.background = data.role.includes("VAMPİR") ? "#eb1727" : "#1368ce";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
