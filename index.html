@@ -1,77 +1,24 @@
-<script type="module">
-    // ... Firebase bağlantı ayarların (initializeApp, db vb.) aynı kalsın ...
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vampir Köylü - Pro Sürüm</title>
+    <style>
+        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; overflow: hidden; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 20px; padding: 25px; width: 90%; max-width: 450px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+        .btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 15px; }
+        .btn-create { background: #48bb78; color: white; }
+        .btn-join { background: #3182ce; color: white; }
+        .btn-vote { background: #805ad5; color: white; margin: 5px 0; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; background: rgba(255, 255, 255, 0.1); color: white; box-sizing: border-box; }
+        .timer { font-size: 30px; font-weight: bold; color: #f6e05e; margin: 15px 0; }
+        .phase-title { font-size: 20px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; color: #a0aec0; }
+        #rolePopup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: 50px; font-weight: bold; display: none; z-index: 100; border: 2px solid white; }
+    </style>
+</head>
+<body>
 
-    let hasVoted = false; // Bu turda oy verip vermediğini takip eder
+<div id="rolePopup"></div>
 
-    // --- OYUN AKIŞI DÖNGÜSÜ ---
-    async function handlePhases(data) {
-        // ... (Diğer fazlar aynı) ...
-
-        if(data.phase === 'voting') {
-            phaseTitle.textContent = "🗳️ OYLAMA ZAMANI";
-            document.body.style.background = "#44337a";
-            
-            // SADECE HAYATTAYSA VE HENÜZ OY VERMEDİYSE BUTONLARI GÖSTER
-            if(isAlive && !hasVoted) {
-                Object.entries(data.players).forEach(([key, p]) => {
-                    if(p.status === 'alive') {
-                        actionList.innerHTML += `<button class="btn btn-vote" onclick="voteAction('${key}')">${p.ad}</button>`;
-                    }
-                });
-            } else if (!isAlive) {
-                actionList.innerHTML = "<p style='color: #e53e3e;'>Ölüler oy kullanamaz!</p>";
-            } else {
-                actionList.innerHTML = "<p>Oyunuzu kullandınız, sonuçlar bekleniyor...</p>";
-            }
-        } else {
-            // Yeni faz başladığında oy verme kilidini sıfırla
-            hasVoted = false; 
-        }
-    }
-
-    // --- GÜVENLİ OYLAMA FONKSİYONU ---
-    window.voteAction = (targetKey) => {
-        if(hasVoted || !isAlive) return; // Zaten vermişse veya ölüyse işlem yapma
-
-        const voteRef = ref(db, `rooms/${currentRoom}/players/${targetKey}/votes`);
-        
-        // Firebase'deki oyu 1 artır
-        onValue(voteRef, (s) => {
-            const currentVotes = s.val() || 0;
-            update(ref(db, `rooms/${currentRoom}/players/${targetKey}`), { votes: currentVotes + 1 });
-            
-            hasVoted = true; // Yerel olarak kilidi kapat
-            document.getElementById('gameActionList').innerHTML = "Oyunuz başarıyla kaydedildi.";
-        }, {onlyOnce: true});
-    };
-
-    // --- LİDERİN OY SONUCU HESAPLAMASI (GELİŞMİŞ) ---
-    async function calculateVotingResult() {
-        const finalSnap = await new Promise(res => onValue(ref(db, `rooms/${currentRoom}/players`), res, {onlyOnce:true}));
-        const players = finalSnap.val();
-        
-        let maxVotes = 0;
-        let candidates = [];
-
-        // Oyları say
-        Object.entries(players).forEach(([k, p]) => {
-            if(p.votes > maxVotes) {
-                maxVotes = p.votes;
-                candidates = [k]; // Yeni lider aday
-            } else if (p.votes === maxVotes && maxVotes > 0) {
-                candidates.push(k); // Beraberlik listesine ekle
-            }
-            // Bir sonraki tur için oyları temizle
-            update(ref(db, `rooms/${currentRoom}/players/${k}`), { votes: 0 });
-        });
-
-        // SONUÇ: Sadece tek bir kişi en yüksek oyu aldıysa elenir
-        if(candidates.length === 1) {
-            const eliminatedKey = candidates[0];
-            update(ref(db, `rooms/${currentRoom}/players/${eliminatedKey}`), { status: 'dead' });
-            return players[eliminatedKey].ad + " oylamayla elendi!";
-        } else {
-            return "Oylama berabere bitti, kimse elenmedi!";
-        }
-    }
-</script>
+<div class="glass-
