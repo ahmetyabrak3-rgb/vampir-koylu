@@ -3,295 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Avatar Dünyası</title>
+    <title>Vampir Köylü 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --ikincil: #334155; }
-        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; background: var(--arka-plan); color: var(--metin); overflow: hidden; }
-        .kart { background: var(--kart); border-radius: 28px; padding: 25px; width: 95%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255,255,255,0.05); overflow-y: auto; max-height: 90vh; }
-        h1 { font-size: 24px; font-weight: 800; color: var(--vurgu); margin-bottom: 10px; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; }
-        .buton { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .buton-ana { background: var(--vurgu); color: #1e293b; }
-        .buton-ikincil { background: var(--ikincil); color: white; }
+        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --ikincil: #334155; }
+        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .kart { background: var(--kart); border-radius: 30px; padding: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; z-index: 10; }
         
-        /* AVATAR TASARIM */
-        .avatar-box { font-size: 60px; height: 100px; display: flex; align-items: center; justify-content: center; position: relative; background: rgba(0,0,0,0.3); border-radius: 20px; margin-bottom: 15px; border: 2px solid var(--vurgu); }
-        .acc-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        .secim-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px; }
-        .secim-item { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 8px; cursor: pointer; font-size: 20px; }
-        .secim-item:hover { border-color: var(--vurgu); }
-
-        /* DIGER STİLLER */
-        .kod-alani { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 5px 0; font-size: 28px; font-weight: 800; }
-        .panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: left; border: 1px dashed var(--vurgu); }
-        .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--arka-plan); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; }
-        .oyuncu-kart { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        /* 3D SAHNE ALANI */
+        #container3d { width: 100%; height: 250px; background: #000; border-radius: 20px; margin-bottom: 15px; border: 2px solid var(--vurgu); position: relative; overflow: hidden; }
+        
+        .kontrol-paneli { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
+        .secim-btn { background: var(--ikincil); border: none; padding: 10px; border-radius: 10px; cursor: pointer; color: white; font-size: 18px; transition: 0.2s; }
+        .secim-btn:hover { background: var(--vurgu); color: black; }
+        
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; margin-bottom: 10px; box-sizing: border-box; }
+        .buton { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 5px; }
+        .buton-ana { background: var(--vurgu); color: #1e293b; }
+        
+        #lobi-ekrani, #oyun-alani { display: none; }
+        .oyuncu-liste { text-align: left; max-height: 150px; overflow-y: auto; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div id="durumKatmani" class="katman">
-    <div id="katmanEmoji" style="font-size: 80px;"></div>
-    <div id="katmanBaslik" style="font-size: 32px; font-weight: 900; color: var(--vurgu);"></div>
-    <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8;"></div>
-    <button class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">ANLADIM</button>
-</div>
-
 <div class="kart">
     <div id="giris-ekrani">
-        <h1>VAMPİR KÖYLÜ</h1>
+        <h2 style="margin: 0 0 10px 0; color: var(--vurgu);">3D KARAKTERİN</h2>
         
-        <div class="avatar-box" id="avatarOnizleme">
-            <span id="p-char">😊</span>
-            <span class="acc-layer" id="p-hat"></span>
-            <span class="acc-layer" id="p-glass"></span>
-            <span class="acc-layer" id="p-mask"></span>
+        <div id="container3d">
+            </div>
+
+        <input type="text" id="kullaniciAdi" placeholder="Adınızı Yazın">
+        
+        <div style="font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #64748b;">RENK VE TARZ SEÇ</div>
+        <div class="kontrol-paneli">
+            <button class="secim-btn" onclick="renkDegistir(0xff4444)">🔴</button>
+            <button class="secim-btn" onclick="renkDegistir(0x44ff44)">🟢</button>
+            <button class="secim-btn" onclick="renkDegistir(0x4444ff)">🔵</button>
+            <button class="secim-btn" onclick="aksesuarEkle('sapka')">🎩</button>
+            <button class="secim-btn" onclick="aksesuarEkle('gozluk')">🕶️</button>
+            <button class="secim-btn" onclick="aksesuarEkle('maske')">😷</button>
+            <button class="secim-btn" onclick="sifirla()">❌</button>
         </div>
-
-        <input type="text" id="kullaniciAdi" placeholder="Adınız">
-
-        <div style="font-size: 11px; color: var(--vurgu); font-weight: bold; margin: 10px 0;">KARAKTER & AKSESUAR</div>
-        <div class="secim-grid" id="charGrid"></div>
-        <div class="secim-grid" id="hatGrid"></div>
-        <div class="secim-grid" id="glassGrid"></div>
-        <div class="secim-grid" id="maskGrid"></div>
 
         <button class="buton buton-ana" onclick="odaOlustur()">Oda Oluştur</button>
-        <div class="kod-alani">
-            <input type="text" id="odaKoduGiris" placeholder="Kod" style="width: 120px; margin:0;">
-            <button class="buton buton-ikincil" onclick="odayaKatil()" style="margin:0; width: 100px;">KATIL</button>
-        </div>
+        <button class="buton" style="background: #334155; color: white; margin-top: 5px;" onclick="odayaKatil()">Odaya Katıl</button>
+        <input type="text" id="odaKoduGiris" placeholder="Oda Kodu" style="margin-top: 10px;">
     </div>
 
-    <div id="lobi-ekrani" style="display: none;">
-        <div id="odaKoduGoster" style="font-size: 24px; font-weight: 800;">000000</div>
-        <div id="qrcode" style="background:white; padding:5px; display:inline-block; border-radius:8px; margin:10px;"></div>
-        
-        <div id="beklemeEkrani" style="display:none; color: #94a3b8; font-weight: bold;">LİDER BEKLENİYOR...</div>
-
-        <div id="admin-ayarlari" class="panel" style="display:none;">
-            <p style="text-align:center; margin:0; font-weight:bold; color:var(--vurgu);">ADMİN AYARLARI</p>
-            <label style="font-size:10px;">OYUNCU MUSUN?</label>
-            <select id="adminOyuncuMu"><option value="true">EVET</option><option value="false">HAYIR</option></select>
-            <button class="buton buton-ana" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
-        </div>
-
-        <div id="oyuncuListesi" style="margin-top:15px; text-align: left;"></div>
-    </div>
-
-    <div id="oyun-alani" style="display: none;">
-        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800;">BEKLEYİN</div>
-        <div id="sayacGosterge" style="font-size: 40px; font-weight: 800;">00:00</div>
-        <div id="oyunAksiyonListesi"></div>
+    <div id="lobi-ekrani">
+        <h3 id="odaKoduGoster" style="letter-spacing: 2px;">000000</h3>
+        <div id="qrcode" style="background:white; padding:5px; display:inline-block; border-radius:8px;"></div>
+        <p style="color: #94a3b8;">Oyuncular Bekleniyor...</p>
+        <div id="oyuncuListesi" class="oyuncu-liste"></div>
+        <button id="baslatBtn" class="buton buton-ana" style="display:none;" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script>
+    // --- 3D MOTORU (THREE.JS) AYARLARI ---
+    let scene, camera, renderer, character, bodyMaterial;
+    let items = { sapka: null, gozluk: null, maske: null };
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBBXkGLUFGXfQsXhZ8uKpJZf6Y5hTjdK-8",
-        authDomain: "vampir-koylu-oyunu.firebaseapp.com",
-        databaseURL: "https://vampir-koylu-oyunu-default-rtdb.firebaseio.com",
-        projectId: "vampir-koylu-oyunu"
-    };
+    function init3D() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+        camera.position.z = 5;
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(360, 250);
+        document.getElementById('container3d').appendChild(renderer.domElement);
 
-    const ASSETS = {
-        chars: ['😊','😎','🐱','🐶','🦊','👻','🤖','👽'],
-        hats: ['', '🎩','🤠','👑','🎓','🎩'],
-        glasses: ['', '🕶️','🤓','😎','🧐'],
-        masks: ['', '😷','👺','🎭','💀']
-    };
+        // Işıklandırma
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(0, 5, 5).set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
 
-    let myAvatar = { char: '😊', hat: '', glass: '', mask: '' };
-    let mevcutOda = null, benimAdim = "", benimAnahtarim = "", liderMiyim = false, rolum = "", hayattaMiyim = true;
+        // Karakter (Gövde ve Kafa)
+        const group = new THREE.Group();
+        bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xfbbf24 });
+        
+        const bodyGeo = new THREE.CapsuleGeometry(0.7, 1, 4, 16);
+        const body = new THREE.Mesh(bodyGeo, bodyMaterial);
+        group.add(body);
 
-    // UI Doldurma
-    function initSecim(id, list, key) {
-        const grid = document.getElementById(id);
-        list.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'secim-item';
-            div.textContent = item || '❌';
-            div.onclick = () => {
-                myAvatar[key] = item;
-                document.getElementById('p-'+key).textContent = item;
-                if(key === 'char') document.getElementById('p-char').textContent = item;
-            };
-            grid.appendChild(div);
-        });
+        const headGeo = new THREE.SphereGeometry(0.5, 32, 32);
+        const head = new THREE.Mesh(headGeo, bodyMaterial);
+        head.position.y = 1.2;
+        group.add(head);
+
+        character = group;
+        scene.add(character);
+
+        animate();
     }
-    initSecim('charGrid', ASSETS.chars, 'char');
-    initSecim('hatGrid', ASSETS.hats, 'hat');
-    initSecim('glassGrid', ASSETS.glasses, 'glass');
-    initSecim('maskGrid', ASSETS.masks, 'mask');
 
+    function animate() {
+        requestAnimationFrame(animate);
+        character.rotation.y += 0.01; // Karakteri yavaşça döndür
+        renderer.render(scene, camera);
+    }
+
+    // --- KONTROLLER ---
+    window.renkDegistir = (color) => { bodyMaterial.color.setHex(color); };
+
+    window.aksesuarEkle = (tip) => {
+        if (items[tip]) { scene.remove(items[tip]); items[tip] = null; return; }
+        
+        let geo, mat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+        if(tip === 'sapka') {
+            geo = new THREE.CylinderGeometry(0.6, 0.6, 0.4, 32);
+            items.sapka = new THREE.Mesh(geo, mat);
+            items.sapka.position.y = 1.8;
+            scene.add(items.sapka);
+        } else if(tip === 'gozluk') {
+            geo = new THREE.BoxGeometry(0.8, 0.2, 0.1);
+            items.gozluk = new THREE.Mesh(geo, mat);
+            items.gozluk.position.set(0, 1.3, 0.5);
+            scene.add(items.gozluk);
+        }
+    };
+
+    window.sifirla = () => {
+        Object.keys(items).forEach(k => { if(items[k]) scene.remove(items[k]); items[k] = null; });
+        bodyMaterial.color.setHex(0xfbbf24);
+    };
+
+    // --- OYUN MANTIĞI ---
     window.odaOlustur = () => {
-        benimAdim = document.getElementById('kullaniciAdi').value || "Oyuncu";
-        mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
-        liderMiyim = true;
-        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi' }).then(() => odayaGir());
+        document.getElementById('giris-ekrani').style.display = 'none';
+        document.getElementById('lobi-ekrani').style.display = 'block';
+        const kod = Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('odaKoduGoster').textContent = kod;
+        document.getElementById('baslatBtn').style.display = 'block';
+        new QRCode(document.getElementById("qrcode"), { text: "vampir-koylu-" + kod, width: 100, height: 100 });
     };
 
     window.odayaKatil = () => {
-        benimAdim = document.getElementById('kullaniciAdi').value || "Oyuncu";
-        mevcutOda = document.getElementById('odaKoduGiris').value;
-        if(!mevcutOda) return alert("Kod gir!");
-        odayaGir();
-    };
-
-    function odayaGir() {
+        const ad = document.getElementById('kullaniciAdi').value;
+        if(!ad) return alert("Lütfen adınızı girin!");
         document.getElementById('giris-ekrani').style.display = 'none';
         document.getElementById('lobi-ekrani').style.display = 'block';
-        document.getElementById('odaKoduGoster').textContent = "ODA KODU: " + mevcutOda;
-        
-        if(!liderMiyim) {
-            const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, avatar: myAvatar, status: 'alive', votes: 0, rol: '?' });
-            benimAnahtarim = pRef.key;
-            document.getElementById('beklemeEkrani').style.display = 'block';
-        } else {
-            document.getElementById('admin-ayarlari').style.display = 'block';
-            new QRCode(document.getElementById("qrcode"), { text: window.location.href + "?room=" + mevcutOda, width: 100, height: 100 });
-        }
-        odayiDinle();
-    }
-
-    function odayiDinle() {
-        onValue(ref(db, `rooms/${mevcutOda}`), (snapshot) => {
-            const veri = snapshot.val();
-            if(!veri) return;
-            if(veri.winner) { katmaniGoster(veri.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', veri.winner + " KAZANDI", "Vampir: " + veri.vampireName, true); return; }
-
-            if(veri.phase === 'lobi') {
-                const liste = document.getElementById('oyuncuListesi');
-                liste.innerHTML = "";
-                Object.values(veri.players || {}).forEach(p => {
-                    liste.innerHTML += `
-                    <div class="oyuncu-kart">
-                        <div style="position:relative; font-size:24px;">
-                            ${p.avatar.char}
-                            <span style="position:absolute; top:-5px; left:0;">${p.avatar.hat}</span>
-                            <span style="position:absolute; top:0; left:0;">${p.avatar.glass}</span>
-                            <span style="position:absolute; bottom:0; left:0;">${p.avatar.mask}</span>
-                        </div>
-                        <b>${p.ad}</b>
-                    </div>`;
-                });
-            } else {
-                document.getElementById('lobi-ekrani').style.display = 'none';
-                document.getElementById('oyun-alani').style.display = 'block';
-                if(veri.players && veri.players[benimAnahtarim]) {
-                    rolum = veri.players[benimAnahtarim].rol;
-                    hayattaMiyim = veri.players[benimAnahtarim].status === 'alive';
-                }
-                if(!window.rolGosterildi) {
-                    window.rolGosterildi = true;
-                    katmaniGoster(rolum === 'VAMPİR' ? '🩸' : '👨‍🌾', rolum, "Oyun Başladı!");
-                }
-                arayuzuGuncelle(veri);
-            }
-        });
-    }
-
-    window.oyunuBaslat = async () => {
-        if(document.getElementById('adminOyuncuMu').value === "true") {
-            const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, avatar: myAvatar, status: 'alive', votes: 0, rol: '?' });
-            benimAnahtarim = pRef.key;
-        }
-        onValue(ref(db, `rooms/${mevcutOda}/players`), (s) => {
-            const oyuncular = s.val(), keys = Object.keys(oyuncular);
-            const vKey = keys[Math.floor(Math.random()*keys.length)];
-            keys.forEach(k => update(ref(db, `rooms/${mevcutOda}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
-            update(ref(db, `rooms/${mevcutOda}`), { vampireName: oyuncular[vKey].ad });
-            dongu();
-        }, {onlyOnce: true});
     };
 
-    async function dongu() {
-        await update(ref(db, `rooms/${mevcutOda}`), { target: "" });
-        await asama('night', 20);
-        const snap = await new Promise(r => onValue(ref(db, `rooms/${mevcutOda}`), r, {onlyOnce:true}));
-        const h = snap.val().target;
-        if(h) await update(ref(db, `rooms/${mevcutOda}/players/${h}`), { status: 'dead' });
-        await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: h ? snap.val().players[h].ad + " öldürüldü!" : "Kimse ölmedi." });
-        
-        if(await kontrol()) return;
-        await asama('discussion', 40);
-        await asama('voting', 20);
-        await oylamaYap();
-        if(await kontrol()) return;
-        dongu();
-    }
-
-    function arayuzuGuncelle(veri) {
-        document.getElementById('asamaEtiketi').textContent = veri.phase === 'night' ? "🌙 GECE" : "🗣️ TARTIŞMA/OYLAMA";
-        document.getElementById('sayacGosterge').textContent = "00:" + (veri.timer || 0).toString().padStart(2,'0');
-        const liste = document.getElementById('oyunAksiyonListesi');
-        liste.innerHTML = "";
-
-        if(veri.phase === 'night' && rolum === 'VAMPİR' && hayattaMiyim) {
-            Object.entries(veri.players).forEach(([k, p]) => {
-                if(p.status === 'alive' && p.rol !== 'VAMPİR')
-                    liste.innerHTML += `<button class="buton" style="background:var(--vampir-renk)" onclick="vAction('target','${k}')">${p.avatar.char} ${p.ad} ÖLDÜR</button>`;
-            });
-        } else if(veri.phase === 'voting' && hayattaMiyim) {
-            Object.entries(veri.players).forEach(([k, p]) => {
-                if(p.status === 'alive')
-                    liste.innerHTML += `<button class="buton buton-ikincil" onclick="vVote('${k}')">${p.avatar.char} ${p.ad}</button>`;
-            });
-        } else if(veri.phase === 'discussion') {
-            liste.innerHTML = `<h3>${veri.lastEvent || "Tartışma başladı..."}</h3>`;
-        }
-    }
-
-    window.vAction = (path, val) => update(ref(db, `rooms/${mevcutOda}`), { [path]: val });
-    window.vVote = (k) => {
-        onValue(ref(db, `rooms/${mevcutOda}/players/${k}/votes`), (s) => {
-            update(ref(db, `rooms/${mevcutOda}/players/${k}`), { votes: (s.val() || 0) + 1 });
-        }, {onlyOnce:true});
-    };
-
-    async function asama(ad, sn) {
-        for(let i = sn; i >= 0; i--) {
-            await update(ref(db, `rooms/${mevcutOda}`), { phase: ad, timer: i });
-            await new Promise(r => setTimeout(r, 1000));
-        }
-    }
-
-    async function oylamaYap() {
-        const s = await new Promise(r => onValue(ref(db, `rooms/${mevcutOda}/players`), r, {onlyOnce:true}));
-        const players = s.val();
-        let enCok = 0, aday = null;
-        Object.entries(players).forEach(([k, p]) => {
-            if(p.votes > enCok) { enCok = p.votes; aday = k; }
-            update(ref(db, `rooms/${mevcutOda}/players/${k}`), { votes: 0 });
-        });
-        if(aday) await update(ref(db, `rooms/${mevcutOda}/players/${aday}`), { status: 'dead' });
-    }
-
-    async function kontrol() {
-        const s = await new Promise(r => onValue(ref(db, `rooms/${mevcutOda}/players`), r, {onlyOnce:true}));
-        const pArr = Object.values(s.val());
-        const vA = pArr.some(p => p.rol === 'VAMPİR' && p.status === 'alive');
-        const kA = pArr.filter(p => p.rol === 'KÖYLÜ' && p.status === 'alive').length;
-        if(!vA) { update(ref(db, `rooms/${mevcutOda}`), { winner: 'KÖYLÜLER' }); return true; }
-        if(kA <= 1) { update(ref(db, `rooms/${mevcutOda}`), { winner: 'VAMPİR' }); return true; }
-        return false;
-    }
-
-    function katmaniGoster(emoji, baslik, alt, f = false) {
-        const k = document.getElementById('durumKatmani'); k.style.display = 'flex';
-        document.getElementById('katmanEmoji').textContent = emoji;
-        document.getElementById('katmanBaslik').textContent = baslik;
-        document.getElementById('katmanAltMetin').textContent = alt;
-        if(f) document.querySelector('#durumKatmani button').onclick = () => location.reload();
-    }
-    window.katmaniKapat = () => document.getElementById('durumKatmani').style.display = 'none';
+    init3D();
 </script>
 </body>
 </html>
