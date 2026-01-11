@@ -3,78 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Tam Sürüm</title>
+    <title>Vampir Köylü - Türkçe</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #fbbf24; --vampir: #ef4444; --secondary: #334155; }
-        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-        .card { background: var(--card); border-radius: 28px; padding: 25px; width: 95%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255,255,255,0.05); overflow-y: auto; max-height: 90vh; }
-        h1 { font-size: 24px; font-weight: 800; color: var(--accent); margin-bottom: 15px; }
+        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --ikincil: #334155; }
+        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; background: var(--arka-plan); color: var(--metin); overflow: hidden; }
+        .kart { background: var(--kart); border-radius: 28px; padding: 25px; width: 95%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255,255,255,0.05); overflow-y: auto; max-height: 90vh; }
+        h1 { font-size: 24px; font-weight: 800; color: var(--vurgu); margin-bottom: 15px; }
         input, select { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; }
-        .btn { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .btn-primary { background: var(--accent); color: #1e293b; }
-        .btn-secondary { background: var(--secondary); color: white; }
-        .admin-panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: left; border: 1px dashed var(--accent); }
-        .admin-panel label { font-size: 11px; color: var(--accent); font-weight: bold; display: block; margin-top: 8px; }
-        .player-item { padding: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .timer { font-size: 45px; font-weight: 800; color: var(--accent); }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; box-sizing: border-box; }
+        .buton { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .buton-ana { background: var(--vurgu); color: #1e293b; }
+        .buton-ikincil { background: var(--ikincil); color: white; }
+        .panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: left; border: 1px dashed var(--vurgu); }
+        .panel label { font-size: 11px; color: var(--vurgu); font-weight: bold; display: block; margin-top: 8px; }
+        .oyuncu-oge { padding: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .sayac { font-size: 45px; font-weight: 800; color: var(--vurgu); }
+        .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--arka-plan); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-<div id="statusOverlay" class="overlay">
-    <div id="overlayEmoji" style="font-size: 80px;"></div>
-    <div id="overlayTitle" style="font-size: 36px; font-weight: 900; color: var(--accent);"></div>
-    <div id="overlaySub" style="margin: 20px; color: #94a3b8;"></div>
-    <button class="btn btn-primary" style="width: 200px;" onclick="closeOverlay()">Anladım</button>
+<div id="durumKatmani" class="katman">
+    <div id="katmanEmoji" style="font-size: 80px;"></div>
+    <div id="katmanBaslik" style="font-size: 36px; font-weight: 900; color: var(--vurgu);"></div>
+    <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8;"></div>
+    <button class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">Anladım</button>
 </div>
 
-<div class="card">
-    <div id="auth-screen">
+<div class="kart">
+    <div id="giris-ekrani">
         <h1>VAMPİR KÖYLÜ</h1>
-        <input type="text" id="userName" placeholder="Adınız">
-        <button class="btn btn-primary" onclick="createRoom()">Oda Oluştur (Admin)</button>
+        <input type="text" id="kullaniciAdi" placeholder="Adınız">
+        <button class="buton buton-ana" onclick="odaOlustur()">Oda Oluştur (Admin)</button>
         <div style="margin: 10px; color: #64748b; font-weight: bold;">VEYA</div>
-        <input type="text" id="roomCodeInput" placeholder="Oda Kodu">
-        <button class="btn btn-secondary" onclick="joinRoom()">Katıl</button>
+        <input type="text" id="odaKoduGiris" placeholder="Oda Kodu">
+        <button class="buton buton-ikincil" onclick="odayaKatil()">Odaya Katıl</button>
     </div>
 
-    <div id="room-screen" style="display: none;">
+    <div id="lobi-ekrani" style="display: none;">
         <div style="font-size: 11px; color: #64748b;">ODA KODU</div>
-        <div id="displayCode" style="font-size: 32px; font-weight: 800; color: white;">000000</div>
+        <div id="odaKoduGoster" style="font-size: 32px; font-weight: 800; color: white;">000000</div>
         <div id="qrcode" style="background:white; padding:5px; display:inline-block; border-radius:8px; margin:10px;"></div>
 
-        <div id="admin-settings" class="admin-panel" style="display:none;">
-            <p style="text-align:center; margin:0; font-weight:bold; color:var(--accent);">ADMİN PANELİ</p>
-            <label>ROLÜNÜZ</label>
-            <select id="adminIsPlayer">
+        <div id="admin-ayarlari" class="panel" style="display:none;">
+            <p style="text-align:center; margin:0; font-weight:bold; color:var(--vurgu);">YÖNETİCİ PANELİ</p>
+            <label>ADMİN ROLÜ</label>
+            <select id="adminOyuncuMu">
                 <option value="true">Oyuncu Olarak Katıl</option>
                 <option value="false">Sadece İzleyici Kal</option>
             </select>
-            <label>GECE / TARTIŞMA / OYLAMA (SN)</label>
+            <label>SÜRELER (GECE / TARTIŞMA / OYLAMA)</label>
             <div style="display:flex; gap:5px;">
-                <input type="number" id="setNight" value="20">
-                <input type="number" id="setDisc" value="60">
-                <input type="number" id="setVote" value="30">
+                <input type="number" id="sureGece" value="20" title="Gece Süresi">
+                <input type="number" id="sureTartisma" value="60" title="Tartışma Süresi">
+                <input type="number" id="sureOylama" value="30" title="Oylama Süresi">
             </div>
         </div>
 
-        <div id="playerList" style="margin-top:20px;"></div>
-        <button id="startBtn" class="btn btn-primary" style="display:none;" onclick="startTheGame()">Oyunu Başlat</button>
-        <p id="waitMsg" style="display:none; color: #94a3b8;">Admin bekleniyor...</p>
+        <div id="oyuncuListesi" style="margin-top:20px;"></div>
+        <button id="baslatButon" class="buton buton-ana" style="display:none;" onclick="oyunuBaslat()">Oyunu Başlat</button>
+        <p id="beklemeMesaji" style="display:none; color: #94a3b8;">Admin ayarları yapıyor...</p>
     </div>
 
-    <div id="game-area" style="display: none;">
-        <div id="phaseBadge" style="color: var(--accent); font-weight: 800; text-transform:uppercase;">BEKLEYİN</div>
-        <div id="timerDisplay" class="timer">00:00</div>
-        <div id="gameActionList"></div>
+    <div id="oyun-alani" style="display: none;">
+        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800; text-transform:uppercase;">BEKLEYİN</div>
+        <div id="sayacGosterge" class="sayac">00:00</div>
+        <div id="oyunAksiyonListesi"></div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBBXkGLUFGXfQsXhZ8uKpJZf6Y5hTjdK-8",
@@ -86,195 +86,193 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let currentRoom = null, myName = "", myKey = "", isLider = false, myRole = "İzleyici", isAlive = true, hasVoted = false;
+    let mevcutOda = null, benimAdim = "", benimAnahtarim = "", liderMiyim = false, rolum = "İzleyici", hayattaMiyim = true, oyVerdimMi = false;
 
-    window.createRoom = () => {
-        myName = document.getElementById('userName').value || "Admin";
-        currentRoom = Math.floor(100000 + Math.random() * 900000).toString();
-        isLider = true;
-        set(ref(db, 'rooms/'+currentRoom), { phase: 'lobby' }).then(() => {
-            enterRoom();
-            document.getElementById('admin-settings').style.display = 'block';
-            new QRCode(document.getElementById("qrcode"), { text: window.location.href.split('?')[0] + "?room=" + currentRoom, width: 80, height: 80 });
+    window.odaOlustur = () => {
+        benimAdim = document.getElementById('kullaniciAdi').value || "Admin";
+        mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
+        liderMiyim = true;
+        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi' }).then(() => {
+            odayaGir();
+            document.getElementById('admin-ayarlari').style.display = 'block';
+            new QRCode(document.getElementById("qrcode"), { text: window.location.href.split('?')[0] + "?room=" + mevcutOda, width: 80, height: 80 });
         });
     };
 
-    window.joinRoom = () => {
-        myName = document.getElementById('userName').value;
-        currentRoom = document.getElementById('roomCodeInput').value;
-        if(!myName || !currentRoom) return;
-        enterRoom();
+    window.odayaKatil = () => {
+        benimAdim = document.getElementById('kullaniciAdi').value;
+        mevcutOda = document.getElementById('odaKoduGiris').value;
+        if(!benimAdim || !mevcutOda) return alert("Lütfen adınızı ve oda kodunu girin!");
+        odayaGir();
     };
 
-    function enterRoom() {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('room-screen').style.display = 'block';
-        document.getElementById('displayCode').textContent = currentRoom;
+    function odayaGir() {
+        document.getElementById('giris-ekrani').style.display = 'none';
+        document.getElementById('lobi-ekrani').style.display = 'block';
+        document.getElementById('odaKoduGoster').textContent = mevcutOda;
         
-        if(!isLider) {
-            const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
-            myKey = pRef.key;
-            document.getElementById('waitMsg').style.display = 'block';
+        if(!liderMiyim) {
+            const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, rol: '?', status: 'alive', votes: 0 });
+            benimAnahtarim = pRef.key;
+            document.getElementById('beklemeMesaji').style.display = 'block';
         } else {
-            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('baslatButon').style.display = 'block';
         }
-        listenRoom();
+        odayiDinle();
     }
 
-    function listenRoom() {
-        onValue(ref(db, `rooms/${currentRoom}`), (snapshot) => {
-            const data = snapshot.val();
-            if(!data) return;
+    function odayiDinle() {
+        onValue(ref(db, `rooms/${mevcutOda}`), (snapshot) => {
+            const veri = snapshot.val();
+            if(!veri) return;
 
-            if(data.winner) {
-                showOverlay(data.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', data.winner + " KAZANDI", "Vampir: " + data.vampireName, true);
+            if(veri.winner) {
+                katmaniGoster(veri.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', veri.winner + " KAZANDI", "Oyun Bitti. Vampir: " + veri.vampireName, true);
                 return;
             }
 
-            if(data.phase === 'lobby') {
-                const listDiv = document.getElementById('playerList');
-                listDiv.innerHTML = "";
-                Object.values(data.players || {}).forEach(p => {
-                    listDiv.innerHTML += `<div class="player-item"><span>• ${p.ad}</span></div>`;
+            if(veri.phase === 'lobi') {
+                const liste = document.getElementById('oyuncuListesi');
+                liste.innerHTML = "";
+                Object.values(veri.players || {}).forEach(p => {
+                    liste.innerHTML += `<div class="oyuncu-oge"><span>• ${p.ad}</span></div>`;
                 });
             } else {
-                document.getElementById('room-screen').style.display = 'none';
-                document.getElementById('game-area').style.display = 'block';
+                document.getElementById('lobi-ekrani').style.display = 'none';
+                document.getElementById('oyun-alani').style.display = 'block';
                 
-                if(data.players && data.players[myKey]) {
-                    myRole = data.players[myKey].rol;
-                    isAlive = data.players[myKey].status === 'alive';
+                if(veri.players && veri.players[benimAnahtarim]) {
+                    rolum = veri.players[benimAnahtarim].rol;
+                    hayattaMiyim = veri.players[benimAnahtarim].status === 'alive';
                 }
 
-                if(!window.roleShown) {
-                    window.roleShown = true;
-                    showOverlay(myRole === 'VAMPİR' ? '🩸' : (myRole === 'KÖYLÜ' ? '👨‍🌾' : '👁️'), myRole, "Oyun Başladı!");
+                if(!window.rolGosterildi) {
+                    window.rolGosterildi = true;
+                    katmaniGoster(rolum === 'VAMPİR' ? '🩸' : (rolum === 'KÖYLÜ' ? '👨‍🌾' : '👁️'), rolum, "Oyun Başladı! Rolünü dikkatli oyna.");
                 }
-                updateUI(data);
+                arayuzuGuncelle(veri);
             }
         });
     }
 
-    window.startTheGame = async () => {
-        const isAdminPlayer = document.getElementById('adminIsPlayer').value === "true";
-        const nS = parseInt(document.getElementById('setNight').value);
-        const dS = parseInt(document.getElementById('setDisc').value);
-        const vS = parseInt(document.getElementById('setVote').value);
+    window.oyunuBaslat = async () => {
+        const adminOyuncuOlsun = document.getElementById('adminOyuncuMu').value === "true";
+        const nS = parseInt(document.getElementById('sureGece').value);
+        const dS = parseInt(document.getElementById('sureTartisma').value);
+        const vS = parseInt(document.getElementById('sureOylama').value);
 
-        if(isAdminPlayer && isLider) {
-            const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
-            myKey = pRef.key;
+        if(adminOyuncuOlsun && liderMiyim) {
+            const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, rol: '?', status: 'alive', votes: 0 });
+            benimAnahtarim = pRef.key;
         }
 
         setTimeout(() => {
-            onValue(ref(db, `rooms/${currentRoom}/players`), (s) => {
-                const players = s.val(), keys = Object.keys(players);
-                if(keys.length < 2) { alert("En az 2 kişi lazım!"); return; }
-                const vKey = keys[Math.floor(Math.random()*keys.length)];
-                keys.forEach(k => update(ref(db, `rooms/${currentRoom}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
-                update(ref(db, `rooms/${currentRoom}`), { vampireName: players[vKey].ad, target: "" });
-                gameLoop(nS, dS, vS);
+            onValue(ref(db, `rooms/${mevcutOda}/players`), (s) => {
+                const oyuncular = s.val(), anahtarlar = Object.keys(oyuncular);
+                if(anahtarlar.length < 2) { alert("En az 2 oyuncu olmalı!"); return; }
+                const vKey = anahtarlar[Math.floor(Math.random()*anahtarlar.length)];
+                anahtarlar.forEach(k => update(ref(db, `rooms/${mevcutOda}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
+                update(ref(db, `rooms/${mevcutOda}`), { vampireName: oyuncular[vKey].ad, target: "" });
+                oyunDongusu(nS, dS, vS);
             }, {onlyOnce: true});
         }, 500);
     };
 
-    async function gameLoop(n, d, v) {
-        // GECE BAŞLIYOR
-        await update(ref(db, `rooms/${currentRoom}`), { target: "" }); // Hedefi sıfırla
-        await runPhase('night', n);
+    async function oyunDongusu(n, d, v) {
+        await update(ref(db, `rooms/${mevcutOda}`), { target: "" });
+        await asamaKos('night', n);
         
-        // Gece Bitti, Öldürmeyi İşle
-        const snap = await new Promise(r => onValue(ref(db, `rooms/${currentRoom}`), r, {onlyOnce:true}));
-        const t = snap.val().target;
-        let eventMsg = "Gece kimse ölmedi.";
-        if(t && snap.val().players[t]) {
-            await update(ref(db, `rooms/${currentRoom}/players/${t}`), { status: 'dead' });
-            eventMsg = "Bu gece " + snap.val().players[t].ad + " vahşice öldürüldü!";
+        const snap = await new Promise(r => onValue(ref(db, `rooms/${mevcutOda}`), r, {onlyOnce:true}));
+        const hedef = snap.val().target;
+        let olayMesaji = "Gece sakin geçti, kimse ölmedi.";
+        if(hedef && snap.val().players[hedef]) {
+            await update(ref(db, `rooms/${mevcutOda}/players/${hedef}`), { status: 'dead' });
+            olayMesaji = "Karanlık çöktü ve " + snap.val().players[hedef].ad + " öldürüldü!";
         }
-        await update(ref(db, `rooms/${currentRoom}`), { lastEvent: eventMsg });
+        await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: olayMesaji });
 
-        if(await checkWinner()) return;
+        if(await kazananKontrol()) return;
 
-        // TARTIŞMA VE OYLAMA
-        await runPhase('discussion', d);
-        await runPhase('voting', v);
-        await calculateVote();
+        await asamaKos('discussion', d);
+        await asamaKos('voting', v);
+        await oylariHesapla();
         
-        if(await checkWinner()) return;
-        gameLoop(n, d, v);
+        if(await kazananKontrol()) return;
+        oyunDongusu(n, d, v);
     }
 
-    function updateUI(data) {
-        document.getElementById('phaseBadge').textContent = data.phase === 'night' ? "🌙 GECE" : (data.phase === 'voting' ? "🗳️ OYLAMA" : "🗣️ TARTIŞMA");
-        document.getElementById('timerDisplay').textContent = "00:" + (data.timer || 0).toString().padStart(2,'0');
-        const list = document.getElementById('gameActionList');
-        list.innerHTML = "";
+    function arayuzuGuncelle(veri) {
+        const asama = veri.phase === 'night' ? "🌙 GECE" : (veri.phase === 'voting' ? "🗳️ OYLAMA" : "🗣️ TARTIŞMA");
+        document.getElementById('asamaEtiketi').textContent = asama;
+        document.getElementById('sayacGosterge').textContent = "00:" + (veri.timer || 0).toString().padStart(2,'0');
+        const liste = document.getElementById('oyunAksiyonListesi');
+        liste.innerHTML = "";
 
-        if(data.phase === 'night' && myRole === 'VAMPİR' && isAlive) {
-            Object.entries(data.players).forEach(([k, p]) => {
+        if(veri.phase === 'night' && rolum === 'VAMPİR' && hayattaMiyim) {
+            Object.entries(veri.players).forEach(([k, p]) => {
                 if(p.status === 'alive' && p.rol !== 'VAMPİR')
-                    list.innerHTML += `<button class="btn btn-danger" style="background:#ef4444" onclick="vKill('${k}')">${p.ad} Öldür</button>`;
+                    liste.innerHTML += `<button class="buton" style="background:var(--vampir-renk)" onclick="vampirOldur('${k}')">${p.ad} ÖLDÜR</button>`;
             });
-        } else if(data.phase === 'voting' && isAlive && !hasVoted) {
-            Object.entries(data.players).forEach(([k, p]) => {
-                if(p.status === 'alive') list.innerHTML += `<button class="btn btn-secondary" onclick="vVote('${k}')">${p.ad}</button>`;
+        } else if(veri.phase === 'voting' && hayattaMiyim && !oyVerdimMi) {
+            Object.entries(veri.players).forEach(([k, p]) => {
+                if(p.status === 'alive') liste.innerHTML += `<button class="buton buton-ikincil" onclick="oyVer('${k}')">${p.ad}</button>`;
             });
-        } else if(data.phase === 'discussion') {
-            list.innerHTML = `<h3 style="color:white; line-height:1.5;">${data.lastEvent || ""}</h3>`;
-            hasVoted = false;
+        } else if(veri.phase === 'discussion') {
+            liste.innerHTML = `<h3 style="color:white; line-height:1.5;">${veri.lastEvent || ""}</h3>`;
+            oyVerdimMi = false;
         }
     }
 
-    window.vKill = (k) => update(ref(db, `rooms/${currentRoom}`), { target: k });
-    window.vVote = (k) => {
-        hasVoted = true;
-        onValue(ref(db, `rooms/${currentRoom}/players/${k}/votes`), (s) => {
-            update(ref(db, `rooms/${currentRoom}/players/${k}`), { votes: (s.val() || 0) + 1 });
+    window.vampirOldur = (k) => update(ref(db, `rooms/${mevcutOda}`), { target: k });
+    window.oyVer = (k) => {
+        oyVerdimMi = true;
+        onValue(ref(db, `rooms/${mevcutOda}/players/${k}/votes`), (s) => {
+            update(ref(db, `rooms/${mevcutOda}/players/${k}`), { votes: (s.val() || 0) + 1 });
         }, {onlyOnce: true});
     };
 
-    async function runPhase(name, sec) {
-        for(let i = sec; i >= 0; i--) {
-            await update(ref(db, `rooms/${currentRoom}`), { phase: name, timer: i });
+    async function asamaKos(ad, sn) {
+        for(let i = sn; i >= 0; i--) {
+            await update(ref(db, `rooms/${mevcutOda}`), { phase: ad, timer: i });
             await new Promise(r => setTimeout(r, 1000));
         }
     }
 
-    async function calculateVote() {
-        const s = await new Promise(r => onValue(ref(db, `rooms/${currentRoom}/players`), r, {onlyOnce:true}));
-        const players = s.val() || {};
-        let max = 0, cand = [];
-        Object.entries(players).forEach(([k, p]) => {
-            if(p.votes > max) { max = p.votes; cand = [k]; }
-            else if(p.votes === max && max > 0) cand.push(k);
-            update(ref(db, `rooms/${currentRoom}/players/${k}`), { votes: 0 });
+    async function oylariHesapla() {
+        const s = await new Promise(r => onValue(ref(db, `rooms/${mevcutOda}/players`), r, {onlyOnce:true}));
+        const oyuncular = s.val() || {};
+        let enCokOy = 0, adaylar = [];
+        Object.entries(oyuncular).forEach(([k, p]) => {
+            if(p.votes > enCokOy) { enCokOy = p.votes; adaylar = [k]; }
+            else if(p.votes === enCokOy && enCokOy > 0) adaylar.push(k);
+            update(ref(db, `rooms/${mevcutOda}/players/${k}`), { votes: 0 });
         });
-        if(cand.length === 1) {
-            await update(ref(db, `rooms/${currentRoom}/players/${cand[0]}`), { status: 'dead' });
-            await update(ref(db, `rooms/${currentRoom}`), { lastEvent: "Oylama sonucu " + players[cand[0]].ad + " asıldı!" });
+        if(adaylar.length === 1) {
+            await update(ref(db, `rooms/${mevcutOda}/players/${adaylar[0]}`), { status: 'dead' });
+            await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: "Halkın kararıyla " + oyuncular[adaylar[0]].ad + " asıldı!" });
         } else {
-            await update(ref(db, `rooms/${currentRoom}`), { lastEvent: "Oylarda eşitlik var, kimse asılmadı." });
+            await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: "Oylama sonuçsuz kaldı, kimse asılmadı." });
         }
     }
 
-    async function checkWinner() {
-        const s = await new Promise(r => onValue(ref(db, `rooms/${currentRoom}/players`), r, {onlyOnce:true}));
-        const pArr = Object.values(s.val() || {});
-        const vAlive = pArr.some(p => p.rol === 'VAMPİR' && p.status === 'alive');
-        const kAlive = pArr.filter(p => p.rol === 'KÖYLÜ' && p.status === 'alive').length;
-        if(!vAlive && pArr.length > 0) { update(ref(db, `rooms/${currentRoom}`), { winner: 'KÖYLÜLER' }); return true; }
-        if(kAlive <= 1 && vAlive) { update(ref(db, `rooms/${currentRoom}`), { winner: 'VAMPİR' }); return true; }
+    async function kazananKontrol() {
+        const s = await new Promise(r => onValue(ref(db, `rooms/${mevcutOda}/players`), r, {onlyOnce:true}));
+        const pDizi = Object.values(s.val() || {});
+        const vYasiyor = pDizi.some(p => p.rol === 'VAMPİR' && p.status === 'alive');
+        const kYasiyor = pDizi.filter(p => p.rol === 'KÖYLÜ' && p.status === 'alive').length;
+        if(!vYasiyor && pDizi.length > 0) { update(ref(db, `rooms/${mevcutOda}`), { winner: 'KÖYLÜLER' }); return true; }
+        if(kYasiyor <= 1 && vYasiyor) { update(ref(db, `rooms/${mevcutOda}`), { winner: 'VAMPİR' }); return true; }
         return false;
     }
 
-    function showOverlay(emoji, title, sub, isFinal = false) {
-        const o = document.getElementById('statusOverlay'); o.style.display = 'flex';
-        document.getElementById('overlayEmoji').textContent = emoji;
-        document.getElementById('overlayTitle').textContent = title;
-        document.getElementById('overlaySub').textContent = sub;
-        document.getElementById('overlayBtn').onclick = isFinal ? () => location.reload() : closeOverlay;
+    function katmaniGoster(emoji, baslik, altMetin, final = false) {
+        const k = document.getElementById('durumKatmani'); k.style.display = 'flex';
+        document.getElementById('katmanEmoji').textContent = emoji;
+        document.getElementById('katmanBaslik').textContent = baslik;
+        document.getElementById('katmanAltMetin').textContent = altMetin;
+        document.getElementById('overlayBtn').onclick = final ? () => location.reload() : katmaniKapat;
     }
-    window.closeOverlay = () => document.getElementById('statusOverlay').style.display = 'none';
+    window.katmaniKapat = () => document.getElementById('durumKatmani').style.display = 'none';
 </script>
 </body>
 </html>
