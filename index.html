@@ -3,58 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Ultra Karakter</title>
+    <title>Vampir Köylü - 3D Pro</title>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; }
-        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .kart { background: var(--kart); border-radius: 30px; padding: 20px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow-y: auto; max-height: 95vh; border: 1px solid #334155; }
+        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .kart { background: var(--kart); border-radius: 30px; padding: 20px; width: 95%; max-width: 420px; text-align: center; border: 1px solid #334155; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         
         /* 3D SAHNE */
         #container3d { 
-            width: 100%; height: 280px; background: radial-gradient(circle, #2d3748 0%, #1a202c 100%); 
-            border-radius: 20px; margin-bottom: 20px; border: 3px solid var(--vurgu); 
-            display: flex; align-items: center; justify-content: center; position: relative;
+            width: 100%; height: 260px; background: radial-gradient(circle, #2d3748 0%, #1a202c 100%); 
+            border-radius: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
         }
 
         /* FALL GUYS KARAKTERİ */
         .char-wrapper { position: relative; width: 100px; height: 140px; animation: bounce 2s infinite ease-in-out; }
         .character {
-            width: 100px; height: 140px; background: var(--vurgu);
-            border-radius: 50px 50px 35px 35px;
-            position: absolute;
+            width: 100px; height: 135px; background: var(--vurgu);
+            border-radius: 50px 50px 35px 35px; position: absolute;
             box-shadow: inset -10px -10px 20px rgba(0,0,0,0.3), 0 15px 30px rgba(0,0,0,0.4);
-            transition: 0.3s;
+            transition: 0.3s; z-index: 2;
         }
 
-        /* GÖZLER */
-        .eye { position: absolute; width: 16px; height: 16px; background: #111; border-radius: 50%; top: 45px; z-index: 5; }
-        .eye-l { left: 24px; }
-        .eye-r { right: 24px; }
+        /* GÖZLER (3D Görünümlü) */
+        .eye { position: absolute; width: 16px; height: 18px; background: #000; border-radius: 50%; top: 45px; z-index: 10; border-bottom: 2px solid #333; }
+        .eye-l { left: 25px; } .eye-r { right: 25px; }
 
-        /* AKSESUARLAR (Hassas Yerleşim) */
-        .aks-item { position: absolute; pointer-events: none; z-index: 10; display: none; width: 120%; left: -10%; text-align: center; }
+        /* --- GERÇEK 3D GÖRÜNÜMLÜ AKSESUARLAR --- */
+        .obj-3d { position: absolute; display: none; z-index: 15; pointer-events: none; }
         
-        .sapka-pos { top: -45px; font-size: 70px; }
-        .gozluk-pos { top: 32px; font-size: 55px; }
-        .maske-pos { top: 65px; font-size: 50px; }
+        /* 1. Silindir Şapka (Emoji Değil) */
+        #hat-pro { top: -30px; left: 10px; width: 80px; height: 40px; background: #222; border-radius: 5px; box-shadow: 0 5px 0 #000, 0 10px 15px rgba(0,0,0,0.5); border-bottom: 10px solid #444; }
+        #hat-pro::before { content: ''; position: absolute; bottom: -5px; left: -15px; width: 110px; height: 10px; background: #111; border-radius: 50%; }
+
+        /* 2. Modern Gözlük */
+        #glass-pro { top: 42px; left: 10px; width: 80px; height: 22px; background: rgba(0,0,0,0.8); border-radius: 5px; border: 2px solid #555; }
+        #glass-pro::after { content: ''; position: absolute; left: 35px; width: 10px; height: 4px; background: #555; }
+
+        /* 3. Ninja Maskesi */
+        #mask-pro { top: 65px; left: 0; width: 100px; height: 40px; background: #111; border-radius: 0 0 35px 35px; opacity: 0.9; }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         
-        /* PANEL */
-        .section-title { font-size: 11px; font-weight: 800; color: var(--altin); margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .grid-panel { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 5px; }
-        .btn-kutu { background: #334155; border: none; padding: 6px; border-radius: 8px; cursor: pointer; color: white; font-size: 22px; transition: 0.2s; }
-        .btn-kutu:hover { transform: scale(1.1); background: #475569; }
-        .btn-renk { width: 100%; height: 30px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.1); }
+        /* DÜZENLİ PANEL */
+        .section-title { font-size: 11px; font-weight: 800; color: var(--altin); margin: 15px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #334155; padding-bottom: 5px; }
+        .grid-panel { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+        .btn-kutu { background: #334155; border: none; padding: 10px; border-radius: 10px; cursor: pointer; color: white; transition: 0.2s; font-size: 14px; font-weight: bold; }
+        .btn-kutu:hover { background: #475569; transform: scale(1.05); }
+        .btn-renk { width: 100%; height: 35px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); }
         
-        input { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #0f172a; color: white; margin: 10px 0; text-align: center; border: 1px solid #334155; }
-        .ana-buton { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; font-size: 16px; cursor: pointer; }
+        .ana-buton { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; font-size: 16px; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="kart">
-    <h2 style="color: var(--altin); margin: 0 0 10px 0;">KARAKTER ATÖLYESİ</h2>
+    <h3 style="margin: 0 0 15px 0; color: var(--altin);">KARAKTER TASARIM MERKEZİ</h3>
     
     <div id="container3d">
         <div class="char-wrapper">
@@ -62,85 +65,46 @@
                 <div class="eye eye-l"></div>
                 <div class="eye eye-r"></div>
                 
-                <div id="h-1" class="aks-item sapka-pos">🎩</div>
-                <div id="h-2" class="aks-item sapka-pos">🤠</div>
-                <div id="h-3" class="aks-item sapka-pos">👑</div>
-                <div id="h-4" class="aks-item sapka-pos">🎓</div>
-                <div id="h-5" class="aks-item sapka-pos">🎅</div>
-                
-                <div id="g-1" class="aks-item gozluk-pos">🕶️</div>
-                <div id="g-2" class="aks-item gozluk-pos">😎</div>
-                <div id="g-3" class="aks-item gozluk-pos">🧐</div>
-                <div id="g-4" class="aks-item gozluk-pos">🥽</div>
-                <div id="g-5" class="aks-item gozluk-pos">👁️</div>
-
-                <div id="m-1" class="aks-item maske-pos">🥸</div>
-                <div id="m-2" class="aks-item maske-pos">🎭</div>
-                <div id="m-3" class="aks-item maske-pos">🥷</div>
-                <div id="m-4" class="aks-item maske-pos">🩹</div>
-                <div id="m-5" class="aks-item maske-pos">😷</div>
+                <div id="hat-pro" class="obj-3d"></div>
+                <div id="glass-pro" class="obj-3d"></div>
+                <div id="mask-pro" class="obj-3d"></div>
             </div>
         </div>
     </div>
 
-    <input type="text" id="kullaniciAdi" placeholder="OYUNCU ADI">
-
-    <div class="section-title">Renkler</div>
+    <div class="section-title">Renk Paleti</div>
     <div class="grid-panel">
         <div class="btn-kutu btn-renk" style="background:#ef4444" onclick="renkSet('#ef4444')"></div>
         <div class="btn-kutu btn-renk" style="background:#22c55e" onclick="renkSet('#22c55e')"></div>
         <div class="btn-kutu btn-renk" style="background:#3b82f6" onclick="renkSet('#3b82f6')"></div>
         <div class="btn-kutu btn-renk" style="background:#fbbf24" onclick="renkSet('#fbbf24')"></div>
         <div class="btn-kutu btn-renk" style="background:#a855f7" onclick="renkSet('#a855f7')"></div>
-        <div class="btn-kutu btn-renk" style="background:#ec4899" onclick="renkSet('#ec4899')"></div>
-        <div class="btn-kutu btn-renk" style="background:#06b6d4" onclick="renkSet('#06b6d4')"></div>
-        <div class="btn-kutu btn-renk" style="background:#f97316" onclick="renkSet('#f97316')"></div>
-        <div class="btn-kutu btn-renk" style="background:#10b981" onclick="renkSet('#10b981')"></div>
-        <div class="btn-kutu btn-renk" style="background:#ffffff" onclick="renkSet('#ffffff')"></div>
-        <div class="btn-kutu btn-renk" style="background:#64748b" onclick="renkSet('#64748b')"></div>
         <div class="btn-kutu btn-renk" style="background:#000000" onclick="renkSet('#000000')"></div>
     </div>
 
-    <div class="section-title">Aksesuar Seçimi</div>
+    <div class="section-title">Ekipmanlar</div>
     <div class="grid-panel">
-        <button class="btn-kutu" onclick="cycleAks('h')">🎩</button>
-        <button class="btn-kutu" onclick="cycleAks('g')">🕶️</button>
-        <button class="btn-kutu" onclick="cycleAks('m')">😷</button>
-        <button class="btn-kutu" style="background:var(--vurgu)" onclick="sifirla()">❌</button>
+        <button class="btn-kutu" onclick="toggleObj('hat-pro')">ŞAPKA</button>
+        <button class="btn-kutu" onclick="toggleObj('glass-pro')">GÖZLÜK</button>
+        <button class="btn-kutu" onclick="toggleObj('mask-pro')">MASKE</button>
+        <button class="btn-kutu" style="grid-column: span 3; background:#475569;" onclick="sifirla()">TÜMÜNÜ SIFIRLA</button>
     </div>
 
-    <button class="ana-buton">OYUNA GİR</button>
+    <button class="ana-buton">KARAKTERİ KAYDET</button>
 </div>
 
 <script>
-    let counters = { h: 0, g: 0, m: 0 };
-    const maxItems = 5;
-
     function renkSet(r) {
         document.getElementById('mainChar').style.background = r;
     }
 
-    function cycleAks(tip) {
-        // Mevcut olanı gizle
-        if(counters[tip] > 0) {
-            document.getElementById(tip + '-' + counters[tip]).style.display = 'none';
-        }
-        
-        // Bir sonrakine geç
-        counters[tip]++;
-        if(counters[tip] > maxItems) counters[tip] = 0;
-
-        // Yenisi 0 değilse göster
-        if(counters[tip] > 0) {
-            document.getElementById(tip + '-' + counters[tip]).style.display = 'block';
-        }
+    function toggleObj(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
     }
 
     function sifirla() {
-        ['h','g','m'].forEach(tip => {
-            if(counters[tip] > 0) document.getElementById(tip + '-' + counters[tip]).style.display = 'none';
-            counters[tip] = 0;
-        });
+        document.querySelectorAll('.obj-3d').forEach(el => el.style.display = 'none');
         renkSet('#ef4444');
     }
 </script>
