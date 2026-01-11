@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - 3D Beard Edition</title>
+    <title>Vampir Köylü - Ultra 3D Atölye</title>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; }
         body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .kart { background: var(--kart); border-radius: 30px; padding: 15px; width: 95%; max-width: 480px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); max-height: 98vh; overflow-y: auto; scrollbar-width: none; }
+        .kart { background: var(--kart); border-radius: 30px; padding: 15px; width: 95%; max-width: 480px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); max-height: 95vh; overflow-y: auto; }
         
         #container3d { 
             width: 100%; height: 220px; background: radial-gradient(circle, #2d3748 0%, #000 100%); 
@@ -25,31 +25,32 @@
         .eye { position: absolute; width: 12px; height: 14px; background: #000; border-radius: 50%; top: 35px; z-index: 10; border-bottom: 2px solid #222; }
         .eye-l { left: 20px; } .eye-r { right: 20px; }
 
-        /* --- 3D SAKALLAR (EMOJI DEĞİL) --- */
-        .obj-3d { position: absolute; display: none; z-index: 15; pointer-events: none; width: 100%; left: 0; }
+        /* --- 3D AKSESUARLAR (FIXED) --- */
+        .obj-3d { position: absolute; display: none; z-index: 20; pointer-events: none; width: 100%; left: 0; text-align: center; }
         
-        /* 1. Keçi Sakal (Sivri) */
-        .beard-1 { top: 65px; left: 30px; width: 20px; height: 25px; background: #1a1a1a; clip-path: polygon(0 0, 100% 0, 50% 100%); border-top: 2px solid #333; }
+        /* Şapkalar */
+        .h1 { top: -25px; height: 30px; background: #222; border-radius: 5px; width: 60px; left: 10px; box-shadow: 0 5px 0 #000; }
+        .h2 { top: -15px; height: 15px; background: gold; border-radius: 50% 50% 0 0; width: 50px; left: 15px; border: 2px solid #555; }
+        .h3 { top: -40px; font-size: 30px; } /* Örnek anten */
         
-        /* 2. Tam Sakal (Karakterin altını sarar) */
-        .beard-2 { top: 70px; left: 5px; width: 70px; height: 40px; background: #222; border-radius: 0 0 25px 25px; border-top: 4px solid #111; opacity: 0.95; }
-        
-        /* 3. Viking Sakalı (Uzun Örgülü Görünüm) */
-        .beard-3 { top: 75px; left: 25px; width: 30px; height: 45px; background: #3d2b1f; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); border-radius: 0 0 10px 10px; }
+        /* Gözlükler */
+        .g1 { top: 38px; height: 12px; background: #000; border-radius: 10px; width: 64px; left: 8px; opacity: 0.9; }
+        .g2 { top: 35px; height: 20px; background: rgba(0, 255, 255, 0.4); border: 2px solid #0ff; width: 70px; left: 5px; }
 
-        /* Diğerleri (Şapka, Gözlük vb.) */
-        .hat-pro { top: -25px; left: 10px; width: 60px; height: 30px; background: #111; border-radius: 4px; box-shadow: 0 5px 0 #444; }
+        /* Maskeler & Gövde */
+        .m1 { top: 60px; height: 50px; background: #111; border-radius: 0 0 25px 25px; width: 80px; left: 0; }
+        .m2 { top: 85px; width: 15px; height: 25px; background: #fff; clip-path: polygon(50% 0, 100% 30%, 50% 100%, 0 30%); left: 32px; }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         
-        /* PANEL */
+        /* DÜZENLİ PANEL */
         .section-title { font-size: 10px; font-weight: 800; color: var(--altin); margin: 12px 0 6px 0; text-transform: uppercase; text-align: left; padding-left: 5px; border-left: 3px solid var(--vurgu); }
         .grid-panel { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 8px; }
-        .btn-kutu { background: #334155; border: none; padding: 12px; border-radius: 10px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; transition: 0.2s; font-size: 18px; }
+        .btn-kutu { background: #334155; border: none; padding: 12px; border-radius: 10px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-kutu:hover { background: #475569; transform: scale(1.1); }
         .btn-renk { height: 35px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; }
         
-        .ana-buton { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; cursor: pointer; margin-top: 10px; }
+        .ana-buton { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; font-size: 16px; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -59,15 +60,17 @@
         <div class="char-wrapper">
             <div class="character" id="mainChar">
                 <div class="eye eye-l"></div><div class="eye eye-r"></div>
-                <div id="beard-1" class="obj-3d beard-1"></div>
-                <div id="beard-2" class="obj-3d beard-2"></div>
-                <div id="beard-3" class="obj-3d beard-3"></div>
-                <div id="hat-1" class="obj-3d hat-pro"></div>
-            </div>
+                <div id="item-1" class="obj-3d h1"></div>
+                <div id="item-2" class="obj-3d h2"></div>
+                <div id="item-3" class="obj-3d g1"></div>
+                <div id="item-4" class="obj-3d g2"></div>
+                <div id="item-5" class="obj-3d m1"></div>
+                <div id="item-6" class="obj-3d m2"></div>
+                </div>
         </div>
     </div>
 
-    <div class="section-title">Renk Paleti</div>
+    <div class="section-title">Renk Tonları</div>
     <div class="grid-panel">
         <div class="btn-renk" style="background:#ef4444" onclick="renkSet('#ef4444')"></div>
         <div class="btn-renk" style="background:#f97316" onclick="renkSet('#f97316')"></div>
@@ -83,18 +86,26 @@
         <div class="btn-renk" style="background:#000000" onclick="renkSet('#000000')"></div>
     </div>
 
-    <div class="section-title">3D Sakal Çeşitleri</div>
+    <div class="section-title">Kafa Ekipmanları</div>
     <div class="grid-panel">
-        <button class="btn-kutu" onclick="tglSakal('beard-1')">goatee</button>
-        <button class="btn-kutu" onclick="tglSakal('beard-2')">beard</button>
-        <button class="btn-kutu" onclick="tglSakal('beard-3')">viking</button>
-        <button class="btn-kutu" onclick="clrBeards()" style="background:#475569">❌</button>
+        <button class="btn-kutu" onclick="sec(1)">🎩</button>
+        <button class="btn-kutu" onclick="sec(2)">👑</button>
+        <button class="btn-kutu" onclick="sec(0)">❌</button>
     </div>
 
-    <div class="section-title">Diğer (30 Slot)</div>
+    <div class="section-title">Gözlükler</div>
     <div class="grid-panel">
-        <button class="btn-kutu" onclick="tglSakal('hat-1')">🎩</button>
-        </div>
+        <button class="btn-kutu" onclick="sec(3)">🕶️</button>
+        <button class="btn-kutu" onclick="sec(4)">🥽</button>
+        <button class="btn-kutu" onclick="sec(0)">❌</button>
+    </div>
+
+    <div class="section-title">Aksesuarlar</div>
+    <div class="grid-panel">
+        <button class="btn-kutu" onclick="sec(5)">🎭</button>
+        <button class="btn-kutu" onclick="sec(6)">👔</button>
+        <button class="btn-kutu" onclick="sec(0)">❌</button>
+    </div>
 
     <button class="ana-buton">OYUNA BAŞLA</button>
 </div>
@@ -102,15 +113,20 @@
 <script>
     function renkSet(r) { document.getElementById('mainChar').style.background = r; }
     
-    function tglSakal(id) {
-        const el = document.getElementById(id);
-        // Aynı anda sadece bir sakal görünebilir (isteğe bağlı)
-        if(id.includes('beard')) clrBeards();
-        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
-    }
+    function sec(id) {
+        // Eğer 0 gelirse her şeyi temizle
+        if(id === 0) {
+            document.querySelectorAll('.obj-3d').forEach(e => e.style.display = 'none');
+            return;
+        }
 
-    function clrBeards() {
-        document.querySelectorAll("[id^='beard-']").forEach(e => e.style.display = 'none');
+        const el = document.getElementById('item-' + id);
+        // Tıklananı aç/kapat
+        if(el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+        }
     }
 </script>
 </body>
