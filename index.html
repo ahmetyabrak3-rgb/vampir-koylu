@@ -3,40 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Orijinal Renk Atölyesi</title>
+    <title>Vampir Köylü - Admin & Spectator Mod</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; }
+        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; --admin-renk: #3b82f6; }
         body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 10px; }
-        
-        .kart { background: var(--kart); border-radius: 30px; padding: 20px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); max-height: 98vh; overflow-y: auto; scrollbar-width: none; }
+        .kart { background: var(--kart); border-radius: 30px; padding: 20px; width: 100%; max-width: 450px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); position: relative; }
         .ekran { display: none; }
         .ekran.aktif { display: block; animation: fadeIn 0.3s; }
 
-        /* KARAKTER ALANI */
-        #container3d { width: 100%; height: 200px; background: #000; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        .char-wrapper { position: relative; width: 80px; height: 110px; animation: bounce 2s infinite ease-in-out; }
-        .character { width: 100%; height: 100%; background: #ef4444; border-radius: 40px 40px 25px 25px; position: relative; box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2); transition: background 0.2s; }
-        .eye { position: absolute; width: 12px; height: 14px; background: #000; border-radius: 50%; top: 35px; }
-        .eye-l { left: 20px; } .eye-r { right: 20px; }
+        /* KARAKTER */
+        #container3d { width: 100%; height: 180px; background: #000; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        .char-wrapper { position: relative; width: 70px; height: 95px; animation: bounce 2s infinite ease-in-out; }
+        .character { width: 100%; height: 100%; background: #ef4444; border-radius: 35px 35px 20px 20px; position: relative; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.2); }
+        .eye { position: absolute; width: 10px; height: 12px; background: #000; border-radius: 50%; top: 30px; }
+        .eye-l { left: 18px; } .eye-r { right: 18px; }
 
-        /* AKSESUARLAR (2D/BASİT) */
-        .acc { position: absolute; display: none; z-index: 5; pointer-events: none; }
-        .h-sapka { top: -20px; left: 10px; width: 60px; height: 30px; background: #222; border-radius: 5px; border-bottom: 5px solid #000; }
-        .h-tac { top: -15px; left: 15px; width: 50px; height: 20px; background: gold; clip-path: polygon(0% 100%, 0% 20%, 25% 60%, 50% 0%, 75% 60%, 100% 20%, 100% 100%); }
-        .g-gozluk { top: 38px; left: 8px; width: 64px; height: 12px; background: rgba(0,0,0,0.8); border-radius: 10px; }
-        .s-sakal { top: 70px; left: 15px; width: 50px; height: 30px; background: #1a1a1a; border-radius: 0 0 25px 25px; }
+        /* AKSESUARLAR */
+        .acc { position: absolute; display: none; z-index: 5; }
+        .h-sapka { top: -15px; left: 10px; width: 50px; height: 25px; background: #222; border-radius: 4px; border-bottom: 4px solid #000; }
+        .h-tac { top: -12px; left: 12px; width: 45px; height: 18px; background: gold; clip-path: polygon(0% 100%, 0% 20%, 25% 60%, 50% 0%, 75% 60%, 100% 20%, 100% 100%); }
 
-        /* RENK PANELİ (FOTOĞRAFTAKİ SIRALAMA) */
+        /* PANEL */
         .section-title { font-size: 10px; font-weight: 800; color: var(--altin); margin: 15px 0 8px 0; text-transform: uppercase; text-align: left; border-left: 3px solid var(--vurgu); padding-left: 8px; }
         .renk-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
-        .btn-renk { height: 35px; border-radius: 8px; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); }
-        
-        .grid-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .btn-renk { height: 35px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
         .btn-kutu { background: #334155; border: none; padding: 12px; border-radius: 12px; cursor: pointer; color: white; font-size: 20px; }
+        .ana-buton { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .ana-buton:hover { filter: brightness(1.1); }
 
-        .ana-buton { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; cursor: pointer; margin-top: 15px; }
-        .oda-kod-kutu { background: #0f172a; padding: 15px; border-radius: 20px; margin: 10px 0; border: 2px dashed var(--altin); font-size: 24px; font-weight: 900; color: var(--altin); }
+        /* ADMIN ÖZEL */
+        .admin-badge { background: var(--admin-renk); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        .mod-secimi { display: flex; gap: 10px; margin: 15px 0; }
+        .mod-kart { flex: 1; padding: 15px; background: #0f172a; border-radius: 15px; border: 2px solid transparent; cursor: pointer; transition: 0.3s; }
+        .mod-kart.secili { border-color: var(--altin); background: #1e293b; }
+        
         #qrcode { background: white; padding: 10px; border-radius: 10px; width: fit-content; margin: 10px auto; }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -47,62 +48,72 @@
 
 <div class="kart">
     <div id="ekran-tasarim" class="ekran aktif">
-        <h2 style="color:var(--altin); margin:0 0 10px 0;">KARAKTER TASARLA</h2>
+        <h2 style="color:var(--altin); margin:0 0 10px 0;">KARAKTER ATÖLYESİ</h2>
         <div id="container3d">
             <div class="char-wrapper">
                 <div class="character" id="mainChar">
                     <div class="eye eye-l"></div><div class="eye eye-r"></div>
                     <div id="acc-1" class="acc h-sapka"></div>
                     <div id="acc-2" class="acc h-tac"></div>
-                    <div id="acc-3" class="acc g-gozluk"></div>
-                    <div id="acc-4" class="acc s-sakal"></div>
                 </div>
             </div>
         </div>
-
-        <div class="section-title">Renk Tonları</div>
+        <div class="section-title">Renkler</div>
         <div class="renk-grid" id="palet"></div>
-
         <div class="section-title">Aksesuarlar</div>
-        <div class="grid-panel">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
             <button class="btn-kutu" onclick="tgl(1)">🎩</button>
             <button class="btn-kutu" onclick="tgl(2)">👑</button>
-            <button class="btn-kutu" onclick="tgl(3)">🕶️</button>
-            <button class="btn-kutu" onclick="tgl(4)">🧔</button>
+            <button class="btn-kutu" onclick="clrAcc()" style="background:#475569">❌</button>
         </div>
-
-        <button class="ana-buton" onclick="ekranDegis('ekran-secim')">OYUNA BAŞLA</button>
+        <button class="ana-buton" onclick="ekranDegis('ekran-secim')">DEVAM ET</button>
     </div>
 
     <div id="ekran-secim" class="ekran">
-        <h2 style="color:var(--altin);">ODA SEÇİMİ</h2>
-        <button class="ana-buton" onclick="odaOlustur()">➕ ODA OLUŞTUR</button>
+        <h2 style="color:var(--altin);">LOBİ</h2>
+        <button class="ana-buton" style="background:var(--admin-renk)" onclick="odaOlustur()">👑 ODA KUR (ADMİN)</button>
         <button class="ana-buton" style="background:#334155" onclick="ekranDegis('ekran-katil')">🚪 ODAYA KATIL</button>
         <button class="ana-buton" style="background:#475569" onclick="ekranDegis('ekran-tasarim')">⬅ GERİ</button>
     </div>
 
     <div id="ekran-oda" class="ekran">
-        <h2 style="color:var(--altin);">ODA HAZIR</h2>
-        <div class="oda-kod-kutu" id="odaKodu">VK-0000</div>
-        <button class="btn-kutu" style="width:100%; font-size:14px" onclick="kopyala()">📋 KODU KOPYALA</button>
+        <div class="admin-badge">ODA YÖNETİCİSİ</div>
+        <h2 style="margin:0;">YÖNETİM PANELİ</h2>
+        
+        <div style="background:#0f172a; padding:15px; border-radius:15px; margin:15px 0;">
+            <small style="color:#94a3b8">ODA KODU</small><br>
+            <span id="odaKodu" style="font-size:24px; font-weight:900; color:var(--altin);">VK-0000</span>
+            <button onclick="kopyala()" style="background:none; border:none; color:white; cursor:pointer; font-size:18px; margin-left:10px;">📋</button>
+        </div>
+
+        <div class="section-title">Oyun Modun</div>
+        <div class="mod-secimi">
+            <div id="mod-oyna" class="mod-kart secili" onclick="modSec('oyna')">
+                <span style="font-size:24px;">🎮</span><br>
+                <small>OYNA</small>
+            </div>
+            <div id="mod-izle" class="mod-kart" onclick="modSec('izle')">
+                <span style="font-size:24px;">👁️</span><br>
+                <small>İZLE</small>
+            </div>
+        </div>
+
         <div id="qrcode"></div>
-        <button class="ana-buton" style="background:#22c55e">OYUNU BAŞLAT</button>
+        <button class="ana-buton" style="background:#22c55e" onclick="alert('Oyun Başlatılıyor!')">OYUNU BAŞLAT</button>
+        <button class="ana-buton" style="background:#ef4444; margin-top:5px;" onclick="ekranDegis('ekran-secim')">ODAYI KAPAT</button>
     </div>
 
     <div id="ekran-katil" class="ekran">
-        <input type="text" placeholder="Kod Girin..." style="width:100%; padding:15px; border-radius:10px; background:#0f172a; color:white; border:1px solid #444; text-align:center; box-sizing:border-box;">
+        <h2 style="color:var(--altin);">ODAYA KATIL</h2>
+        <input type="text" placeholder="VK-XXXX" style="width:100%; padding:15px; border-radius:12px; background:#0f172a; color:white; border:1px solid #444; text-align:center; box-sizing:border-box; margin-bottom:10px;">
         <button class="ana-buton">KATIL</button>
         <button class="ana-buton" style="background:#475569" onclick="ekranDegis('ekran-secim')">İPTAL</button>
     </div>
 </div>
 
 <script>
-    // FOTOĞRAFTAKİ BİREBİR RENK LİSTESİ
-    const renkler = [
-        '#ef4444', '#f97316', '#fbbf24', '#22c55e', '#06b6d4', '#3b82f6',
-        '#6366f1', '#a855f7', '#ec4899', '#ffffff', '#64748b', '#000000'
-    ];
-
+    // Renkler (Senin fotoğraflardaki gibi)
+    const renkler = ['#ef4444', '#f97316', '#fbbf24', '#22c55e', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#ffffff', '#64748b', '#000000'];
     const palet = document.getElementById('palet');
     renkler.forEach(r => {
         const div = document.createElement('div');
@@ -116,17 +127,23 @@
         const el = document.getElementById('acc-' + id);
         el.style.display = el.style.display === 'block' ? 'none' : 'block';
     }
+    function clrAcc() { document.querySelectorAll('.acc').forEach(a => a.style.display = 'none'); }
 
     function ekranDegis(id) {
         document.querySelectorAll('.ekran').forEach(e => e.classList.remove('aktif'));
         document.getElementById(id).classList.add('aktif');
     }
 
+    function modSec(tip) {
+        document.querySelectorAll('.mod-kart').forEach(k => k.classList.remove('secili'));
+        document.getElementById('mod-' + tip).classList.add('secili');
+    }
+
     function odaOlustur() {
         const kod = "VK-" + Math.floor(1000 + Math.random() * 9000);
         document.getElementById('odaKodu').innerText = kod;
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: kod, width: 120, height: 120 });
+        new QRCode(document.getElementById("qrcode"), { text: kod, width: 100, height: 100 });
         ekranDegis('ekran-oda');
     }
 
