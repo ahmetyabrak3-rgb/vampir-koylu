@@ -1,265 +1,77 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Pro Sürüm</title>
-    <style>
-        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; overflow: hidden; }
-        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 20px; padding: 25px; width: 90%; max-width: 450px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
-        .btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 15px; }
-        .btn-create { background: #48bb78; color: white; }
-        .btn-join { background: #3182ce; color: white; }
-        .btn-kill { background: #e53e3e; color: white; }
-        .btn-vote { background: #805ad5; color: white; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; background: rgba(255, 255, 255, 0.1); color: white; box-sizing: border-box; }
-        .timer { font-size: 30px; font-weight: bold; color: #f6e05e; margin: 15px 0; text-shadow: 0 0 10px rgba(246, 224, 94, 0.5); }
-        .phase-title { font-size: 20px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; color: #a0aec0; }
-        .player-box { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
-        .dead { opacity: 0.3; text-decoration: line-through; pointer-events: none; }
-        #rolePopup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 50px; font-weight: bold; display: none; z-index: 100; }
-    </style>
-</head>
-<body>
-
-<div id="rolePopup"></div>
-
-<div class="glass-card">
-    <div id="auth-screen">
-        <h1>VAMPİR KÖYLÜ</h1>
-        <input type="text" id="userName" placeholder="Takma Adınız">
-        <button class="btn btn-create" onclick="createRoom()">Oda Oluştur</button>
-        <input type="text" id="roomCodeInput" placeholder="Oda Kodu">
-        <button class="btn btn-join" onclick="joinRoom()">Odaya Katıl</button>
-    </div>
-
-    <div id="room-screen" style="display: none;">
-        <div id="roomTitle" style="font-size: 22px; color: #f6e05e;">ODA: ......</div>
-        <div id="playerList" style="margin: 20px 0;"></div>
-        <button id="startBtn" class="btn btn-create" style="display:none;" onclick="assignRoles()">Oyunu Başlat</button>
-        <p id="waitMsg" style="display:none; font-style: italic;">Liderin başlatması bekleniyor...</p>
-    </div>
-
-    <div id="game-area" style="display: none;">
-        <div id="phaseDisplay" class="phase-title">HAZIRLANIN...</div>
-        <div id="timerDisplay" class="timer">00:00</div>
-        <div id="gameActionList"></div>
-        <p id="gameStatusMsg"></p>
-    </div>
-</div>
-
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // ... Firebase bağlantı ayarların (initializeApp, db vb.) aynı kalsın ...
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBBXkGLUFGXfQsXhZ8uKpJZf6Y5hTjdK-8",
-        authDomain: "vampir-koylu-oyunu.firebaseapp.com",
-        databaseURL: "https://vampir-koylu-oyunu-default-rtdb.firebaseio.com",
-        projectId: "vampir-koylu-oyunu"
-    };
+    let hasVoted = false; // Bu turda oy verip vermediğini takip eder
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let currentRoom = null;
-    let myName = "";
-    let myKey = "";
-    let isLider = false;
-    let myRole = "";
-    let isAlive = true;
-
-    // --- TEMEL FONKSİYONLAR ---
-    window.createRoom = () => {
-        myName = document.getElementById('userName').value;
-        if(!myName) return alert("İsim yaz!");
-        currentRoom = Math.floor(100000 + Math.random() * 900000).toString();
-        isLider = true;
-        set(ref(db, 'rooms/'+currentRoom), { lider: myName, phase: 'lobby', timer: 0 }).then(() => enterRoom());
-    };
-
-    window.joinRoom = () => {
-        myName = document.getElementById('userName').value;
-        currentRoom = document.getElementById('roomCodeInput').value;
-        if(!myName || !currentRoom) return alert("Eksik bilgi!");
-        onValue(ref(db, 'rooms/'+currentRoom), (s) => {
-            if(s.exists()) enterRoom(); else alert("Oda yok!");
-        }, {onlyOnce: true});
-    };
-
-    function enterRoom() {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('room-screen').style.display = 'block';
-        document.getElementById('roomTitle').textContent = "ODA: " + currentRoom;
-
-        const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
-        myKey = pRef.key;
-
-        if(isLider) document.getElementById('startBtn').style.display = 'block';
-        else document.getElementById('waitMsg').style.display = 'block';
-
-        listenRoom();
-    }
-
-    function listenRoom() {
-        onValue(ref(db, `rooms/${currentRoom}`), (snapshot) => {
-            const data = snapshot.val();
-            if(!data) return;
-
-            // Oyuncu Listesi Güncelleme
-            const listDiv = document.getElementById('playerList');
-            if(data.phase === 'lobby') {
-                listDiv.innerHTML = "";
-                Object.values(data.players || {}).forEach(p => {
-                    listDiv.innerHTML += `<div class="player-box">${p.ad}</div>`;
-                });
-            }
-
-            // Faz Kontrolü
-            handlePhases(data);
-        });
-    }
-
-    // --- OYUN MANTIĞI ---
+    // --- OYUN AKIŞI DÖNGÜSÜ ---
     async function handlePhases(data) {
-        const gameArea = document.getElementById('game-area');
-        const roomScreen = document.getElementById('room-screen');
-        
-        if(data.phase === 'lobby') return;
+        // ... (Diğer fazlar aynı) ...
 
-        roomScreen.style.display = 'none';
-        gameArea.style.display = 'block';
-        
-        myRole = data.players[myKey].rol;
-        isAlive = data.players[myKey].status === 'alive';
-        
-        showRoleOnce();
-        updateTimerDisplay(data.timer);
-
-        const actionList = document.getElementById('gameActionList');
-        const phaseTitle = document.getElementById('phaseDisplay');
-        actionList.innerHTML = "";
-
-        if(data.phase === 'night') {
-            phaseTitle.textContent = "🌙 GECE (Vampir Seçiyor)";
-            document.body.style.background = "#0f0f1b";
-            if(myRole === 'VAMPİR' && isAlive) {
-                Object.entries(data.players).forEach(([key, p]) => {
-                    if(p.status === 'alive' && p.rol !== 'VAMPİR') {
-                        actionList.innerHTML += `<button class="btn btn-kill" onclick="vampirAction('${key}')">${p.ad} Öldür</button>`;
-                    }
-                });
-            } else {
-                actionList.innerHTML = "<p>Gözlerini kapat, vampir avlanıyor...</p>";
-            }
-        } 
-        else if(data.phase === 'discussion') {
-            phaseTitle.textContent = "🗣️ TARTIŞMA SÜRESİ";
-            document.body.style.background = "#1a365d";
-            actionList.innerHTML = "<p>Katili bulmak için tartışın!</p>";
-            if(data.lastDead) actionList.innerHTML = `<h2 style="color:#e53e3e">${data.lastDead} gece öldürüldü!</h2>` + actionList.innerHTML;
-        }
-        else if(data.phase === 'voting') {
+        if(data.phase === 'voting') {
             phaseTitle.textContent = "🗳️ OYLAMA ZAMANI";
             document.body.style.background = "#44337a";
-            if(isAlive) {
+            
+            // SADECE HAYATTAYSA VE HENÜZ OY VERMEDİYSE BUTONLARI GÖSTER
+            if(isAlive && !hasVoted) {
                 Object.entries(data.players).forEach(([key, p]) => {
                     if(p.status === 'alive') {
                         actionList.innerHTML += `<button class="btn btn-vote" onclick="voteAction('${key}')">${p.ad}</button>`;
                     }
                 });
+            } else if (!isAlive) {
+                actionList.innerHTML = "<p style='color: #e53e3e;'>Ölüler oy kullanamaz!</p>";
+            } else {
+                actionList.innerHTML = "<p>Oyunuzu kullandınız, sonuçlar bekleniyor...</p>";
             }
+        } else {
+            // Yeni faz başladığında oy verme kilidini sıfırla
+            hasVoted = false; 
         }
     }
 
-    // --- AKSİYONLAR ---
-    window.vampirAction = (targetKey) => {
-        update(ref(db, `rooms/${currentRoom}`), { target: targetKey });
-        document.getElementById('gameActionList').innerHTML = "Hedef seçildi, süre dolunca ölecek.";
-    };
-
+    // --- GÜVENLİ OYLAMA FONKSİYONU ---
     window.voteAction = (targetKey) => {
+        if(hasVoted || !isAlive) return; // Zaten vermişse veya ölüyse işlem yapma
+
         const voteRef = ref(db, `rooms/${currentRoom}/players/${targetKey}/votes`);
+        
+        // Firebase'deki oyu 1 artır
         onValue(voteRef, (s) => {
             const currentVotes = s.val() || 0;
             update(ref(db, `rooms/${currentRoom}/players/${targetKey}`), { votes: currentVotes + 1 });
-        }, {onlyOnce: true});
-        document.getElementById('gameActionList').innerHTML = "Oyunuzu kullandınız.";
-    };
-
-    // --- LİDER ZAMANLAYICI KONTROLÜ ---
-    window.assignRoles = async () => {
-        onValue(ref(db, `rooms/${currentRoom}/players`), (s) => {
-            const keys = Object.keys(s.val());
-            const vKey = keys[Math.floor(Math.random()*keys.length)];
-            keys.forEach(k => update(ref(db, `rooms/${currentRoom}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
-            startCycle();
+            
+            hasVoted = true; // Yerel olarak kilidi kapat
+            document.getElementById('gameActionList').innerHTML = "Oyunuz başarıyla kaydedildi.";
         }, {onlyOnce: true});
     };
 
-    async function startCycle() {
-        // 1. GECE (30 sn)
-        await runPhase('night', 30);
-        
-        // Öldürme işlemini uygula
-        const snap = await new Promise(res => onValue(ref(db, `rooms/${currentRoom}`), res, {onlyOnce:true}));
-        const target = snap.val().target;
-        let deadName = "Kimse";
-        if(target) {
-            deadName = snap.val().players[target].ad;
-            update(ref(db, `rooms/${currentRoom}/players/${target}`), { status: 'dead' });
-        }
-
-        // 2. TARTIŞMA (120 sn - 2 dk)
-        await runPhase('discussion', 120, deadName);
-
-        // 3. OYLAMA (30 sn)
-        await runPhase('voting', 30);
-
-        // Oylama Sonucu
+    // --- LİDERİN OY SONUCU HESAPLAMASI (GELİŞMİŞ) ---
+    async function calculateVotingResult() {
         const finalSnap = await new Promise(res => onValue(ref(db, `rooms/${currentRoom}/players`), res, {onlyOnce:true}));
         const players = finalSnap.val();
+        
         let maxVotes = 0;
-        let votedKey = null;
-        let isTie = false;
+        let candidates = [];
 
+        // Oyları say
         Object.entries(players).forEach(([k, p]) => {
-            if(p.votes > maxVotes) { maxVotes = p.votes; votedKey = k; isTie = false; }
-            else if(p.votes === maxVotes && maxVotes > 0) { isTie = true; }
-            update(ref(db, `rooms/${currentRoom}/players/${k}`), { votes: 0 }); // Oyları sıfırla
+            if(p.votes > maxVotes) {
+                maxVotes = p.votes;
+                candidates = [k]; // Yeni lider aday
+            } else if (p.votes === maxVotes && maxVotes > 0) {
+                candidates.push(k); // Beraberlik listesine ekle
+            }
+            // Bir sonraki tur için oyları temizle
+            update(ref(db, `rooms/${currentRoom}/players/${k}`), { votes: 0 });
         });
 
-        if(!isTie && votedKey) {
-            update(ref(db, `rooms/${currentRoom}/players/${votedKey}`), { status: 'dead' });
+        // SONUÇ: Sadece tek bir kişi en yüksek oyu aldıysa elenir
+        if(candidates.length === 1) {
+            const eliminatedKey = candidates[0];
+            update(ref(db, `rooms/${currentRoom}/players/${eliminatedKey}`), { status: 'dead' });
+            return players[eliminatedKey].ad + " oylamayla elendi!";
+        } else {
+            return "Oylama berabere bitti, kimse elenmedi!";
         }
-
-        // Tur Bitti, Yeni Tur
-        update(ref(db, `rooms/${currentRoom}`), { target: null });
-        startCycle();
-    }
-
-    async function runPhase(name, seconds, lastDead = null) {
-        update(ref(db, `rooms/${currentRoom}`), { phase: name, timer: seconds, lastDead: lastDead });
-        for(let i = seconds; i >= 0; i--) {
-            await new Promise(r => setTimeout(r, 1000));
-            update(ref(db, `rooms/${currentRoom}`), { timer: i });
-        }
-    }
-
-    function updateTimerDisplay(sec) {
-        const m = Math.floor(sec/60);
-        const s = sec%60;
-        document.getElementById('timerDisplay').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    }
-
-    function showRoleOnce() {
-        const p = document.getElementById('rolePopup');
-        if(p.style.display === "block") return;
-        p.textContent = "ROLÜN: " + myRole;
-        p.style.display = "block";
-        p.style.background = myRole === 'VAMPİR' ? '#e53e3e' : '#3182ce';
-        setTimeout(() => p.style.display = "none", 5000);
     }
 </script>
-</body>
-</html>
