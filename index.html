@@ -3,96 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - %100 Çalışan Sürüm</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>Vampir Köylü - Pro Karakter Tasarımı</title>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; }
-        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .kart { background: var(--kart); border-radius: 25px; padding: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
+        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .kart { background: var(--kart); border-radius: 30px; padding: 25px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); overflow-y: auto; max-height: 95vh; }
         
-        /* 3D KARAKTER ALANI */
+        /* 3D KARAKTER SAHNESİ */
         #container3d { 
-            width: 100%; height: 250px; background: #1a1a1a; border-radius: 15px; 
-            margin-bottom: 15px; border: 2px solid var(--vurgu); 
+            width: 100%; height: 260px; background: radial-gradient(circle, #2d3748 0%, #1a202c 100%); 
+            border-radius: 20px; margin-bottom: 20px; border: 3px solid var(--vurgu); 
             display: flex; align-items: center; justify-content: center;
-            perspective: 1000px; overflow: hidden;
+            perspective: 800px; position: relative;
         }
 
-        /* FALL GUYS KARAKTERİ (CSS 3D) */
+        /* FALL GUYS KARAKTERİ */
         .character {
-            width: 80px; height: 120px; background: var(--vurgu);
-            border-radius: 40px 40px 20px 20px;
+            width: 90px; height: 130px; background: var(--vurgu);
+            border-radius: 45px 45px 30px 30px;
             position: relative;
-            animation: bounce 2s infinite ease-in-out, rotate 5s infinite linear;
-            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.3), 0 20px 30px rgba(0,0,0,0.5);
+            animation: bounce 2s infinite ease-in-out;
+            box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), 0 15px 25px rgba(0,0,0,0.4);
+            transition: background 0.3s;
         }
 
         /* GÖZLER */
         .character::before, .character::after {
-            content: ''; position: absolute; width: 12px; height: 12px;
-            background: #000; border-radius: 50%; top: 35px;
+            content: ''; position: absolute; width: 14px; height: 14px;
+            background: #111; border-radius: 50%; top: 40px; z-index: 5;
         }
-        .character::before { left: 20px; }
-        .character::after { right: 20px; }
+        .character::before { left: 22px; }
+        .character::after { right: 22px; }
 
-        /* AKSESUARLAR */
-        #hat { position: absolute; top: -15px; left: 10px; font-size: 50px; display: none; z-index: 10; }
-        #glass { position: absolute; top: 25px; left: 5px; font-size: 40px; display: none; z-index: 10; }
-
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        /* AKSESUARLARIN KONUMLARI */
+        .aks-item { position: absolute; pointer-events: none; z-index: 10; display: none; text-align: center; width: 100%; }
         
-        /* PANEL */
-        .grid-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-        .btn-kutu { background: #334155; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 18px; color: white; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #0f172a; color: white; margin-bottom: 10px; box-sizing: border-box; text-align: center; }
-        .ana-buton { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; background: var(--vurgu); color: white; }
+        /* Şapkalar - Karakterin tam tepesine */
+        .sapka-pos { top: -35px; left: 0; font-size: 55px; }
+        /* Gözlükler - Gözlerin tam üstüne */
+        .gozluk-pos { top: 28px; left: 0; font-size: 45px; }
+        /* Maskeler/Yüz - Gözlerin altına */
+        .maske-pos { top: 55px; left: 0; font-size: 40px; }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-12px) rotate(1deg); } }
+        
+        /* PANEL TASARIMI */
+        .section-title { font-size: 12px; font-weight: bold; color: var(--altin); margin: 15px 0 8px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .grid-panel { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 10px; }
+        .btn-kutu { background: #334155; border: none; padding: 8px; border-radius: 10px; cursor: pointer; color: white; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .btn-kutu:hover { transform: scale(1.1); background: #475569; }
+        .btn-renk { width: 100%; height: 35px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2); }
+        
+        input { width: 100%; padding: 14px; border-radius: 12px; border: none; background: #0f172a; color: white; margin: 15px 0; box-sizing: border-box; text-align: center; font-weight: bold; border: 1px solid #334155; }
+        .ana-buton { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; background: var(--vurgu); color: white; font-size: 16px; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
     </style>
 </head>
 <body>
 
 <div class="kart">
     <div id="giris-ekrani">
-        <h2 style="color: var(--altin); margin-top: 0;">KARAKTERİNİ TASARLA</h2>
+        <h2 style="color: var(--altin); margin: 0 0 15px 0;">PRO KARAKTER TASARIMI</h2>
         
         <div id="container3d">
             <div class="character" id="mainChar">
-                <span id="hat">🎩</span>
-                <span id="glass">🕶️</span>
+                <div id="h-1" class="aks-item sapka-pos">🎩</div>
+                <div id="h-2" class="aks-item sapka-pos">🤠</div>
+                <div id="h-3" class="aks-item sapka-pos">👑</div>
+                <div id="h-4" class="aks-item sapka-pos">🎓</div>
+                
+                <div id="g-1" class="aks-item gozluk-pos">🕶️</div>
+                <div id="g-2" class="aks-item gozluk-pos">🕶️</div>
+                <div id="g-3" class="aks-item gozluk-pos">🧐</div>
+                <div id="g-4" class="aks-item gozluk-pos">🥽</div>
+
+                <div id="m-1" class="aks-item maske-pos">🥸</div>
+                <div id="m-2" class="aks-item maske-pos">🎭</div>
+                <div id="m-3" class="aks-item maske-pos">🥷</div>
+                <div id="m-4" class="aks-item maske-pos">🩹</div>
             </div>
         </div>
 
-        <input type="text" id="kullaniciAdi" placeholder="Adını Yaz">
-        
+        <input type="text" id="kullaniciAdi" placeholder="OYUNCU ADI">
+
+        <div class="section-title">Renk Seçimi</div>
         <div class="grid-panel">
-            <button class="btn-kutu" onclick="renkGuncelle('#ef4444')">🔴</button>
-            <button class="btn-kutu" onclick="renkGuncelle('#22c55e')">🟢</button>
-            <button class="btn-kutu" onclick="renkGuncelle('#3b82f6')">🔵</button>
-            <button class="btn-kutu" onclick="renkGuncelle('#fbbf24')">🟡</button>
-            <button class="btn-kutu" onclick="toggleAks('hat')">🎩</button>
-            <button class="btn-kutu" onclick="toggleAks('glass')">🕶️</button>
-            <button class="btn-kutu" onclick="renkGuncelle('#ffffff')">⚪</button>
-            <button class="btn-kutu" onclick="sifirla()">❌</button>
+            <div class="btn-kutu btn-renk" style="background:#ef4444" onclick="renkSet('#ef4444')"></div>
+            <div class="btn-kutu btn-renk" style="background:#22c55e" onclick="renkSet('#22c55e')"></div>
+            <div class="btn-kutu btn-renk" style="background:#3b82f6" onclick="renkSet('#3b82f6')"></div>
+            <div class="btn-kutu btn-renk" style="background:#fbbf24" onclick="renkSet('#fbbf24')"></div>
+            <div class="btn-kutu btn-renk" style="background:#a855f7" onclick="renkSet('#a855f7')"></div>
+            <div class="btn-kutu btn-renk" style="background:#ec4899" onclick="renkSet('#ec4899')"></div>
         </div>
 
-        <button class="ana-buton" onclick="alert('Karakter Hazır!')">Oda Oluştur</button>
+        <div class="section-title">Şapkalar</div>
+        <div class="grid-panel">
+            <button class="btn-kutu" onclick="setAks('h', 1)">🎩</button>
+            <button class="btn-kutu" onclick="setAks('h', 2)">🤠</button>
+            <button class="btn-kutu" onclick="setAks('h', 3)">👑</button>
+            <button class="btn-kutu" onclick="setAks('h', 4)">🎓</button>
+            <button class="btn-kutu" onclick="setAks('h', 0)">❌</button>
+        </div>
+
+        <div class="section-title">Gözlükler</div>
+        <div class="grid-panel">
+            <button class="btn-kutu" onclick="setAks('g', 1)">🕶️</button>
+            <button class="btn-kutu" onclick="setAks('g', 2)">😎</button>
+            <button class="btn-kutu" onclick="setAks('g', 3)">🧐</button>
+            <button class="btn-kutu" onclick="setAks('g', 4)">🥽</button>
+            <button class="btn-kutu" onclick="setAks('g', 0)">❌</button>
+        </div>
+
+        <div class="section-title">Maske ve Yüz</div>
+        <div class="grid-panel">
+            <button class="btn-kutu" onclick="setAks('m', 1)">🥸</button>
+            <button class="btn-kutu" onclick="setAks('m', 2)">🎭</button>
+            <button class="btn-kutu" onclick="setAks('m', 3)">🥷</button>
+            <button class="btn-kutu" onclick="setAks('m', 4)">🩹</button>
+            <button class="btn-kutu" onclick="setAks('m', 0)">❌</button>
+        </div>
+
+        <button class="ana-buton" onclick="alert('Karakter Kaydedildi! Odaya Katılıyorsun...')">OYUNA BAŞLA</button>
     </div>
 </div>
 
 <script>
-    function renkGuncelle(renk) {
-        document.getElementById('mainChar').style.background = renk;
+    let currentAks = { h: 0, g: 0, m: 0 };
+
+    function renkSet(r) {
+        document.getElementById('mainChar').style.background = r;
     }
 
-    function toggleAks(id) {
-        const el = document.getElementById(id);
-        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    function setAks(tip, id) {
+        // Önce o tipteki tüm aksesuarları gizle
+        for(let i=1; i<=4; i++) {
+            let el = document.getElementById(tip + '-' + i);
+            if(el) el.style.display = 'none';
+        }
+        
+        // Eğer 0 seçilmediyse yenisini göster
+        if(id !== 0) {
+            document.getElementById(tip + '-' + id).style.display = 'block';
+        }
+        currentAks[tip] = id;
     }
 
-    function sifirla() {
-        document.getElementById('mainChar').style.background = '#ef4444';
-        document.getElementById('hat').style.display = 'none';
-        document.getElementById('glass').style.display = 'none';
-    }
+    // Başlangıç rengi
+    renkSet('#ef4444');
 </script>
 </body>
 </html>
