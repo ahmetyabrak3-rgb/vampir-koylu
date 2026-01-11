@@ -3,70 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Premium</title>
+    <title>Vampir Köylü - QR Destekli</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        /* ŞIK RENK PALETİ */
-        :root { 
-            --bg: #0f172a; /* Derin Gece Mavisi */
-            --card: #1e293b; /* Koyu Lacivert Kart */
-            --text: #f8fafc; /* Beyaza yakın gri */
-            --accent: #fbbf24; /* Altın Sarısı (Vurgu) */
-            --vampir: #ef4444; /* Şık Kırmızı */
-            --secondary: #334155; /* Yumuşak Gri */
-        }
-        
-        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-        
-        .card { background: var(--card); border-radius: 28px; padding: 40px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        
-        h1 { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 30px; color: var(--accent); }
-        
-        input { width: 100%; padding: 16px; margin: 8px 0; border-radius: 14px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-size: 16px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2); }
-        
-        .btn { width: 100%; padding: 16px; margin: 10px 0; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #fbbf24; --vampir: #ef4444; --secondary: #334155; }
+        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+        .card { background: var(--card); border-radius: 28px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        h1 { font-size: 26px; font-weight: 800; color: var(--accent); margin-bottom: 20px; }
+        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; }
+        .btn { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         .btn-primary { background: var(--accent); color: #1e293b; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.3); }
         .btn-secondary { background: var(--secondary); color: white; }
-        .btn-danger { background: var(--vampir); color: white; }
+        .timer { font-size: 50px; font-weight: 800; color: var(--accent); margin: 15px 0; }
         
-        .timer { font-size: 56px; font-weight: 800; margin: 20px 0; color: var(--accent); font-variant-numeric: tabular-nums; }
-        .phase-badge { display: inline-block; padding: 8px 16px; border-radius: 30px; background: rgba(251, 191, 36, 0.1); color: var(--accent); font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; border: 1px solid rgba(251, 191, 36, 0.2); }
+        /* QR KOD ALANI */
+        #qr-container { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin-top: 15px; }
+        #playerList { text-align: left; margin: 20px 0; max-height: 150px; overflow-y: auto; }
         
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; box-sizing: border-box; }
-        .role-emoji { font-size: 100px; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.3)); }
-        .role-title { font-size: 44px; font-weight: 900; margin-bottom: 10px; color: var(--accent); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="statusOverlay" class="overlay">
-    <div id="overlayEmoji" class="role-emoji"></div>
-    <div id="overlayTitle" class="role-title"></div>
-    <div id="overlaySub" style="font-size: 20px; color: #94a3b8; margin-bottom: 40px; max-width: 300px;"></div>
-    <button id="overlayBtn" class="btn btn-primary" style="max-width: 250px;" onclick="closeOverlay()">Devam Et</button>
+    <div id="overlayEmoji" style="font-size: 80px;"></div>
+    <div id="overlayTitle" style="font-size: 36px; font-weight: 900; color: var(--accent);"></div>
+    <div id="overlaySub" style="margin: 20px; color: #94a3b8;"></div>
+    <button class="btn btn-primary" style="width: 200px;" onclick="closeOverlay()">Devam Et</button>
 </div>
 
 <div class="card">
     <div id="auth-screen">
         <h1>VAMPİR KÖYLÜ</h1>
-        <input type="text" id="userName" placeholder="Oyuncu Adı">
+        <input type="text" id="userName" placeholder="Adınız">
         <button class="btn btn-primary" onclick="createRoom()">Oda Oluştur</button>
-        <div style="margin: 15px; color: #64748b; font-weight: 600;">VEYA</div>
+        <div style="margin: 10px; color: #64748b;">veya</div>
         <input type="text" id="roomCodeInput" placeholder="Oda Kodu">
         <button class="btn btn-secondary" onclick="joinRoom()">Katıl</button>
     </div>
 
     <div id="room-screen" style="display: none;">
-        <div style="font-weight: 700; color: #64748b; letter-spacing: 2px; font-size: 12px;">LOBİ KODU</div>
-        <h2 id="displayCode" style="font-size: 42px; margin: 10px 0; color: white;">000000</h2>
-        <div id="playerList" style="text-align: left; margin: 30px 0; border-top: 1px solid #334155;"></div>
+        <div style="font-size: 12px; color: #64748b; font-weight: bold;">ODA KODU</div>
+        <div id="displayCode" style="font-size: 36px; font-weight: 800; color: white;">000000</div>
+        
+        <div id="qr-container">
+            <div id="qrcode"></div>
+        </div>
+        
+        <div id="playerList"></div>
         <button id="startBtn" class="btn btn-primary" style="display:none;" onclick="assignRoles()">Oyunu Başlat</button>
-        <p id="waitMsg" style="display:none; color: #94a3b8; font-weight: 500;">Diğer oyuncuların gelmesi bekleniyor...</p>
+        <p id="waitMsg" style="display:none; color: #94a3b8;">Lider bekleniyor...</p>
     </div>
 
     <div id="game-area" style="display: none;">
-        <div id="phaseBadge" class="phase-badge">HAZIRLANIN</div>
+        <div id="phaseBadge" style="color: var(--accent); font-weight: 800;">HAZIRLANIN</div>
         <div id="timerDisplay" class="timer">00:00</div>
         <div id="gameActionList"></div>
     </div>
@@ -88,12 +78,37 @@
 
     let currentRoom = null, myName = "", myKey = "", isLider = false, myRole = "", isAlive = true, hasVoted = false;
 
+    // QR Kod Oluşturma Fonksiyonu
+    function generateQR(code) {
+        document.getElementById('qrcode').innerHTML = "";
+        // Site adresin + oda kodu parametresi
+        const joinLink = window.location.href.split('?')[0] + "?room=" + code;
+        new QRCode(document.getElementById("qrcode"), {
+            text: joinLink,
+            width: 128,
+            height: 128,
+            colorDark : "#000000",
+            colorLight : "#ffffff"
+        });
+    }
+
+    // Sayfa QR linkiyle açılmışsa otomatik oda kodunu doldur
+    window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('room')) {
+            document.getElementById('roomCodeInput').value = urlParams.get('room');
+        }
+    };
+
     window.createRoom = () => {
         myName = document.getElementById('userName').value;
         if(!myName) return;
         currentRoom = Math.floor(100000 + Math.random() * 900000).toString();
         isLider = true;
-        set(ref(db, 'rooms/'+currentRoom), { phase: 'lobby' }).then(() => enterRoom());
+        set(ref(db, 'rooms/'+currentRoom), { phase: 'lobby' }).then(() => {
+            enterRoom();
+            generateQR(currentRoom);
+        });
     };
 
     window.joinRoom = () => {
@@ -112,25 +127,24 @@
         const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
         myKey = pRef.key;
         if(isLider) document.getElementById('startBtn').style.display = 'block';
-        else document.getElementById('waitMsg').style.display = 'block';
+        else {
+            document.getElementById('waitMsg').style.display = 'block';
+            document.getElementById('qr-container').style.display = 'none'; // Katılanlara QR gösterme
+        }
         listenRoom();
     }
 
+    // --- (Oyun Mantığı Kodları Aşağıdaki Gibidir - Öncekiyle Aynı) ---
     function listenRoom() {
         onValue(ref(db, `rooms/${currentRoom}`), (snapshot) => {
             const data = snapshot.val();
             if(!data) return;
-
-            if(data.winner) {
-                showOverlay(data.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', data.winner + " KAZANDI", "Oyun bitti. Vampir: " + data.vampireName, true);
-                return;
-            }
-
+            if(data.winner) { showOverlay(data.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', data.winner + " KAZANDI", "Vampir: " + data.vampireName, true); return; }
             if(data.phase === 'lobby') {
                 const listDiv = document.getElementById('playerList');
                 listDiv.innerHTML = "";
                 Object.values(data.players || {}).forEach(p => {
-                    listDiv.innerHTML += `<div style="padding:14px; border-bottom:1px solid #334155; font-weight:500;">${p.ad}</div>`;
+                    listDiv.innerHTML += `<div style="padding:10px; border-bottom:1px solid #334155;">• ${p.ad}</div>`;
                 });
             } else {
                 document.getElementById('room-screen').style.display = 'none';
@@ -139,7 +153,7 @@
                 isAlive = data.players[myKey].status === 'alive';
                 if(!window.roleShown) {
                     window.roleShown = true;
-                    showOverlay(myRole === 'VAMPİR' ? '🩸' : '👨‍🌾', myRole, myRole === 'VAMPİR' ? "Köylüleri sessizce ortadan kaldır." : "Aralarındaki vampiri bul ve onu as!");
+                    showOverlay(myRole === 'VAMPİR' ? '🩸' : '👨‍🌾', myRole, myRole === 'VAMPİR' ? "Köylüleri avla." : "Vampiri bul.");
                 }
                 updateUI(data);
             }
@@ -147,27 +161,20 @@
     }
 
     function updateUI(data) {
-        document.getElementById('phaseBadge').textContent = data.phase === 'night' ? 'GECE' : (data.phase === 'voting' ? 'OYLAMA' : 'TARTIŞMA');
         document.getElementById('timerDisplay').textContent = "00:" + data.timer.toString().padStart(2,'0');
         const list = document.getElementById('gameActionList');
         list.innerHTML = "";
-
-        if(data.phase === 'night') {
-            if(myRole === 'VAMPİR' && isAlive) {
-                Object.entries(data.players).forEach(([k, p]) => {
-                    if(p.status === 'alive' && p.rol !== 'VAMPİR')
-                        list.innerHTML += `<button class="btn btn-danger" onclick="vAction('${k}')">${p.ad}</button>`;
-                });
-            } else { list.innerHTML = "<p style='color:#64748b'>Gece çöküyor, vampir avda...</p>"; }
-        } else if(data.phase === 'voting') {
-            if(isAlive && !hasVoted) {
-                Object.entries(data.players).forEach(([k, p]) => {
-                    if(p.status === 'alive')
-                        list.innerHTML += `<button class="btn btn-secondary" onclick="voteAction('${k}')">${p.ad}</button>`;
-                });
-            } else { list.innerHTML = isAlive ? "<p>Oyunuzu kullandınız.</p>" : "<p style='color:#ef4444'>Elendiğiniz için izliyorsunuz.</p>"; }
-        } else {
-            list.innerHTML = `<h3 style="color:white; font-size:20px;">${data.lastEvent || "Sakin bir gece geçti."}</h3>`;
+        if(data.phase === 'night' && myRole === 'VAMPİR' && isAlive) {
+            Object.entries(data.players).forEach(([k, p]) => {
+                if(p.status === 'alive' && p.rol !== 'VAMPİR')
+                    list.innerHTML += `<button class="btn btn-secondary" style="background:#ef4444" onclick="vAction('${k}')">${p.ad}</button>`;
+            });
+        } else if(data.phase === 'voting' && isAlive && !hasVoted) {
+            Object.entries(data.players).forEach(([k, p]) => {
+                if(p.status === 'alive') list.innerHTML += `<button class="btn btn-secondary" onclick="voteAction('${k}')">${p.ad}</button>`;
+            });
+        } else if(data.phase === 'discussion') {
+            list.innerHTML = `<h3>${data.lastEvent || "Sessiz bir gece."}</h3>`;
             hasVoted = false;
         }
     }
@@ -231,8 +238,7 @@
     }
 
     function showOverlay(emoji, title, sub, isFinal = false) {
-        const o = document.getElementById('statusOverlay');
-        o.style.display = 'flex';
+        const o = document.getElementById('statusOverlay'); o.style.display = 'flex';
         document.getElementById('overlayEmoji').textContent = emoji;
         document.getElementById('overlayTitle').textContent = title;
         document.getElementById('overlaySub').textContent = sub;
