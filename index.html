@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Bekleme Ekranlı</title>
+    <title>Vampir Köylü - Tam Sürüm</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --ikincil: #334155; }
@@ -20,6 +20,9 @@
         #odaKoduGoster { font-size: 36px; font-weight: 800; color: white; }
         .kopyala-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 8px; color: var(--vurgu); padding: 8px; cursor: pointer; }
         
+        /* QR KOD STİLİ */
+        #qr-cerceve { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 15px 0; }
+
         /* BEKLEME ANİMASYONU */
         .bekleme-modu { margin: 20px 0; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
         .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--vurgu); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
@@ -56,9 +59,15 @@
             <button class="kopyala-btn" onclick="koduKopyala()"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
         </div>
         
+        <div id="qr-kapsayici" style="display:none;">
+            <div id="qr-cerceve">
+                <div id="qrcode"></div>
+            </div>
+        </div>
+
         <div id="beklemeEkrani" class="bekleme-modu" style="display:none;">
             <div class="loader"></div>
-            <span style="font-weight: 700; color: #94a3b8; letter-spacing: 1px; font-size: 13px;">DİĞER OYUNCULAR BEKLENİYOR...</span>
+            <span style="font-weight: 700; color: #94a3b8; font-size: 13px;">DİĞER OYUNCULAR BEKLENİYOR...</span>
         </div>
 
         <div id="admin-ayarlari" class="panel" style="display:none;">
@@ -108,11 +117,21 @@
         navigator.clipboard.writeText(kod).then(() => alert("Kod kopyalandı: " + kod));
     };
 
+    function qrOlustur(kod) {
+        document.getElementById('qrcode').innerHTML = "";
+        const link = window.location.href.split('?')[0] + "?room=" + kod;
+        new QRCode(document.getElementById("qrcode"), { text: link, width: 120, height: 120 });
+        document.getElementById('qr-kapsayici').style.display = 'block';
+    }
+
     window.odaOlustur = () => {
         benimAdim = document.getElementById('kullaniciAdi').value || "Admin";
         mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
         liderMiyim = true;
-        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi' }).then(() => odayaGir());
+        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi' }).then(() => {
+            odayaGir();
+            qrOlustur(mevcutOda);
+        });
     };
 
     window.odayaKatil = () => {
@@ -141,12 +160,7 @@
         onValue(ref(db, `rooms/${mevcutOda}`), (snapshot) => {
             const veri = snapshot.val();
             if(!veri) return;
-
-            if(veri.winner) {
-                katmaniGoster(veri.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', veri.winner + " KAZANDI", "Vampir: " + (veri.vampireName || "?"), true);
-                return;
-            }
-
+            if(veri.winner) { katmaniGoster(veri.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', veri.winner + " KAZANDI", "Vampir: " + (veri.vampireName || "?"), true); return; }
             if(veri.phase === 'lobi') {
                 const liste = document.getElementById('oyuncuListesi');
                 liste.innerHTML = "";
@@ -174,12 +188,10 @@
         const nS = parseInt(document.getElementById('sureGece').value);
         const dS = parseInt(document.getElementById('sureTartisma').value);
         const vS = parseInt(document.getElementById('sureOylama').value);
-
         if(adminOlsun && liderMiyim) {
             const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, rol: '?', status: 'alive', votes: 0 });
             benimAnahtarim = pRef.key;
         }
-
         setTimeout(() => {
             onValue(ref(db, `rooms/${mevcutOda}/players`), (s) => {
                 const oyuncular = s.val(), anahtarlar = Object.keys(oyuncular);
@@ -279,6 +291,12 @@
         document.querySelector('#durumKatmani button').onclick = fin ? () => location.reload() : katmaniKapat;
     }
     window.katmaniKapat = () => document.getElementById('durumKatmani').style.display = 'none';
+
+    // Sayfa QR linkiyle açılmışsa kodu doldur
+    window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('room')) document.getElementById('odaKoduGiris').value = urlParams.get('room');
+    };
 </script>
 </body>
 </html>
