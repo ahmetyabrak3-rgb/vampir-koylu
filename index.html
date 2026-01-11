@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Rol Dağıtma</title>
+    <title>Vampir Köylü - Modern Lobi</title>
     <style>
         body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: rgba(255, 255, 255, 0.2); color: white; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); text-align: center; border: 1px solid rgba(255, 255, 255, 0.2); }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none; background: rgba(255, 255, 255, 0.2); color: white; box-sizing: border-box; font-size: 16px; }
+        input::placeholder { color: rgba(255,255,255,0.7); }
+        .btn { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
         .btn-create { background-color: #48bb78; color: white; }
         .btn-join { background-color: #3182ce; color: white; }
-        .btn-start { background-color: #e53e3e; color: white; display: none; }
+        .btn-start { background-color: #e53e3e; color: white; display: none; margin-top: 20px; }
         .room-info { font-size: 24px; font-weight: bold; margin: 20px 0; color: #f6e05e; }
-        .player-item { background: rgba(0,0,0,0.2); padding: 8px 15px; border-radius: 5px; margin: 5px 0; display: flex; justify-content: space-between; }
-        .role-box { background: #ff4d4d; padding: 20px; border-radius: 15px; font-size: 22px; font-weight: bold; margin-bottom: 20px; display: none; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .player-item { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin: 5px 0; display: flex; justify-content: space-between; font-weight: bold; }
+        .role-box { background: #ff4d4d; padding: 20px; border-radius: 15px; font-size: 22px; font-weight: bold; margin-bottom: 20px; display: none; border: 2px solid white; }
     </style>
 </head>
 <body>
@@ -34,9 +35,10 @@
 
     <div id="room-screen" style="display: none;">
         <div class="room-info" id="displayRoomCode">ODA: ......</div>
+        <h3>Oyuncular:</h3>
         <div id="playerList"></div>
-        <button id="startBtn" class="btn btn-start" onclick="assignRoles()">Rolleri Dağıt ve Başlat</button>
-        <p id="waitMsg" style="margin-top:20px; font-style: italic; display:none;">Liderin rolleri dağıtması bekleniyor...</p>
+        <button id="startBtn" class="btn btn-start" onclick="assignRoles()">Rolleri Dağıt</button>
+        <p id="waitMsg" style="margin-top:20px; font-style: italic; display:none; color: #f6e05e;">Liderin rolleri dağıtması bekleniyor...</p>
     </div>
 </div>
 
@@ -45,4 +47,111 @@
     import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyBB
+        apiKey: "AIzaSyBBXkGLUFGXfQsXhZ8uKpJZf6Y5hTjdK-8",
+        authDomain: "vampir-koylu-oyunu.firebaseapp.com",
+        databaseURL: "https://vampir-koylu-oyunu-default-rtdb.firebaseio.com",
+        projectId: "vampir-koylu-oyunu"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let currentRoom = null;
+    let isLider = false;
+    let myName = "";
+    let myPlayerKey = "";
+
+    // ODA OLUŞTURMA
+    window.createRoom = function() {
+        myName = document.getElementById('userName').value;
+        if(!myName) return alert("Lütfen bir isim yazın!");
+        
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        currentRoom = code;
+        isLider = true;
+
+        set(ref(db, 'rooms/' + code), {
+            lider: myName,
+            durum: "bekliyor"
+        }).then(() => {
+            enterRoom(code);
+        });
+    };
+
+    // ODAYA KATILMA
+    window.joinRoom = function() {
+        myName = document.getElementById('userName').value;
+        const code = document.getElementById('roomCodeInput').value;
+        if(!myName || !code) return alert("İsim ve Oda Kodu gerekli!");
+
+        onValue(ref(db, 'rooms/' + code), (snapshot) => {
+            if(snapshot.exists()) {
+                currentRoom = code;
+                enterRoom(code);
+            } else {
+                alert("Böyle bir oda bulunamadı!");
+            }
+        }, { onlyOnce: true });
+    };
+
+    function enterRoom(code) {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('room-screen').style.display = 'block';
+        document.getElementById('displayRoomCode').textContent = "ODA KODU: " + code;
+
+        const playersRef = ref(db, 'rooms/' + code + '/players');
+        const newPlayer = push(playersRef, {
+            ad: myName,
+            rol: "Bekleniyor..."
+        });
+        myPlayerKey = newPlayer.key;
+
+        if(isLider) {
+            document.getElementById('startBtn').style.display = 'block';
+        } else {
+            document.getElementById('waitMsg').style.display = 'block';
+        }
+
+        // Oyuncu Listesini ve Rolleri Dinle
+        onValue(playersRef, (snapshot) => {
+            const listDiv = document.getElementById('playerList');
+            listDiv.innerHTML = "";
+            snapshot.forEach((child) => {
+                const data = child.val();
+                const p = document.createElement('div');
+                p.className = 'player-item';
+                p.textContent = data.ad;
+                listDiv.appendChild(p);
+
+                // Kendi rolünü göster
+                if (child.key === myPlayerKey && data.rol !== "Bekleniyor...") {
+                    const roleBox = document.getElementById('roleDisplay');
+                    roleBox.style.display = "block";
+                    roleBox.textContent = "ROLÜN: " + data.rol;
+                    roleBox.style.background = (data.rol === "VAMPİR") ? "#e53e3e" : "#3182ce";
+                }
+            });
+        });
+    }
+
+    // ROLLERİ DAĞITMA (Sadece Lider Yapabilir)
+    window.assignRoles = function() {
+        const playersRef = ref(db, 'rooms/' + currentRoom + '/players');
+        onValue(playersRef, (snapshot) => {
+            const keys = Object.keys(snapshot.val());
+            const vampirIndex = Math.floor(Math.random() * keys.length);
+            const vampirKey = keys[vampirIndex];
+
+            keys.forEach((key) => {
+                const assignedRole = (key === vampirKey) ? "VAMPİR" : "KÖYLÜ";
+                update(ref(db, 'rooms/' + currentRoom + '/players/' + key), {
+                    rol: assignedRole
+                });
+            });
+            document.getElementById('startBtn').style.display = 'none';
+        }, { onlyOnce: true });
+    };
+</script>
+
+</body>
+</html>
