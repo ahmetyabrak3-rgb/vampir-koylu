@@ -3,37 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Final Sürüm</title>
+    <title>Vampir Köylü - Tematik Sürüm</title>
     <style>
-        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; overflow: hidden; }
+        :root { --vampir-bg: linear-gradient(135deg, #4a0000 0%, #000000 100%); --koylu-bg: linear-gradient(135deg, #1a365d 0%, #2d3748 100%); }
+        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: white; overflow: hidden; transition: 1s; }
         .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 20px; padding: 25px; width: 90%; max-width: 450px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
         .btn { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 15px; }
         .btn-create { background: #48bb78; color: white; }
-        .btn-join { background: #3182ce; color: white; }
         .btn-vote { background: #805ad5; color: white; margin: 5px 0; }
         .timer { font-size: 40px; font-weight: bold; color: #f6e05e; margin: 15px 0; }
-        .player-item { padding: 10px; background: rgba(0,0,0,0.2); margin: 5px; border-radius: 8px; }
+        
+        /* ROL POPUP TEMALARI */
+        #rolePopup { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            display: none; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 2000; animation: fadeIn 0.8s ease; 
+        }
+        .vampir-tema { background: var(--vampir-bg); color: #ff0000; }
+        .koylu-tema { background: var(--koylu-bg); color: #63b3ed; }
+        .role-icon { font-size: 80px; margin-bottom: 20px; }
+        .role-name { font-size: 45px; font-weight: 900; letter-spacing: 5px; }
 
-        /* KAZANAN EKRANI STİLİ */
+        /* ZAFER EKRANI */
         #winnerOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 1000;
-            animation: fadeIn 0.5s ease;
+            align-items: center; justify-content: center; z-index: 3000;
         }
-        .winner-text { font-size: 40px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
-        .winner-sub { font-size: 24px; color: #cbd5e0; margin-bottom: 30px; }
-        .vampire-win { color: #e53e3e; text-shadow: 0 0 20px rgba(229, 62, 62, 0.6); }
-        .villager-win { color: #48bb78; text-shadow: 0 0 20px rgba(72, 187, 120, 0.6); }
+        .winner-text { font-size: 40px; font-weight: 900; text-transform: uppercase; text-align: center; margin: 10px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
+<div id="rolePopup">
+    <div class="role-icon" id="roleIcon"></div>
+    <div class="role-name" id="roleTitle"></div>
+    <p id="roleDesc" style="font-size: 18px; margin-top: 10px;"></p>
+    <button class="btn" style="width:150px; background:white; color:black; margin-top:30px;" onclick="closeRolePopup()">Anladım</button>
+</div>
+
 <div id="winnerOverlay">
     <div id="winnerText" class="winner-text"></div>
-    <div id="winnerSub" class="winner-sub"></div>
-    <button class="btn btn-join" style="width:200px" onclick="location.reload()">Ana Sayfaya Dön</button>
+    <div id="winnerSub" style="font-size: 24px; color: #cbd5e0; margin-bottom: 30px;"></div>
+    <button class="btn" style="width:200px; background:#3182ce; color:white;" onclick="location.reload()">Yeni Oyun</button>
 </div>
 
 <div class="glass-card">
@@ -42,17 +55,17 @@
         <input type="text" id="userName" placeholder="İsminiz">
         <button class="btn btn-create" onclick="createRoom()">Oda Oluştur</button>
         <input type="text" id="roomCodeInput" placeholder="Oda Kodu">
-        <button class="btn btn-join" onclick="joinRoom()">Katıl</button>
+        <button class="btn" style="background:#3182ce; color:white" onclick="joinRoom()">Katıl</button>
     </div>
 
     <div id="room-screen" style="display: none;">
-        <div id="roomTitle" style="font-size: 22px; color: #f6e05e;">ODA KODU: ......</div>
-        <div id="playerList"></div>
+        <h2 id="roomTitle" style="color: #f6e05e;">ODA: ......</h2>
+        <div id="playerList" style="margin: 20px 0;"></div>
         <button id="startBtn" class="btn btn-create" style="display:none;" onclick="assignRoles()">Oyunu Başlat</button>
     </div>
 
     <div id="game-area" style="display: none;">
-        <div id="phaseDisplay" style="text-transform:uppercase; letter-spacing:2px; color:#a0aec0;">YÜKLENİYOR...</div>
+        <div id="phaseDisplay" style="color:#a0aec0; font-weight:bold;">OYUN BAŞLADI</div>
         <div id="timerDisplay" class="timer">00:00</div>
         <div id="gameActionList"></div>
     </div>
@@ -94,8 +107,7 @@
     function enterRoom() {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('room-screen').style.display = 'block';
-        document.getElementById('roomTitle').textContent = "ODA KODU: " + currentRoom;
-
+        document.getElementById('roomTitle').textContent = "ODA: " + currentRoom;
         const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
         myKey = pRef.key;
         if(isLider) document.getElementById('startBtn').style.display = 'block';
@@ -116,17 +128,43 @@
                 const listDiv = document.getElementById('playerList');
                 listDiv.innerHTML = "";
                 Object.values(data.players || {}).forEach(p => {
-                    listDiv.innerHTML += `<div class="player-item">${p.ad}</div>`;
+                    listDiv.innerHTML += `<div style="padding:10px; background:rgba(255,255,255,0.1); margin:5px; border-radius:8px;">${p.ad}</div>`;
                 });
             } else {
                 document.getElementById('room-screen').style.display = 'none';
                 document.getElementById('game-area').style.display = 'block';
                 myRole = data.players[myKey].rol;
                 isAlive = data.players[myKey].status === 'alive';
+                if(!window.roleShown) showThemedRole(myRole);
                 handleGameFlow(data);
             }
         });
     }
+
+    function showThemedRole(role) {
+        window.roleShown = true;
+        const pop = document.getElementById('rolePopup');
+        const icon = document.getElementById('roleIcon');
+        const title = document.getElementById('roleTitle');
+        const desc = document.getElementById('roleDesc');
+
+        pop.style.display = 'flex';
+        if(role === 'VAMPİR') {
+            pop.className = 'vampir-tema';
+            icon.innerHTML = '🧛‍♂️';
+            title.innerHTML = 'VAMPİR';
+            desc.innerHTML = 'Karanlık çöktüğünde avlan, köylüleri yok et!';
+            document.body.style.background = 'black';
+        } else {
+            pop.className = 'koylu-tema';
+            icon.innerHTML = '👨‍🌾';
+            title.innerHTML = 'KÖYLÜ';
+            desc.innerHTML = 'Vampiri bul ve kasabanı kurtar!';
+            document.body.style.background = '#1a365d';
+        }
+    }
+
+    window.closeRolePopup = () => document.getElementById('rolePopup').style.display = 'none';
 
     function handleGameFlow(data) {
         const actionList = document.getElementById('gameActionList');
@@ -134,13 +172,13 @@
         actionList.innerHTML = "";
 
         if(data.phase === 'night') {
-            document.getElementById('phaseDisplay').textContent = "🌙 GECE (Vampir Seçiyor)";
+            document.getElementById('phaseDisplay').textContent = "🌙 GECE (AV ZAMANI)";
             if(myRole === 'VAMPİR' && isAlive) {
                 Object.entries(data.players).forEach(([key, p]) => {
                     if(p.status === 'alive' && p.rol !== 'VAMPİR') 
-                        actionList.innerHTML += `<button class="btn btn-vote" style="background:#e53e3e" onclick="vampirAction('${key}')">${p.ad} Öldür</button>`;
+                        actionList.innerHTML += `<button class="btn" style="background:#e53e3e; color:white" onclick="vampirAction('${key}')">${p.ad} SESSİZCE ÖLDÜR</button>`;
                 });
-            } else { actionList.innerHTML = "<p>Gözlerini kapat, vampir avlanıyor...</p>"; }
+            }
         } else if(data.phase === 'voting') {
             document.getElementById('phaseDisplay').textContent = "🗳️ OYLAMA";
             if(isAlive && !hasVoted) {
@@ -148,10 +186,10 @@
                     if(p.status === 'alive') 
                         actionList.innerHTML += `<button class="btn btn-vote" onclick="voteAction('${key}')">${p.ad}</button>`;
                 });
-            } else { actionList.innerHTML = isAlive ? "<p>Oyunuzu kullandınız.</p>" : "<p style='color:red'>Ölüler oy kullanamaz!</p>"; }
+            }
         } else {
             document.getElementById('phaseDisplay').textContent = "🗣️ TARTIŞMA";
-            actionList.innerHTML = `<h3>${data.lastEvent || "Gece kimse ölmedi."}</h3>`;
+            actionList.innerHTML = `<h3>${data.lastEvent || "Gece sakin geçti."}</h3>`;
             hasVoted = false;
         }
     }
@@ -169,12 +207,11 @@
         onValue(ref(db, `rooms/${currentRoom}/players`), (s) => {
             const players = s.val();
             const keys = Object.keys(players);
-            const vIndex = Math.floor(Math.random()*keys.length);
-            const vKey = keys[vIndex];
+            const vKey = keys[Math.floor(Math.random()*keys.length)];
             const vName = players[vKey].ad;
 
             keys.forEach(k => update(ref(db, `rooms/${currentRoom}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
-            update(ref(db, `rooms/${currentRoom}`), { vampireName: vName }); // Vampirin ismini sakla
+            update(ref(db, `rooms/${currentRoom}`), { vampireName: vName });
             gameLoop();
         }, {onlyOnce: true});
     };
@@ -182,12 +219,11 @@
     async function gameLoop() {
         await runPhase('night', 20);
         const snap = await new Promise(res => onValue(ref(db, `rooms/${currentRoom}`), res, {onlyOnce:true}));
-        const target = snap.val().target;
-        if(target) update(ref(db, `rooms/${currentRoom}/players/${target}`), { status: 'dead' });
+        if(snap.val().target) update(ref(db, `rooms/${currentRoom}/players/${snap.val().target}`), { status: 'dead' });
         
         if(await checkWinner()) return;
 
-        await runPhase('discussion', 120);
+        await runPhase('discussion', 60);
         await runPhase('voting', 30);
         
         await calculateVoteResult();
@@ -221,12 +257,14 @@
         const aliveVampir = pArr.some(p => p.rol === 'VAMPİR' && p.status === 'alive');
         const aliveVillagers = pArr.filter(p => p.rol === 'KÖYLÜ' && p.status === 'alive').length;
 
+        // KÖYLÜLER KAZANDI (Vampir asılırsa)
         if(!aliveVampir) {
-            update(ref(db, `rooms/${currentRoom}`), { winner: 'KÖYLÜLER KAZANDI' });
+            update(ref(db, `rooms/${currentRoom}`), { winner: 'VAMPİR KAYBETTİ! KÖYLÜLER KAZANDI ✅' });
             return true;
         }
-        if(aliveVillagers <= 1) {
-            update(ref(db, `rooms/${currentRoom}`), { winner: 'VAMPİR KAZANDI' });
+        // VAMPİR KAZANDI (Vampir dahil 2 kişi kalırsa)
+        if(aliveVillagers <= 1 && aliveVampir) {
+            update(ref(db, `rooms/${currentRoom}`), { winner: 'VAMPİR KAZANDI! 🩸' });
             return true;
         }
         return false;
@@ -235,12 +273,10 @@
     function showWinner(winText, vName) {
         const overlay = document.getElementById('winnerOverlay');
         const txt = document.getElementById('winnerText');
-        const sub = document.getElementById('winnerSub');
-        
         overlay.style.display = 'flex';
         txt.textContent = winText;
-        txt.className = 'winner-text ' + (winText.includes('VAMPİR') ? 'vampire-win' : 'villager-win');
-        sub.textContent = "Vampir: " + vName;
+        txt.style.color = winText.includes('VAMPİR KAZANDI') ? '#e53e3e' : '#48bb78';
+        document.getElementById('winnerSub').textContent = "Vampir: " + vName;
     }
 </script>
 </body>
