@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Admin Panelli</title>
+    <title>Vampir Köylü - Tam Sürüm</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #fbbf24; --vampir: #ef4444; --secondary: #334155; }
@@ -15,10 +15,10 @@
         .btn-primary { background: var(--accent); color: #1e293b; }
         .btn-secondary { background: var(--secondary); color: white; }
         .admin-panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: left; border: 1px dashed var(--accent); }
-        .admin-panel label { font-size: 12px; color: var(--accent); font-weight: bold; }
-        .player-item { padding: 8px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; }
+        .admin-panel label { font-size: 11px; color: var(--accent); font-weight: bold; display: block; margin-top: 8px; }
+        .player-item { padding: 10px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
         .timer { font-size: 45px; font-weight: 800; color: var(--accent); }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -27,7 +27,7 @@
     <div id="overlayEmoji" style="font-size: 80px;"></div>
     <div id="overlayTitle" style="font-size: 36px; font-weight: 900; color: var(--accent);"></div>
     <div id="overlaySub" style="margin: 20px; color: #94a3b8;"></div>
-    <button class="btn btn-primary" style="width: 200px;" onclick="closeOverlay()">Devam Et</button>
+    <button class="btn btn-primary" style="width: 200px;" onclick="closeOverlay()">Anladım</button>
 </div>
 
 <div class="card">
@@ -35,7 +35,7 @@
         <h1>VAMPİR KÖYLÜ</h1>
         <input type="text" id="userName" placeholder="Adınız">
         <button class="btn btn-primary" onclick="createRoom()">Oda Oluştur (Admin)</button>
-        <div style="margin: 10px; color: #64748b;">veya</div>
+        <div style="margin: 10px; color: #64748b; font-weight: bold;">VEYA</div>
         <input type="text" id="roomCodeInput" placeholder="Oda Kodu">
         <button class="btn btn-secondary" onclick="joinRoom()">Katıl</button>
     </div>
@@ -43,35 +43,30 @@
     <div id="room-screen" style="display: none;">
         <div style="font-size: 11px; color: #64748b;">ODA KODU</div>
         <div id="displayCode" style="font-size: 32px; font-weight: 800; color: white;">000000</div>
-        
         <div id="qrcode" style="background:white; padding:5px; display:inline-block; border-radius:8px; margin:10px;"></div>
 
         <div id="admin-settings" class="admin-panel" style="display:none;">
-            <p style="text-align:center; margin:0 0 10px 0; font-weight:bold;">⚙️ ADMİN AYARLARI</p>
-            
-            <label>ADMİN DURUMU</label>
+            <p style="text-align:center; margin:0; font-weight:bold; color:var(--accent);">ADMİN PANELİ</p>
+            <label>ROLÜNÜZ</label>
             <select id="adminIsPlayer">
                 <option value="true">Oyuncu Olarak Katıl</option>
-                <option value="false">Sadece İzleyici (Admin) Kal</option>
+                <option value="false">Sadece İzleyici Kal</option>
             </select>
-
-            <label>GECE SÜRESİ (Saniye)</label>
-            <input type="number" id="setNight" value="20">
-            
-            <label>TARTIŞMA SÜRESİ (Saniye)</label>
-            <input type="number" id="setDisc" value="60">
-
-            <label>OYLAMA SÜRESİ (Saniye)</label>
-            <input type="number" id="setVote" value="30">
+            <label>GECE / TARTIŞMA / OYLAMA (SN)</label>
+            <div style="display:flex; gap:5px;">
+                <input type="number" id="setNight" value="20">
+                <input type="number" id="setDisc" value="60">
+                <input type="number" id="setVote" value="30">
+            </div>
         </div>
 
         <div id="playerList" style="margin-top:20px;"></div>
         <button id="startBtn" class="btn btn-primary" style="display:none;" onclick="startTheGame()">Oyunu Başlat</button>
-        <p id="waitMsg" style="display:none; color: #94a3b8;">Admin ayarları yapıyor...</p>
+        <p id="waitMsg" style="display:none; color: #94a3b8;">Admin bekleniyor...</p>
     </div>
 
     <div id="game-area" style="display: none;">
-        <div id="phaseBadge" style="color: var(--accent); font-weight: 800; text-transform:uppercase;">-</div>
+        <div id="phaseBadge" style="color: var(--accent); font-weight: 800; text-transform:uppercase;">BEKLEYİN</div>
         <div id="timerDisplay" class="timer">00:00</div>
         <div id="gameActionList"></div>
     </div>
@@ -97,10 +92,7 @@
         myName = document.getElementById('userName').value || "Admin";
         currentRoom = Math.floor(100000 + Math.random() * 900000).toString();
         isLider = true;
-        set(ref(db, 'rooms/'+currentRoom), { 
-            phase: 'lobby',
-            settings: { night: 20, disc: 60, vote: 30 }
-        }).then(() => {
+        set(ref(db, 'rooms/'+currentRoom), { phase: 'lobby' }).then(() => {
             enterRoom();
             document.getElementById('admin-settings').style.display = 'block';
             new QRCode(document.getElementById("qrcode"), { text: window.location.href.split('?')[0] + "?room=" + currentRoom, width: 80, height: 80 });
@@ -110,7 +102,7 @@
     window.joinRoom = () => {
         myName = document.getElementById('userName').value;
         currentRoom = document.getElementById('roomCodeInput').value;
-        if(!myName || !currentRoom) return alert("İsim ve kod gerekli!");
+        if(!myName || !currentRoom) return;
         enterRoom();
     };
 
@@ -119,13 +111,10 @@
         document.getElementById('room-screen').style.display = 'block';
         document.getElementById('displayCode').textContent = currentRoom;
         
-        // Admin en başta oyuncu listesine eklenmez, sadece odayı dinler. 
-        // Eğer start'a bastığında "Oyuncu Olarak Katıl" seçiliyse eklenecek.
         if(!isLider) {
             const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
             myKey = pRef.key;
             document.getElementById('waitMsg').style.display = 'block';
-            document.getElementById('qrcode').style.display = 'none';
         } else {
             document.getElementById('startBtn').style.display = 'block';
         }
@@ -137,25 +126,24 @@
             const data = snapshot.val();
             if(!data) return;
 
-            if(data.winner) { showOverlay(data.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', data.winner + " KAZANDI", "Vampir: " + data.vampireName, true); return; }
+            if(data.winner) {
+                showOverlay(data.winner === 'VAMPİR' ? '🧛‍♂️' : '🏆', data.winner + " KAZANDI", "Vampir: " + data.vampireName, true);
+                return;
+            }
 
             if(data.phase === 'lobby') {
                 const listDiv = document.getElementById('playerList');
                 listDiv.innerHTML = "";
                 Object.values(data.players || {}).forEach(p => {
-                    listDiv.innerHTML += `<div class="player-item"><span>• ${p.ad}</span> <small style="color:#64748b">Oyuncu</small></div>`;
+                    listDiv.innerHTML += `<div class="player-item"><span>• ${p.ad}</span></div>`;
                 });
             } else {
                 document.getElementById('room-screen').style.display = 'none';
                 document.getElementById('game-area').style.display = 'block';
                 
-                // Rol Kontrolü
                 if(data.players && data.players[myKey]) {
                     myRole = data.players[myKey].rol;
                     isAlive = data.players[myKey].status === 'alive';
-                } else {
-                    myRole = "İzleyici / Admin";
-                    isAlive = false;
                 }
 
                 if(!window.roleShown) {
@@ -167,52 +155,57 @@
         });
     }
 
-    // ADMİN OYUNU BAŞLATMA
     window.startTheGame = async () => {
         const isAdminPlayer = document.getElementById('adminIsPlayer').value === "true";
-        const nightS = parseInt(document.getElementById('setNight').value);
-        const discS = parseInt(document.getElementById('setDisc').value);
-        const voteS = parseInt(document.getElementById('setVote').value);
+        const nS = parseInt(document.getElementById('setNight').value);
+        const dS = parseInt(document.getElementById('setDisc').value);
+        const vS = parseInt(document.getElementById('setVote').value);
 
-        // Ayarları güncelle
-        update(ref(db, `rooms/${currentRoom}/settings`), { night: nightS, disc: discS, vote: voteS });
-
-        // Eğer admin oyuncu olmak istiyorsa şimdi listeye ekle
-        if(isAdminPlayer) {
+        if(isAdminPlayer && isLider) {
             const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
             myKey = pRef.key;
         }
 
-        // Rolleri Dağıt
-        onValue(ref(db, `rooms/${currentRoom}/players`), (s) => {
-            const players = s.val(), keys = Object.keys(players);
-            if(keys.length < 2) return alert("En az 2 oyuncu lazım!");
-            
-            const vKey = keys[Math.floor(Math.random()*keys.length)];
-            keys.forEach(k => update(ref(db, `rooms/${currentRoom}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
-            update(ref(db, `rooms/${currentRoom}`), { vampireName: players[vKey].ad });
-            
-            gameLoop(nightS, discS, voteS);
-        }, {onlyOnce: true});
+        setTimeout(() => {
+            onValue(ref(db, `rooms/${currentRoom}/players`), (s) => {
+                const players = s.val(), keys = Object.keys(players);
+                if(keys.length < 2) { alert("En az 2 kişi lazım!"); return; }
+                const vKey = keys[Math.floor(Math.random()*keys.length)];
+                keys.forEach(k => update(ref(db, `rooms/${currentRoom}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
+                update(ref(db, `rooms/${currentRoom}`), { vampireName: players[vKey].ad, target: "" });
+                gameLoop(nS, dS, vS);
+            }, {onlyOnce: true});
+        }, 500);
     };
 
     async function gameLoop(n, d, v) {
+        // GECE BAŞLIYOR
+        await update(ref(db, `rooms/${currentRoom}`), { target: "" }); // Hedefi sıfırla
         await runPhase('night', n);
-        const snap = await new Promise(r => onValue(ref(db, `rooms/${currentRoom}`), r, {onlyOnce:true}));
-        if(snap.val().target) update(ref(db, `rooms/${currentRoom}/players/${snap.val().target}`), { status: 'dead' });
         
+        // Gece Bitti, Öldürmeyi İşle
+        const snap = await new Promise(r => onValue(ref(db, `rooms/${currentRoom}`), r, {onlyOnce:true}));
+        const t = snap.val().target;
+        let eventMsg = "Gece kimse ölmedi.";
+        if(t && snap.val().players[t]) {
+            await update(ref(db, `rooms/${currentRoom}/players/${t}`), { status: 'dead' });
+            eventMsg = "Bu gece " + snap.val().players[t].ad + " vahşice öldürüldü!";
+        }
+        await update(ref(db, `rooms/${currentRoom}`), { lastEvent: eventMsg });
+
         if(await checkWinner()) return;
+
+        // TARTIŞMA VE OYLAMA
         await runPhase('discussion', d);
         await runPhase('voting', v);
         await calculateVote();
-        if(await checkWinner()) return;
         
+        if(await checkWinner()) return;
         gameLoop(n, d, v);
     }
 
-    // --- YARDIMCI FONKSİYONLAR ---
     function updateUI(data) {
-        document.getElementById('phaseBadge').textContent = data.phase;
+        document.getElementById('phaseBadge').textContent = data.phase === 'night' ? "🌙 GECE" : (data.phase === 'voting' ? "🗳️ OYLAMA" : "🗣️ TARTIŞMA");
         document.getElementById('timerDisplay').textContent = "00:" + (data.timer || 0).toString().padStart(2,'0');
         const list = document.getElementById('gameActionList');
         list.innerHTML = "";
@@ -220,17 +213,20 @@
         if(data.phase === 'night' && myRole === 'VAMPİR' && isAlive) {
             Object.entries(data.players).forEach(([k, p]) => {
                 if(p.status === 'alive' && p.rol !== 'VAMPİR')
-                    list.innerHTML += `<button class="btn" style="background:var(--vampir)" onclick="vAction('${k}')">${p.ad}</button>`;
+                    list.innerHTML += `<button class="btn btn-danger" style="background:#ef4444" onclick="vKill('${k}')">${p.ad} Öldür</button>`;
             });
         } else if(data.phase === 'voting' && isAlive && !hasVoted) {
             Object.entries(data.players).forEach(([k, p]) => {
-                if(p.status === 'alive') list.innerHTML += `<button class="btn btn-secondary" onclick="voteAction('${k}')">${p.ad}</button>`;
+                if(p.status === 'alive') list.innerHTML += `<button class="btn btn-secondary" onclick="vVote('${k}')">${p.ad}</button>`;
             });
+        } else if(data.phase === 'discussion') {
+            list.innerHTML = `<h3 style="color:white; line-height:1.5;">${data.lastEvent || ""}</h3>`;
+            hasVoted = false;
         }
     }
 
-    window.vAction = (k) => update(ref(db, `rooms/${currentRoom}`), { target: k });
-    window.voteAction = (k) => {
+    window.vKill = (k) => update(ref(db, `rooms/${currentRoom}`), { target: k });
+    window.vVote = (k) => {
         hasVoted = true;
         onValue(ref(db, `rooms/${currentRoom}/players/${k}/votes`), (s) => {
             update(ref(db, `rooms/${currentRoom}/players/${k}`), { votes: (s.val() || 0) + 1 });
@@ -239,20 +235,26 @@
 
     async function runPhase(name, sec) {
         for(let i = sec; i >= 0; i--) {
-            update(ref(db, `rooms/${currentRoom}`), { phase: name, timer: i });
+            await update(ref(db, `rooms/${currentRoom}`), { phase: name, timer: i });
             await new Promise(r => setTimeout(r, 1000));
         }
     }
 
     async function calculateVote() {
         const s = await new Promise(r => onValue(ref(db, `rooms/${currentRoom}/players`), r, {onlyOnce:true}));
+        const players = s.val() || {};
         let max = 0, cand = [];
-        Object.entries(s.val() || {}).forEach(([k, p]) => {
+        Object.entries(players).forEach(([k, p]) => {
             if(p.votes > max) { max = p.votes; cand = [k]; }
             else if(p.votes === max && max > 0) cand.push(k);
             update(ref(db, `rooms/${currentRoom}/players/${k}`), { votes: 0 });
         });
-        if(cand.length === 1) update(ref(db, `rooms/${currentRoom}/players/${cand[0]}`), { status: 'dead' });
+        if(cand.length === 1) {
+            await update(ref(db, `rooms/${currentRoom}/players/${cand[0]}`), { status: 'dead' });
+            await update(ref(db, `rooms/${currentRoom}`), { lastEvent: "Oylama sonucu " + players[cand[0]].ad + " asıldı!" });
+        } else {
+            await update(ref(db, `rooms/${currentRoom}`), { lastEvent: "Oylarda eşitlik var, kimse asılmadı." });
+        }
     }
 
     async function checkWinner() {
