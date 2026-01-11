@@ -21,4 +21,183 @@
 
 <div id="rolePopup"></div>
 
-<div class="glass-
+<div class="glass-card">
+    <div id="auth-screen">
+        <h1>VAMPİR KÖYLÜ</h1>
+        <input type="text" id="userName" placeholder="Takma Adınız">
+        <button class="btn btn-create" onclick="createRoom()">Oda Oluştur</button>
+        <input type="text" id="roomCodeInput" placeholder="Oda Kodu">
+        <button class="btn btn-join" onclick="joinRoom()">Odaya Katıl</button>
+    </div>
+
+    <div id="room-screen" style="display: none;">
+        <div id="roomTitle" style="font-size: 22px; color: #f6e05e; margin-bottom: 20px;">ODA KODU: ......</div>
+        <div id="playerList"></div>
+        <button id="startBtn" class="btn btn-create" style="display:none;" onclick="assignRoles()">Oyunu Başlat</button>
+        <p id="waitMsg" style="display:none; font-style: italic;">Liderin başlatması bekleniyor...</p>
+    </div>
+
+    <div id="game-area" style="display: none;">
+        <div id="phaseDisplay" class="phase-title">HAZIRLANIN...</div>
+        <div id="timerDisplay" class="timer">00:00</div>
+        <div id="gameActionList"></div>
+        <p id="gameStatusMsg"></p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBBXkGLUFGXfQsXhZ8uKpJZf6Y5hTjdK-8",
+        authDomain: "vampir-koylu-oyunu.firebaseapp.com",
+        databaseURL: "https://vampir-koylu-oyunu-default-rtdb.firebaseio.com",
+        projectId: "vampir-koylu-oyunu"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let currentRoom = null, myName = "", myKey = "", isLider = false, myRole = "", isAlive = true, hasVoted = false;
+
+    window.createRoom = () => {
+        myName = document.getElementById('userName').value;
+        if(!myName) return alert("İsim yaz!");
+        currentRoom = Math.floor(100000 + Math.random() * 900000).toString();
+        isLider = true;
+        set(ref(db, 'rooms/'+currentRoom), { phase: 'lobby', timer: 0 }).then(() => enterRoom());
+    };
+
+    window.joinRoom = () => {
+        myName = document.getElementById('userName').value;
+        currentRoom = document.getElementById('roomCodeInput').value;
+        if(!myName || !currentRoom) return alert("Eksik bilgi!");
+        onValue(ref(db, 'rooms/'+currentRoom), (s) => {
+            if(s.exists()) enterRoom(); else alert("Oda bulunamadı!");
+        }, {onlyOnce: true});
+    };
+
+    function enterRoom() {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('room-screen').style.display = 'block';
+        document.getElementById('roomTitle').textContent = "ODA KODU: " + currentRoom;
+
+        const pRef = push(ref(db, `rooms/${currentRoom}/players`), { ad: myName, rol: '?', status: 'alive', votes: 0 });
+        myKey = pRef.key;
+
+        if(isLider) document.getElementById('startBtn').style.display = 'block';
+        else document.getElementById('waitMsg').style.display = 'block';
+
+        listenRoom();
+    }
+
+    function listenRoom() {
+        onValue(ref(db, `rooms/${currentRoom}`), (snapshot) => {
+            const data = snapshot.val();
+            if(!data) return;
+
+            if(data.phase === 'lobby') {
+                const listDiv = document.getElementById('playerList');
+                listDiv.innerHTML = "";
+                Object.values(data.players || {}).forEach(p => {
+                    listDiv.innerHTML += `<div style="padding:10px; background:rgba(0,0,0,0.2); margin:5px; border-radius:5px;">${p.ad}</div>`;
+                });
+            } else {
+                document.getElementById('room-screen').style.display = 'none';
+                document.getElementById('game-area').style.display = 'block';
+                
+                myRole = data.players[myKey].rol;
+                isAlive = data.players[myKey].status === 'alive';
+                
+                showRole(myRole);
+                handleGameFlow(data);
+            }
+        });
+    }
+
+    function handleGameFlow(data) {
+        const actionList = document.getElementById('gameActionList');
+        const phaseTitle = document.getElementById('phaseDisplay');
+        const timerText = document.getElementById('timerDisplay');
+        
+        timerText.textContent = data.timer > 60 ? Math.floor(data.timer/60)+":"+(data.timer%60).toString().padStart(2,'0') : "00:"+data.timer.toString().padStart(2,'0');
+        actionList.innerHTML = "";
+
+        if(data.phase === 'night') {
+            phaseTitle.textContent = "🌙 GECE (Vampir Avda)";
+            if(myRole === 'VAMPİR' && isAlive) {
+                Object.entries(data.players).forEach(([key, p]) => {
+                    if(p.status === 'alive' && p.rol !== 'VAMPİR') {
+                        actionList.innerHTML += `<button class="btn btn-vote" style="background:#e53e3e" onclick="vampirAction('${key}')">${p.ad} Öldür</button>`;
+                    }
+                });
+            } else { actionList.innerHTML = "<p>Gözlerini kapat, vampir seçiyor...</p>"; }
+        } else if(data.phase === 'voting') {
+            phaseTitle.textContent = "🗳️ OYLAMA ZAMANI";
+            if(isAlive && !hasVoted) {
+                Object.entries(data.players).forEach(([key, p]) => {
+                    if(p.status === 'alive') {
+                        actionList.innerHTML += `<button class="btn btn-vote" onclick="voteAction('${key}')">${p.ad}</button>`;
+                    }
+                });
+            } else { actionList.innerHTML = isAlive ? "<p>Oyunuzu kullandınız.</p>" : "<p style='color:red'>Ölüler oy veremez!</p>"; }
+        } else {
+            phaseTitle.textContent = "🗣️ TARTIŞMA";
+            actionList.innerHTML = data.lastEvent ? `<h3 style="color:red">${data.lastEvent}</h3>` : "<p>Kimse ölmedi.</p>";
+            hasVoted = false;
+        }
+    }
+
+    window.vampirAction = (tKey) => update(ref(db, `rooms/${currentRoom}`), { target: tKey });
+
+    window.voteAction = (tKey) => {
+        hasVoted = true;
+        onValue(ref(db, `rooms/${currentRoom}/players/${tKey}/votes`), (s) => {
+            update(ref(db, `rooms/${currentRoom}/players/${tKey}`), { votes: (s.val() || 0) + 1 });
+        }, {onlyOnce: true});
+    };
+
+    window.assignRoles = async () => {
+        onValue(ref(db, `rooms/${currentRoom}/players`), (s) => {
+            const keys = Object.keys(s.val());
+            const vKey = keys[Math.floor(Math.random()*keys.length)];
+            keys.forEach(k => update(ref(db, `rooms/${currentRoom}/players/${k}`), { rol: k===vKey?'VAMPİR':'KÖYLÜ' }));
+            gameLoop();
+        }, {onlyOnce: true});
+    };
+
+    async function gameLoop() {
+        await runPhase('night', 20); // Gece 20 sn
+        const snap = await new Promise(res => onValue(ref(db, `rooms/${currentRoom}`), res, {onlyOnce:true}));
+        const target = snap.val().target;
+        let event = "Gece kimse ölmedi.";
+        if(target) {
+            event = snap.val().players[target].ad + " gece katledildi!";
+            update(ref(db, `rooms/${currentRoom}/players/${target}`), { status: 'dead' });
+        }
+        update(ref(db, `rooms/${currentRoom}`), { target: null, lastEvent: event });
+
+        await runPhase('discussion', 120); // Tartışma 2 dk
+        await runPhase('voting', 30); // Oylama 30 sn
+        
+        // Oylama sonu lider kontrolü (basit mantık)
+        gameLoop();
+    }
+
+    async function runPhase(name, sec) {
+        update(ref(db, `rooms/${currentRoom}`), { phase: name, timer: sec });
+        for(let i = sec; i >= 0; i--) {
+            await new Promise(r => setTimeout(r, 1000));
+            update(ref(db, `rooms/${currentRoom}`), { timer: i });
+        }
+    }
+
+    function showRole(role) {
+        const p = document.getElementById('rolePopup');
+        p.style.display = "block"; p.textContent = "ROLÜN: " + role;
+        p.style.background = role === 'VAMPİR' ? '#e53e3e' : '#3182ce';
+    }
+</script>
+</body>
+</html>
