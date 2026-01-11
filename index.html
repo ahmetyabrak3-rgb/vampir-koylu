@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Kopyalama Özellikli</title>
+    <title>Vampir Köylü - Bekleme Ekranlı</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --ikincil: #334155; }
@@ -15,17 +15,19 @@
         .buton-ana { background: var(--vurgu); color: #1e293b; }
         .buton-ikincil { background: var(--ikincil); color: white; }
         
-        /* KOD VE KOPYALAMA ALANI */
+        /* KOD VE KOPYALAMA */
         .kod-alani { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
         #odaKoduGoster { font-size: 36px; font-weight: 800; color: white; }
-        .kopyala-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 8px; color: var(--vurgu); padding: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; }
-        .kopyala-btn:hover { background: rgba(255,255,255,0.2); }
-        .kopyala-bildirim { position: absolute; font-size: 12px; color: #34c759; margin-top: 65px; display: none; font-weight: bold; }
+        .kopyala-btn { background: rgba(255,255,255,0.1); border: none; border-radius: 8px; color: var(--vurgu); padding: 8px; cursor: pointer; }
+        
+        /* BEKLEME ANİMASYONU */
+        .bekleme-modu { margin: 20px 0; padding: 20px; border-radius: 15px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--vurgu); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: left; border: 1px dashed var(--vurgu); }
-        .panel label { font-size: 11px; color: var(--vurgu); font-weight: bold; display: block; margin-top: 8px; }
         .sayac { font-size: 45px; font-weight: 800; color: var(--vurgu); }
-        .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--arka-plan); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; box-sizing: border-box; }
+        .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--arka-plan); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
@@ -34,7 +36,7 @@
     <div id="katmanEmoji" style="font-size: 80px;"></div>
     <div id="katmanBaslik" style="font-size: 36px; font-weight: 900; color: var(--vurgu);"></div>
     <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8;"></div>
-    <button class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">Anladım</button>
+    <button class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">ANLADIM</button>
 </div>
 
 <div class="kart">
@@ -51,32 +53,31 @@
         <div style="font-size: 11px; color: #64748b;">ODA KODU</div>
         <div class="kod-alani">
             <div id="odaKoduGoster">000000</div>
-            <button class="kopyala-btn" onclick="koduKopyala()" title="Kodu Kopyala">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-            </button>
+            <button class="kopyala-btn" onclick="koduKopyala()"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>
         </div>
-        <div id="kopyalaMesaj" class="kopyala-bildirim">Kopyalandı!</div>
-
-        <div id="qrcode" style="background:white; padding:5px; display:inline-block; border-radius:8px; margin:15px;"></div>
+        
+        <div id="beklemeEkrani" class="bekleme-modu" style="display:none;">
+            <div class="loader"></div>
+            <span style="font-weight: 700; color: #94a3b8; letter-spacing: 1px; font-size: 13px;">DİĞER OYUNCULAR BEKLENİYOR...</span>
+        </div>
 
         <div id="admin-ayarlari" class="panel" style="display:none;">
-            <p style="text-align:center; margin:0; font-weight:bold; color:var(--vurgu);">YÖNETİCİ PANELİ</p>
-            <label>ADMİN ROLÜ</label>
+            <p style="text-align:center; margin:0; font-weight:bold; color:var(--vurgu);">OYUN AYARLARI</p>
+            <label style="font-size:11px; font-weight:bold;">ROLÜNÜZ</label>
             <select id="adminOyuncuMu">
                 <option value="true">Oyuncu Olarak Katıl</option>
                 <option value="false">Sadece İzleyici Kal</option>
             </select>
-            <label>SÜRELER (GECE / TARTIŞMA / OYLAMA)</label>
+            <label style="font-size:11px; font-weight:bold; display:block; margin-top:10px;">SÜRELER (GECE/TARTIŞMA/OYLAMA)</label>
             <div style="display:flex; gap:5px;">
                 <input type="number" id="sureGece" value="20">
                 <input type="number" id="sureTartisma" value="60">
                 <input type="number" id="sureOylama" value="30">
             </div>
+            <button id="baslatButon" class="buton buton-ana" style="margin-top:15px;" onclick="oyunuBaslat()">Oyunu Başlat</button>
         </div>
 
         <div id="oyuncuListesi" style="margin-top:20px; text-align: left;"></div>
-        <button id="baslatButon" class="buton buton-ana" style="display:none;" onclick="oyunuBaslat()">Oyunu Başlat</button>
-        <p id="beklemeMesaji" style="display:none; color: #94a3b8;">Lider bekleniyor...</p>
     </div>
 
     <div id="oyun-alani" style="display: none;">
@@ -102,25 +103,16 @@
 
     let mevcutOda = null, benimAdim = "", benimAnahtarim = "", liderMiyim = false, rolum = "İzleyici", hayattaMiyim = true, oyVerdimMi = false;
 
-    // KOPYALAMA FONKSİYONU
     window.koduKopyala = () => {
         const kod = document.getElementById('odaKoduGoster').textContent;
-        navigator.clipboard.writeText(kod).then(() => {
-            const mesaj = document.getElementById('kopyalaMesaj');
-            mesaj.style.display = 'block';
-            setTimeout(() => { mesaj.style.display = 'none'; }, 2000);
-        });
+        navigator.clipboard.writeText(kod).then(() => alert("Kod kopyalandı: " + kod));
     };
 
     window.odaOlustur = () => {
         benimAdim = document.getElementById('kullaniciAdi').value || "Admin";
         mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
         liderMiyim = true;
-        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi' }).then(() => {
-            odayaGir();
-            document.getElementById('admin-ayarlari').style.display = 'block';
-            new QRCode(document.getElementById("qrcode"), { text: window.location.href.split('?')[0] + "?room=" + mevcutOda, width: 80, height: 80 });
-        });
+        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi' }).then(() => odayaGir());
     };
 
     window.odayaKatil = () => {
@@ -138,10 +130,9 @@
         if(!liderMiyim) {
             const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, rol: '?', status: 'alive', votes: 0 });
             benimAnahtarim = pRef.key;
-            document.getElementById('beklemeMesaji').style.display = 'block';
-            document.getElementById('qrcode').parentElement.style.display = 'none';
+            document.getElementById('beklemeEkrani').style.display = 'block';
         } else {
-            document.getElementById('baslatButon').style.display = 'block';
+            document.getElementById('admin-ayarlari').style.display = 'block';
         }
         odayiDinle();
     }
@@ -160,7 +151,7 @@
                 const liste = document.getElementById('oyuncuListesi');
                 liste.innerHTML = "";
                 Object.values(veri.players || {}).forEach(p => {
-                    liste.innerHTML += `<div style="padding:8px; border-bottom:1px solid #334155;">• ${p.ad}</div>`;
+                    liste.innerHTML += `<div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">• ${p.ad}</div>`;
                 });
             } else {
                 document.getElementById('lobi-ekrani').style.display = 'none';
