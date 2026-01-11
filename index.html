@@ -3,26 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - 3D Fall Guys Edition</title>
+    <title>Vampir Köylü 3D - Karakter Dünyası</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --arka-plan: #1a1a2e; --kart: #16213e; --metin: #ffffff; --vurgu: #e94560; --ikincil: #0f3460; }
-        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        .kart { background: var(--kart); border-radius: 30px; padding: 25px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 2px solid #0f3460; }
+        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; }
+        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .kart { background: var(--kart); border-radius: 25px; padding: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
         
-        /* 3D ALANI */
-        #container3d { width: 100%; height: 280px; background: radial-gradient(circle, #1b1b2f 0%, #000000 100%); border-radius: 20px; margin-bottom: 20px; border: 3px solid var(--vurgu); cursor: grab; }
+        /* 3D ALANI AYARLARI */
+        #container3d { width: 100%; height: 250px; background: #000; border-radius: 15px; margin-bottom: 15px; border: 2px solid var(--vurgu); position: relative; }
         
-        .kontrol-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-        .renk-btn { width: 100%; height: 35px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; }
-        .aks-btn { background: var(--ikincil); border: none; padding: 10px; border-radius: 10px; color: white; cursor: pointer; font-size: 18px; }
-        .aks-btn:active { transform: scale(0.9); }
+        .grid-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
+        .btn-kutu { background: #334155; border: none; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 18px; }
+        .btn-kutu:hover { transform: scale(1.1); background: #475569; }
         
-        input { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #0f3460; color: white; margin-bottom: 15px; text-align: center; font-size: 16px; }
-        .buton { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 16px; transition: 0.3s; }
-        .btn-ana { background: var(--vurgu); color: white; box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4); }
-        
+        input { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #0f172a; color: white; margin-bottom: 10px; box-sizing: border-box; text-align: center; }
+        .ana-buton { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; background: var(--vurgu); color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
         #lobi-ekrani { display: none; }
     </style>
 </head>
@@ -30,64 +27,71 @@
 
 <div class="kart">
     <div id="giris-ekrani">
-        <h1 style="margin: 0 0 10px 0; font-size: 22px; color: var(--vurgu);">KARAKTERİNİ TASARLA</h1>
+        <h2 style="color: var(--altin); margin-top: 0;">KARAKTERİNİ TASARLA</h2>
         
         <div id="container3d"></div>
 
-        <input type="text" id="kullaniciAdi" placeholder="Oyuncu Adı">
+        <input type="text" id="kullaniciAdi" placeholder="Adını Yaz">
         
-        <div class="kontrol-panel">
-            <div class="renk-btn" style="background:#ff4757" onclick="renkSet(0xff4757)"></div>
-            <div class="renk-btn" style="background:#2ed573" onclick="renkSet(0x2ed573)"></div>
-            <div class="renk-btn" style="background:#1e90ff" onclick="renkSet(0x1e90ff)"></div>
-            <div class="renk-btn" style="background:#ffa502" onclick="renkSet(0xffa502)"></div>
-            <button class="aks-btn" onclick="ekle('sapka')">🎩</button>
-            <button class="aks-btn" onclick="ekle('gozluk')">🕶️</button>
-            <button class="aks-btn" onclick="ekle('tavsan')">🐰</button>
-            <button class="aks-btn" onclick="sifirla()">❌</button>
+        <div class="grid-panel">
+            <button class="btn-kutu" onclick="renkGuncelle(0xef4444)">🔴</button>
+            <button class="btn-kutu" onclick="renkGuncelle(0x22c55e)">🟢</button>
+            <button class="btn-kutu" onclick="renkGuncelle(0x3b82f6)">🔵</button>
+            <button class="btn-kutu" onclick="renkGuncelle(0xfbbf24)">🟡</button>
+            <button class="btn-kutu" onclick="aksesuar('sapka')">🎩</button>
+            <button class="btn-kutu" onclick="aksesuar('gozluk')">🕶️</button>
+            <button class="btn-kutu" onclick="aksesuar('tavsan')">🐰</button>
+            <button class="btn-kutu" onclick="sifirla()">❌</button>
         </div>
 
-        <button class="buton btn-ana" onclick="odaOlustur()">Oda Oluştur</button>
-        <button class="buton" style="background:transparent; color:#94a3b8; margin-top:5px;" onclick="odayaKatil()">Odaya Katıl</button>
+        <button class="ana-buton" onclick="odaOlustur()">Oda Oluştur</button>
+        <button class="ana-buton" style="background: #334155; margin-top: 8px;" onclick="odayaKatil()">Odaya Katıl</button>
     </div>
 
     <div id="lobi-ekrani">
-        <h2 id="odaKoduGoster" style="letter-spacing: 5px; font-size: 30px;">000000</h2>
-        <div id="qrcode" style="background:white; padding:10px; display:inline-block; border-radius:15px; margin: 10px 0;"></div>
-        <p>Arkadaşlar bekleniyor...</p>
-        <button class="buton btn-ana" onclick="alert('Oyun yakında başlayacak!')">BAŞLAT</button>
+        <h1 id="odaKoduGoster">------</h1>
+        <div id="qrcode"></div>
+        <p>Oyuncular bekleniyor...</p>
     </div>
 </div>
 
 <script>
-    let scene, camera, renderer, model, mainMaterial;
+    let scene, camera, renderer, character, bodyMaterial;
     let items = { sapka: null, gozluk: null, tavsan: null };
 
     function init3D() {
+        // Sahne Oluşturma
         scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-        camera.position.set(0, 0.5, 4);
-
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(document.getElementById('container3d').clientWidth, 280);
-        document.getElementById('container3d').appendChild(renderer.domElement);
-
-        const light1 = new THREE.DirectionalLight(0xffffff, 1);
-        light1.position.set(2, 2, 5);
-        scene.add(light1);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-        // FALL GUYS TİPİ KARAKTER (KAPSÜL)
-        const group = new THREE.Group();
-        mainMaterial = new THREE.MeshPhongMaterial({ color: 0xff4757, shininess: 100 });
         
-        // Gövde
+        // Kamera Ayarı
+        camera = new THREE.PerspectiveCamera(45, 1.5, 0.1, 1000);
+        camera.position.set(0, 0.5, 4); 
+
+        // Renderer (Görüntüleyici)
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const container = document.getElementById('container3d');
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        // IŞIKLANDIRMA (Siyah ekranı çözen kısım)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Her yeri aydınlatır
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 1); // Karakterin önünde lamba gibi
+        pointLight.position.set(2, 3, 4);
+        scene.add(pointLight);
+
+        // KARAKTER (Fall Guys Tasarımı)
+        const group = new THREE.Group();
+        bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xef4444, shininess: 80 });
+        
+        // Gövde (Kapsül şeklinde tombul)
         const bodyGeo = new THREE.CapsuleGeometry(0.7, 1, 10, 20);
-        const body = new THREE.Mesh(bodyGeo, mainMaterial);
+        const body = new THREE.Mesh(bodyGeo, bodyMaterial);
         group.add(body);
 
-        // Göz Beyazları
-        const eyeGeo = new THREE.SphereGeometry(0.15, 20, 20);
+        // Gözler
+        const eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
         const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
         eyeL.position.set(-0.25, 0.6, 0.6);
@@ -95,48 +99,40 @@
         eyeR.position.set(0.25, 0.6, 0.6);
         group.add(eyeL, eyeR);
 
-        // Göz Bebekleri
-        const pupGeo = new THREE.SphereGeometry(0.07, 20, 20);
-        const pupMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const pupL = new THREE.Mesh(pupGeo, pupMat);
-        pupL.position.set(-0.25, 0.6, 0.72);
-        const pupR = new THREE.Mesh(pupGeo, pupMat);
-        pupR.position.set(0.25, 0.6, 0.72);
-        group.add(pupL, pupR);
+        character = group;
+        scene.add(character);
 
-        model = group;
-        scene.add(model);
         animate();
     }
 
     function animate() {
         requestAnimationFrame(animate);
-        model.rotation.y += 0.01;
+        if(character) character.rotation.y += 0.01; // Kendi etrafında yavaşça döner
         renderer.render(scene, camera);
     }
 
-    // --- ÖZELLEŞTİRME ---
-    window.renkSet = (c) => { mainMaterial.color.setHex(c); };
+    // FONKSİYONLAR
+    window.renkGuncelle = (color) => { bodyMaterial.color.setHex(color); };
 
-    window.ekle = (tip) => {
+    window.aksesuar = (tip) => {
         if(items[tip]) { scene.remove(items[tip]); items[tip] = null; return; }
         
-        let mat = new THREE.MeshPhongMaterial({ color: 0x333333 });
+        let mat = new THREE.MeshPhongMaterial({ color: 0x111111 });
         if(tip === 'sapka') {
             const geo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 32);
             items.sapka = new THREE.Mesh(geo, mat);
             items.sapka.position.y = 1.3;
             scene.add(items.sapka);
         } else if(tip === 'gozluk') {
-            const geo = new THREE.BoxGeometry(1, 0.2, 0.1);
+            const geo = new THREE.BoxGeometry(0.9, 0.2, 0.1);
             items.gozluk = new THREE.Mesh(geo, mat);
             items.gozluk.position.set(0, 0.6, 0.65);
             scene.add(items.gozluk);
         } else if(tip === 'tavsan') {
             const geo = new THREE.CylinderGeometry(0.1, 0.1, 0.8, 32);
             items.tavsan = new THREE.Group();
-            const e1 = new THREE.Mesh(geo, mat); e1.position.set(-0.3, 1.5, 0); e1.rotation.z = 0.2;
-            const e2 = new THREE.Mesh(geo, mat); e2.position.set(0.3, 1.5, 0); e2.rotation.z = -0.2;
+            const e1 = new THREE.Mesh(geo, mat); e1.position.set(-0.3, 1.4, 0); e1.rotation.z = 0.2;
+            const e2 = new THREE.Mesh(geo, mat); e2.position.set(0.3, 1.4, 0); e2.rotation.z = -0.2;
             items.tavsan.add(e1, e2);
             scene.add(items.tavsan);
         }
@@ -144,18 +140,20 @@
 
     window.sifirla = () => {
         Object.keys(items).forEach(k => { if(items[k]) scene.remove(items[k]); items[k]=null; });
+        bodyMaterial.color.setHex(0xef4444);
     };
 
     window.odaOlustur = () => {
         const ad = document.getElementById('kullaniciAdi').value;
-        if(!ad) return alert("Lütfen adını yaz!");
+        if(!ad) return alert("Adını gir!");
         document.getElementById('giris-ekrani').style.display = 'none';
         document.getElementById('lobi-ekrani').style.display = 'block';
         const kod = Math.floor(100000 + Math.random() * 900000);
         document.getElementById('odaKoduGoster').textContent = kod;
-        new QRCode(document.getElementById("qrcode"), { text: "room-" + kod, width: 120, height: 120 });
+        new QRCode(document.getElementById("qrcode"), { text: "room-"+kod, width: 120, height: 120 });
     };
 
+    // Sistemi Başlat
     init3D();
 </script>
 </body>
