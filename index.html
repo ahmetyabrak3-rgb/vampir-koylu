@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Yönetim Paneli</title>
+    <title>Vampir Köylü - Tam Yetkili Panel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; --admin-mavi: #3b82f6; --yesil: #22c55e; }
@@ -11,21 +11,26 @@
         .kart { background: var(--kart); border-radius: 30px; padding: 20px; width: 100%; max-width: 460px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); max-height: 95vh; overflow-y: auto; scrollbar-width: none; }
         .ekran { display: none; }
         .ekran.aktif { display: block; animation: fadeIn 0.3s; }
-        .character-box { width: 100%; height: 140px; background: #000; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
-        .char-base { width: 60px; height: 80px; background: var(--vurgu); border-radius: 30px 30px 15px 15px; position: relative; animation: bounce 2s infinite ease-in-out; }
-        .eye { position: absolute; width: 8px; height: 10px; background: #000; border-radius: 50%; top: 25px; }
-        .eye-l { left: 15px; } .eye-r { right: 15px; }
+        .character-box { width: 100%; height: 120px; background: #000; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        .char-base { width: 50px; height: 70px; background: var(--vurgu); border-radius: 25px 25px 12px 12px; position: relative; animation: bounce 2s infinite ease-in-out; }
+        .eye { position: absolute; width: 7px; height: 9px; background: #000; border-radius: 50%; top: 22px; }
+        .eye-l { left: 13px; } .eye-r { right: 13px; }
         .renk-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 10px; }
         .btn-renk { height: 32px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-        input { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; color: white; border: 2px solid #334155; text-align: center; box-sizing: border-box; margin-bottom: 10px; }
+        input { width: 100%; padding: 12px; border-radius: 12px; background: #0f172a; color: white; border: 2px solid #334155; text-align: center; box-sizing: border-box; margin-bottom: 8px; }
         .ana-buton { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; cursor: pointer; margin-top: 10px; }
         
-        /* LİSTE TASARIMI */
-        .liste-kutu { background: #0f172a; border-radius: 15px; padding: 10px; margin-top: 10px; text-align: left; max-height: 150px; overflow-y: auto; }
-        .oyuncu-satir { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; border-left: 3px solid var(--altin); }
-        .at-butonu { background: var(--vurgu); color: white; border: none; border-radius: 5px; padding: 2px 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        /* ADMIN AYARLARI */
+        .ayar-kutu { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 15px; margin: 10px 0; text-align: left; }
+        .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; }
+        .ayar-satir input { width: 55px; margin: 0; padding: 4px; border-radius: 6px; }
 
-        #qrcode { background: white; padding: 10px; border-radius: 10px; width: fit-content; margin: 15px auto; border: 4px solid var(--admin-mavi); }
+        /* LISTE TASARIMI */
+        .liste-kutu { background: #0f172a; border-radius: 15px; padding: 10px; margin-top: 10px; text-align: left; max-height: 140px; overflow-y: auto; }
+        .oyuncu-satir { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; border-left: 3px solid var(--altin); font-size: 14px; }
+        .at-butonu { background: var(--vurgu); color: white; border: none; border-radius: 5px; padding: 3px 8px; cursor: pointer; font-size: 10px; font-weight: bold; }
+
+        #qrcode { background: white; padding: 10px; border-radius: 10px; width: fit-content; margin: 10px auto; border: 4px solid var(--admin-mavi); }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -34,7 +39,7 @@
 
 <div class="kart">
     <div id="ekran-profil" class="ekran aktif">
-        <h2 style="color:var(--altin);">KARAKTERİNİ TASARLA</h2>
+        <h2 style="color:var(--altin); margin-top:0;">KARAKTERİNİ TASARLA</h2>
         <input type="text" id="oyuncuIsmi" placeholder="İsminizi Yazın..." maxlength="12">
         <div class="character-box"><div class="char-base" id="previewChar"><div class="eye eye-l"></div><div class="eye eye-r"></div></div></div>
         <div class="renk-grid" id="renkPaleti"></div>
@@ -48,9 +53,16 @@
     </div>
 
     <div id="ekran-admin" class="ekran">
-        <h3 style="color:var(--admin-mavi); margin-bottom:5px;">ADMİN PANELİ</h3>
-        <div style="text-align:left; font-size:12px; color:var(--altin); font-weight:bold;">OYUNCULARI YÖNET:</div>
+        <h3 style="color:var(--admin-mavi); margin:0;">ADMİN PANELİ</h3>
+        <div class="ayar-kutu">
+            <div class="ayar-satir"><span>Öldürme Süresi (sn)</span> <input type="number" id="s-oldur" value="30"></div>
+            <div class="ayar-satir"><span>Tartışma Süresi (sn)</span> <input type="number" id="s-tartisma" value="60"></div>
+            <div class="ayar-satir"><span>Oylama Süresi (sn)</span> <input type="number" id="s-oyla" value="20"></div>
+        </div>
+
+        <div style="text-align:left; font-size:12px; color:var(--altin); font-weight:bold;">KATILAN OYUNCULAR:</div>
         <div class="liste-kutu" id="adminOyuncuListesi"></div>
+        
         <div id="qrcode"></div>
         <button class="ana-buton" style="background:var(--yesil)">OYUNU BAŞLAT</button>
     </div>
@@ -59,7 +71,7 @@
         <h2 style="color:var(--yesil);">ODAYA KATILDIN!</h2>
         <p style="font-size:12px; color:#94a3b8;">Odada Şuan Kimler Var:</p>
         <div class="liste-kutu" id="beklemeOyuncuListesi"></div>
-        <div style="font-size:30px; animation: spin 2s linear infinite; margin-top:10px;">⌛</div>
+        <div style="font-size:25px; animation: spin 2s linear infinite; margin-top:10px;">⌛</div>
     </div>
 
     <div id="ekran-katil-manuel" class="ekran">
@@ -71,7 +83,7 @@
 
 <script>
     let oyuncu = { isim: "", renk: "#ef4444", davetKodu: null };
-    let odadakiOyuncular = ["Admin_User", "Sistem Botu"]; // Örnek veri
+    let odadakiOyuncular = ["Sistem Botu"]; // Örnek veri
 
     const renkler = ['#ef4444', '#f97316', '#fbbf24', '#22c55e', '#3b82f6', '#ffffff'];
     const palet = document.getElementById('renkPaleti');
@@ -98,7 +110,7 @@
         if(!oyuncu.isim) { alert("Lütfen ismini yaz!"); return; }
         
         if(oyuncu.davetKodu) {
-            odadakiOyuncular.push(oyuncu.isim); // Kendini ekle
+            odadakiOyuncular.push(oyuncu.isim);
             listeleriGuncelle();
             ekranDegis('ekran-bekleme');
         } else {
@@ -127,25 +139,23 @@
         beklemeListe.innerHTML = "";
 
         odadakiOyuncular.forEach((ad, index) => {
-            // Admin için atma butonlu liste
+            // Admin Listesi (Atma Butonlu)
             const satirAdmin = document.createElement('div');
             satirAdmin.className = 'oyuncu-satir';
-            satirAdmin.innerHTML = `<span>${ad}</span> ${index !== 0 ? `<button class="at-butonu" onclick="oyuncuAt(${index})">AT (X)</button>` : ""}`;
+            satirAdmin.innerHTML = `<span>${ad}</span> ${index !== 0 ? `<button class="at-butonu" onclick="oyuncuAt(${index})">AT</button>` : ""}`;
             adminListe.appendChild(satirAdmin);
 
-            // Oyuncular için normal liste
+            // Oyuncu Listesi
             const satirBekleme = document.createElement('div');
             satirBekleme.className = 'oyuncu-satir';
-            satirBekleme.innerHTML = `<span>${ad}</span> <small style="color:var(--yesil)">Hazır</small>`;
+            satirBekleme.innerHTML = `<span>${ad}</span> <small style="color:var(--yesil)">LOBİDE</small>`;
             beklemeListe.appendChild(satirBekleme);
         });
     }
 
     function oyuncuAt(index) {
-        if(confirm("Bu oyuncuyu odadan atmak istediğine emin misin?")) {
-            odadakiOyuncular.splice(index, 1);
-            listeleriGuncelle();
-        }
+        odadakiOyuncular.splice(index, 1);
+        listeleriGuncelle();
     }
 
     function manuelKatil() {
