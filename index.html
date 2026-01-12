@@ -3,41 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Ultimate Pro</title>
+    <title>Vampir Köylü - Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; --admin-mavi: #3b82f6; --yesil: #22c55e; }
-        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 10px; overflow-x: hidden; }
+        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 10px; }
         .kart { background: var(--kart); border-radius: 30px; padding: 20px; width: 100%; max-width: 460px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); max-height: 95vh; overflow-y: auto; scrollbar-width: none; }
-        
         .ekran { display: none; }
         .ekran.aktif { display: block; animation: fadeIn 0.3s; }
-
-        /* KARAKTER VE RENKLER */
-        .character-box { width: 100%; height: 140px; background: #000; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .character-box { width: 100%; height: 140px; background: #000; border-radius: 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
         .char-base { width: 60px; height: 80px; background: var(--vurgu); border-radius: 30px 30px 15px 15px; position: relative; animation: bounce 2s infinite ease-in-out; }
         .eye { position: absolute; width: 8px; height: 10px; background: #000; border-radius: 50%; top: 25px; }
         .eye-l { left: 15px; } .eye-r { right: 15px; }
         .renk-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 10px; }
         .btn-renk { height: 32px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-
-        /* INPUT VE BUTONLAR */
-        input { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; color: white; border: 2px solid #334155; text-align: center; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
-        .ana-buton { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-        .ana-buton:active { transform: scale(0.98); }
-
-        /* ADMİN AYAR PANELİ */
+        input { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; color: white; border: 2px solid #334155; text-align: center; box-sizing: border-box; margin-bottom: 10px; }
+        .ana-buton { width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: 800; background: var(--vurgu); color: white; cursor: pointer; margin-top: 10px; }
         .ayar-kutu { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 20px; margin: 15px 0; text-align: left; }
-        .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; color: #cbd5e1; }
-        .ayar-satir input { width: 60px; margin: 0; padding: 6px; font-size: 12px; }
-        .oyuncu-listesi { background: #0f172a; border-radius: 12px; padding: 10px; margin-top: 10px; max-height: 100px; overflow-y: auto; text-align: left; }
-
-        /* OYUN EKRANLARI */
-        .rol-banner { font-size: 60px; margin-bottom: 15px; display: block; }
-        .vampir-mod { background: linear-gradient(135deg, #450a0a 0%, #000 100%); border: 2px solid #ef4444; padding: 40px 20px; border-radius: 25px; }
-        .koylu-mod { background: linear-gradient(135deg, #064e3b 0%, #000 100%); border: 2px solid #22c55e; padding: 40px 20px; border-radius: 25px; }
-        .olum-mod { background: #000; border: 2px solid #334155; padding: 40px 20px; border-radius: 25px; color: #64748b; }
-
+        .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
+        .ayar-satir input { width: 60px; margin: 0; padding: 5px; }
+        #qrcode { background: white; padding: 10px; border-radius: 10px; width: fit-content; margin: 15px auto; border: 4px solid var(--admin-mavi); }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -52,160 +37,109 @@
             <div class="char-base" id="previewChar"><div class="eye eye-l"></div><div class="eye eye-r"></div></div>
         </div>
         <div class="renk-grid" id="renkPaleti"></div>
-        <button class="ana-buton" onclick="profilKaydet()">DEVAM ET</button>
+        <button class="ana-buton" onclick="devamEt()">DEVAM ET</button>
     </div>
 
     <div id="ekran-lobi" class="ekran">
-        <h2 id="merhabaYazisi">Merhaba!</h2>
-        <button class="ana-buton" style="background:var(--admin-mavi)" onclick="odaHazirla(true)">👑 ODA KUR (ADMİN)</button>
-        <button class="ana-buton" style="background:#334155; margin-top:10px;" onclick="ekranDegis('ekran-katil-giris')">🚪 ODAYA KATIL</button>
+        <h2 id="merhaba">Merhaba!</h2>
+        <button class="ana-buton" style="background:var(--admin-mavi)" onclick="odaKur()">👑 ODA KUR (ADMİN)</button>
+        <button class="ana-buton" style="background:#334155; margin-top:10px;" onclick="ekranDegis('ekran-katil-manuel')">🚪 ODAYA KATIL</button>
     </div>
 
     <div id="ekran-admin" class="ekran">
-        <h3 style="color:var(--admin-mavi); margin:0;">ADMİN KONTROL</h3>
+        <h3 style="color:var(--admin-mavi);">ADMİN PANELİ</h3>
         <div class="ayar-kutu">
-            <div class="ayar-satir"><span>Öldürme Süresi (sn)</span> <input type="number" id="v-oldur" value="30"></div>
-            <div class="ayar-satir"><span>Sohbet Süresi (sn)</span> <input type="number" id="v-sohbet" value="60"></div>
-            <div class="ayar-satir"><span>Oylama Süresi (sn)</span> <input type="number" id="v-oyla" value="20"></div>
-            <div class="ayar-satir"><span>Rolün</span> 
-                <select id="v-admin-rol" style="background:#0f172a; color:white; border:1px solid #444; border-radius:5px; padding:4px;">
-                    <option value="oyuncu">Oyna</option>
-                    <option value="izle">Sadece İzle</option>
+            <div class="ayar-satir"><span>Öldürme Süresi</span> <input type="number" id="v-oldur" value="30"></div>
+            <div class="ayar-satir"><span>Sohbet Süresi</span> <input type="number" id="v-sohbet" value="60"></div>
+            <div class="ayar-satir"><span>Oylama Süresi</span> <input type="number" id="v-oyla" value="20"></div>
+            <div class="ayar-satir"><span>Modun</span> 
+                <select id="v-mode" style="background:#0f172a; color:white; border:none; padding:5px; border-radius:5px;">
+                    <option value="oyuncu">Oyuncu</option><option value="izle">İzleyici</option>
                 </select>
             </div>
         </div>
-        <div class="oyuncu-listesi" id="adminOyuncuList">
-            <small style="color:var(--altin)">Katılan Oyuncular:</small>
-            <div id="liste-icerik"></div>
+        <div style="background:#0f172a; padding:10px; border-radius:15px;">
+            <small>ODA KODU</small><br><b id="adminOdaKod" style="color:var(--altin); font-size:22px;">---</b>
         </div>
-        <div id="qrcode" style="background:white; padding:10px; border-radius:10px; width:fit-content; margin:15px auto;"></div>
-        <button class="ana-buton" style="background:var(--yesil)" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
+        <div id="qrcode"></div>
+        <button class="ana-buton" style="background:var(--yesil)">OYUNU BAŞLAT</button>
     </div>
 
     <div id="ekran-bekleme" class="ekran">
         <h2 style="color:var(--yesil);">ODAYA KATILDIN!</h2>
-        <p>Diğer oyuncular geliyor, lütfen bekle...</p>
+        <div style="background:#0f172a; padding:15px; border-radius:20px; margin:20px 0;">
+            <small>KATILDIĞIN ODA</small><br><b id="katilinanOda" style="color:var(--altin); font-size:20px;">---</b>
+        </div>
+        <p>Diğer oyuncular geliyor... Lütfen bekle.</p>
         <div style="font-size:40px; animation: spin 2s linear infinite;">⌛</div>
-        <div class="oyuncu-listesi" id="beklemeListesi"></div>
     </div>
 
-    <div id="ekran-rol" class="ekran">
-        <div id="rol-box">
-            <span class="rol-banner" id="rol-emoji">🧛</span>
-            <h1 id="rol-ad" style="margin:0;">VAMPİR</h1>
-            <p id="rol-bilgi">Herkesi gizlice yok et!</p>
-            <button class="ana-buton" style="background:rgba(255,255,255,0.2)" onclick="ekranDegis('ekran-durum-test')">ANLADIM</button>
-        </div>
-    </div>
-
-    <div id="ekran-durum-test" class="ekran">
-        <div class="olum-mod">
-            <span style="font-size:60px;">💀</span>
-            <h1>ÖLDÜN!</h1>
-            <p>Vampir seni yakaladı. Artık bir ruhsun.</p>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="ana-buton" style="background:var(--yesil); font-size:12px;" onclick="sonuc('koylu')">KÖYLÜ KAZANDI (BİTİR)</button>
-                <button class="ana-buton" style="background:var(--vurgu); font-size:12px;" onclick="sonuc('vampir')">VAMPİR KAZANDI (BİTİR)</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="ekran-sonuc" class="ekran">
-        <h1 id="sonuc-baslik" style="font-size:40px;">-</h1>
-        <div id="vampir-ifsa" style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; margin:20px 0;">
-            <p style="color:var(--altin); margin:0;">Vampir Şuydu:</p>
-            <h2 id="vampir-adi" style="margin:5px 0;">-</h2>
-        </div>
-        <button class="ana-buton" onclick="location.reload()">LOBİYE DÖN</button>
-    </div>
-
-    <div id="ekran-katil-giris" class="ekran">
-        <h2>ODA KODU</h2>
-        <input type="text" id="girisKod" placeholder="VK-XXXX">
-        <button class="ana-buton" onclick="odayaBaglan()">KATIL</button>
-        <button class="ana-buton" style="background:#475569" onclick="ekranDegis('ekran-lobi')">İPTAL</button>
+    <div id="ekran-katil-manuel" class="ekran">
+        <h2>ODA KODU GİR</h2>
+        <input type="text" id="manuelKod" placeholder="VK-XXXX">
+        <button class="ana-buton" onclick="manuelKatil()">KATIL</button>
     </div>
 </div>
 
 <script>
-    let user = { isim: "", renk: "#ef4444", rol: "köylü", isAdmin: false };
-    const renkler = ['#ef4444', '#f97316', '#fbbf24', '#22c55e', '#3b82f6', '#ffffff', '#64748b', '#000000'];
+    let oyuncu = { isim: "", renk: "#ef4444", davetKodu: null };
+    const renkler = ['#ef4444', '#f97316', '#fbbf24', '#22c55e', '#3b82f6', '#ffffff'];
 
-    // Renkleri yükle (Fotoğraftakiler)
+    // Renkleri yükle
     const palet = document.getElementById('renkPaleti');
     renkler.forEach(r => {
         const d = document.createElement('div');
         d.className = 'btn-renk'; d.style.background = r;
-        d.onclick = () => { document.getElementById('previewChar').style.background = r; user.renk = r; };
+        d.onclick = () => { document.getElementById('previewChar').style.background = r; oyuncu.renk = r; };
         palet.appendChild(d);
     });
+
+    // Link Kontrolü
+    window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const kod = urlParams.get('oda');
+        if (kod) {
+            oyuncu.davetKodu = kod;
+            console.log("Davet algılandı: " + kod);
+        }
+    };
 
     function ekranDegis(id) {
         document.querySelectorAll('.ekran').forEach(e => e.classList.remove('aktif'));
         document.getElementById(id).classList.add('aktif');
     }
 
-    function profilKaydet() {
-        user.isim = document.getElementById('oyuncuIsmi').value.trim();
-        if(!user.isim) { alert("İsim yazmalısın!"); return; }
-        document.getElementById('merhabaYazisi').innerText = "Merhaba, " + user.isim;
-        ekranDegis('ekran-lobi');
+    function devamEt() {
+        oyuncu.isim = document.getElementById('oyuncuIsmi').value.trim();
+        if(!oyuncu.isim) { alert("Lütfen ismini yaz!"); return; }
+        
+        // EĞER DAVET LİNKİYLE GELDİYSE DOĞRUDAN ODAYA AT
+        if(oyuncu.davetKodu) {
+            document.getElementById('katilinanOda').innerText = oyuncu.davetKodu;
+            ekranDegis('ekran-bekleme');
+        } else {
+            document.getElementById('merhaba').innerText = "Merhaba, " + oyuncu.isim;
+            ekranDegis('ekran-lobi');
+        }
     }
 
-    function odaHazirla(adminMi) {
-        user.isAdmin = adminMi;
+    function odaKur() {
         const kod = "VK-" + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById('odaKodu')?.innerText || (document.getElementById('v-admin-rol').parentNode.parentNode.querySelector('b') ? document.getElementById('v-admin-rol').parentNode.parentNode.querySelector('b').innerText = kod : null);
+        document.getElementById('adminOdaKod').innerText = kod;
         
-        // Admin Listesini Güncelle
-        const list = document.getElementById('liste-icerik');
-        list.innerHTML = `<div>• ${user.isim} (Sen)</div>`;
-        
-        // QR Kod (Tam Link)
+        // QR KODU TAM LİNK OLARAK OLUŞTURUR
+        const tamLink = window.location.origin + window.location.pathname + "?oda=" + kod;
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: window.location.href + "?oda=" + kod, width: 100, height: 100 });
+        new QRCode(document.getElementById("qrcode"), { text: tamLink, width: 120, height: 120 });
         
         ekranDegis('ekran-admin');
     }
 
-    function odayaBaglan() {
-        const kod = document.getElementById('girisKod').value.toUpperCase();
+    function manuelKatil() {
+        const kod = document.getElementById('manuelKod').value.toUpperCase();
         if(kod.length < 4) return;
-        document.getElementById('beklemeListesi').innerHTML = `<div>• ${user.isim} (Sen)</div><div>• AdminBekleniyor...</div>`;
+        document.getElementById('katilinanOda').innerText = kod;
         ekranDegis('ekran-bekleme');
-    }
-
-    function oyunuBaslat() {
-        const rolSec = Math.random() > 0.5 ? "vampir" : "köylü";
-        user.rol = rolSec;
-        const box = document.getElementById('rol-box');
-        
-        if(user.rol === "vampir") {
-            box.parentElement.className = "ekran aktif vampir-mod";
-            document.getElementById('rol-emoji').innerText = "🧛";
-            document.getElementById('rol-ad').innerText = "VAMPİRSİN";
-            document.getElementById('rol-bilgi').innerText = "Kimseye yakalanmadan köylüleri temizle!";
-        } else {
-            box.parentElement.className = "ekran aktif koylu-mod";
-            document.getElementById('rol-emoji').innerText = "👨‍🌾";
-            document.getElementById('rol-ad').innerText = "KÖYLÜSÜN";
-            document.getElementById('rol-bilgi').innerText = "Vampiri bulup oylamayla dışarı at!";
-        }
-        ekranDegis('ekran-rol');
-    }
-
-    function sonuc(kazanan) {
-        ekranDegis('ekran-sonuc');
-        const baslik = document.getElementById('sonuc-baslik');
-        document.getElementById('vampir-adi').innerText = user.isim; // Test verisi
-
-        if(kazanan === 'vampir') {
-            baslik.innerText = "VAMPİR KAZANDI!";
-            baslik.style.color = "var(--vurgu)";
-        } else {
-            baslik.innerText = "KÖYLÜLER KAZANDI!";
-            baslik.style.color = "var(--yesil)";
-        }
     }
 </script>
 </body>
