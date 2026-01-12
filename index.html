@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Pro</title>
+    <title>Vampir Köylü - Admin Takip</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; --admin-mavi: #3b82f6; --yesil: #22c55e; }
@@ -22,6 +22,12 @@
         .ayar-kutu { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 20px; margin: 15px 0; text-align: left; }
         .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
         .ayar-satir input { width: 60px; margin: 0; padding: 5px; }
+
+        /* KATILAN OYUNCULAR LİSTESİ (YENİ) */
+        .admin-liste { background: #0f172a; border-radius: 15px; padding: 10px; margin-top: 10px; text-align: left; border: 1px solid #334155; }
+        .oyuncu-etiket { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 5px 10px; border-radius: 8px; margin-bottom: 5px; font-size: 14px; border-left: 3px solid var(--altin); }
+        .nokta { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
+
         #qrcode { background: white; padding: 10px; border-radius: 10px; width: fit-content; margin: 15px auto; border: 4px solid var(--admin-mavi); }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -47,30 +53,25 @@
     </div>
 
     <div id="ekran-admin" class="ekran">
-        <h3 style="color:var(--admin-mavi);">ADMİN PANELİ</h3>
+        <h3 style="color:var(--admin-mavi); margin-bottom:5px;">ADMİN PANELİ</h3>
         <div class="ayar-kutu">
-            <div class="ayar-satir"><span>Öldürme Süresi</span> <input type="number" id="v-oldur" value="30"></div>
-            <div class="ayar-satir"><span>Sohbet Süresi</span> <input type="number" id="v-sohbet" value="60"></div>
-            <div class="ayar-satir"><span>Oylama Süresi</span> <input type="number" id="v-oyla" value="20"></div>
-            <div class="ayar-satir"><span>Modun</span> 
-                <select id="v-mode" style="background:#0f172a; color:white; border:none; padding:5px; border-radius:5px;">
-                    <option value="oyuncu">Oyuncu</option><option value="izle">İzleyici</option>
-                </select>
-            </div>
+            <div class="ayar-satir"><span>Öldürme Süresi</span> <input type="number" value="30"></div>
+            <div class="ayar-satir"><span>Sohbet Süresi</span> <input type="number" value="60"></div>
+            <div class="ayar-satir"><span>Oylama Süresi</span> <input type="number" value="20"></div>
         </div>
-        <div style="background:#0f172a; padding:10px; border-radius:15px;">
-            <small>ODA KODU</small><br><b id="adminOdaKod" style="color:var(--altin); font-size:22px;">---</b>
+
+        <div style="text-align:left; font-size:12px; color:var(--altin); margin-bottom:5px; font-weight:bold;">KATILANLAR:</div>
+        <div class="admin-liste" id="adminOyuncuListesi">
+            <div class="oyuncu-etiket"><div class="nokta"></div> <span id="adminKendiIsmi">Siz (Admin)</span></div>
         </div>
+
         <div id="qrcode"></div>
         <button class="ana-buton" style="background:var(--yesil)">OYUNU BAŞLAT</button>
     </div>
 
     <div id="ekran-bekleme" class="ekran">
         <h2 style="color:var(--yesil);">ODAYA KATILDIN!</h2>
-        <div style="background:#0f172a; padding:15px; border-radius:20px; margin:20px 0;">
-            <small>KATILDIĞIN ODA</small><br><b id="katilinanOda" style="color:var(--altin); font-size:20px;">---</b>
-        </div>
-        <p>Diğer oyuncular geliyor... Lütfen bekle.</p>
+        <p>Admin oyunu başlatana kadar bekle...</p>
         <div style="font-size:40px; animation: spin 2s linear infinite;">⌛</div>
     </div>
 
@@ -85,7 +86,6 @@
     let oyuncu = { isim: "", renk: "#ef4444", davetKodu: null };
     const renkler = ['#ef4444', '#f97316', '#fbbf24', '#22c55e', '#3b82f6', '#ffffff'];
 
-    // Renkleri yükle
     const palet = document.getElementById('renkPaleti');
     renkler.forEach(r => {
         const d = document.createElement('div');
@@ -94,14 +94,10 @@
         palet.appendChild(d);
     });
 
-    // Link Kontrolü
     window.onload = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const kod = urlParams.get('oda');
-        if (kod) {
-            oyuncu.davetKodu = kod;
-            console.log("Davet algılandı: " + kod);
-        }
+        if (kod) { oyuncu.davetKodu = kod; }
     };
 
     function ekranDegis(id) {
@@ -113,9 +109,7 @@
         oyuncu.isim = document.getElementById('oyuncuIsmi').value.trim();
         if(!oyuncu.isim) { alert("Lütfen ismini yaz!"); return; }
         
-        // EĞER DAVET LİNKİYLE GELDİYSE DOĞRUDAN ODAYA AT
         if(oyuncu.davetKodu) {
-            document.getElementById('katilinanOda').innerText = oyuncu.davetKodu;
             ekranDegis('ekran-bekleme');
         } else {
             document.getElementById('merhaba').innerText = "Merhaba, " + oyuncu.isim;
@@ -125,20 +119,29 @@
 
     function odaKur() {
         const kod = "VK-" + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById('adminOdaKod').innerText = kod;
+        document.getElementById('adminKendiIsmi').innerText = oyuncu.isim + " (Admin)";
         
-        // QR KODU TAM LİNK OLARAK OLUŞTURUR
         const tamLink = window.location.origin + window.location.pathname + "?oda=" + kod;
         document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: tamLink, width: 120, height: 120 });
+        new QRCode(document.getElementById("qrcode"), { text: tamLink, width: 100, height: 100 });
         
         ekranDegis('ekran-admin');
+
+        // ÖRNEK: Katılan birini simüle edelim (Gerçekte bu data sunucudan gelir)
+        setTimeout(() => {
+            oyuncuEkleListeye("Ahmet");
+        }, 3000);
+    }
+
+    function oyuncuEkleListeye(isim) {
+        const liste = document.getElementById('adminOyuncuListesi');
+        const div = document.createElement('div');
+        div.className = 'oyuncu-etiket';
+        div.innerHTML = `<div class="nokta"></div> <span>${isim}</span>`;
+        liste.appendChild(div);
     }
 
     function manuelKatil() {
-        const kod = document.getElementById('manuelKod').value.toUpperCase();
-        if(kod.length < 4) return;
-        document.getElementById('katilinanOda').innerText = kod;
         ekranDegis('ekran-bekleme');
     }
 </script>
