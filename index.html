@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Canlı Lobi</title>
+    <title>Vampir Köylü - Gerçek Lobi</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; --admin-mavi: #3b82f6; --yesil: #22c55e; }
         body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 10px; }
@@ -24,7 +25,6 @@
         .ayar-satir input { width: 55px; margin: 0; padding: 4px; border-radius: 6px; }
         .liste-kutu { background: #0f172a; border-radius: 15px; padding: 10px; margin-top: 10px; text-align: left; max-height: 140px; overflow-y: auto; }
         .oyuncu-satir { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; border-left: 3px solid var(--altin); font-size: 14px; }
-        .at-butonu { background: var(--vurgu); color: white; border: none; border-radius: 5px; padding: 3px 8px; cursor: pointer; font-size: 10px; }
         .kod-alani { background: #0f172a; padding: 10px; border-radius: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
         .kopyala-btn { background: var(--admin-mavi); border: none; color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
         #qrcode { background: white; padding: 10px; border-radius: 10px; width: fit-content; margin: 10px auto; border: 4px solid var(--admin-mavi); }
@@ -52,7 +52,7 @@
     <div id="ekran-admin" class="ekran">
         <h3 style="color:var(--admin-mavi); margin:0;">ADMİN PANELİ</h3>
         <div class="kod-alani">
-            <b id="adminKodYazi" style="color:var(--altin); font-size:18px;">VK-0000</b>
+            <b id="adminKodYazi" style="color:var(--altin); font-size:18px;">VK-BEKLENİYOR</b>
             <button class="kopyala-btn" onclick="kopyala()">📄 KOPYALA</button>
         </div>
         <div class="ayar-kutu">
@@ -82,8 +82,10 @@
 
 <script>
     let oyuncu = { isim: "", renk: "#ef4444", davetKodu: null };
-    let odadakiOyuncular = ["Admin Ahmet"]; // Test için başlangıçta admin varmış gibi
+    let odadakiOyuncular = [];
+    let peer, conn;
 
+    // Renk Paleti
     const renkler = ['#ef4444', '#f97316', '#fbbf24', '#22c55e', '#3b82f6', '#ffffff'];
     const palet = document.getElementById('renkPaleti');
     renkler.forEach(r => {
@@ -93,6 +95,7 @@
         palet.appendChild(d);
     });
 
+    // Link Kontrolü
     window.onload = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const kod = urlParams.get('oda');
@@ -104,59 +107,75 @@
         document.getElementById(id).classList.add('aktif');
     }
 
-    // LİSTELERİ GÜNCELLEYEN TEK FONKSİYON
-    function listeleriGuncelle() {
-        const aL = document.getElementById('adminOyuncuListesi');
-        const bL = document.getElementById('beklemeOyuncuListesi');
-        aL.innerHTML = ""; bL.innerHTML = "";
+    // ADMİN: ODA KURMA (Sunucu gibi davranır)
+    function odaKur() {
+        const kod = "VK-" + Math.floor(1000 + Math.random() * 9000);
+        peer = new Peer(kod); // Sabit kodla peer başlat
         
-        odadakiOyuncular.forEach((ad, i) => {
-            aL.innerHTML += `<div class="oyuncu-satir"><span>${ad}</span>${i!==0 ? `<button class="at-butonu" onclick="at(${i})">AT</button>` : ""}</div>`;
-            bL.innerHTML += `<div class="oyuncu-satir"><span>${ad}</span><small style="color:var(--yesil)">Odada</small></div>`;
+        peer.on('open', (id) => {
+            document.getElementById('adminKodYazi').innerText = id;
+            odadakiOyuncular = [oyuncu.isim + " (Admin)"];
+            listeleriGuncelle();
+            
+            const tamLink = window.location.origin + window.location.pathname + "?oda=" + id;
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { text: tamLink, width: 100, height: 100 });
+            ekranDegis('ekran-admin');
+        });
+
+        peer.on('connection', (c) => {
+            c.on('data', (data) => {
+                if(data.tip === "katil") {
+                    if(!odadakiOyuncular.includes(data.isim)) odadakiOyuncular.push(data.isim);
+                    listeleriGuncelle();
+                    // Diğerlerine yeni listeyi gönder
+                    peer.connections[c.peer].forEach(conn => conn.send({tip: "liste", liste: odadakiOyuncular}));
+                }
+            });
+        });
+    }
+
+    // OYUNCU: ODAYA BAĞLANMA
+    function baglan(kod) {
+        peer = new Peer();
+        peer.on('open', () => {
+            conn = peer.connect(kod);
+            conn.on('open', () => {
+                conn.send({tip: "katil", isim: oyuncu.isim});
+                document.getElementById('beklemeKodYazi').innerText = kod;
+                ekranDegis('ekran-bekleme');
+            });
+            conn.on('data', (data) => {
+                if(data.tip === "liste") {
+                    odadakiOyuncular = data.liste;
+                    listeleriGuncelle();
+                }
+            });
         });
     }
 
     function devamEt() {
         oyuncu.isim = document.getElementById('oyuncuIsmi').value.trim();
-        if(!oyuncu.isim) { alert("Adını yazmalısın!"); return; }
-        
-        if(oyuncu.davetKodu) {
-            document.getElementById('beklemeKodYazi').innerText = oyuncu.davetKodu;
-            odadakiOyuncular.push(oyuncu.isim); // İSMİ LİSTEYE EKLEDİM
-            listeleriGuncelle(); // LİSTEYİ GÜNCELLEDİM
-            ekranDegis('ekran-bekleme');
-        } else {
-            document.getElementById('merhaba').innerText = "Merhaba, " + oyuncu.isim;
-            ekranDegis('ekran-lobi');
-        }
+        if(!oyuncu.isim) return alert("Adını yaz!");
+        if(oyuncu.davetKodu) { baglan(oyuncu.davetKodu); } 
+        else { document.getElementById('merhaba').innerText = "Merhaba, " + oyuncu.isim; ekranDegis('ekran-lobi'); }
     }
 
-    function odaKur() {
-        const kod = "VK-" + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById('adminKodYazi').innerText = kod;
-        odadakiOyuncular = [oyuncu.isim + " (Admin)"]; // Sadece admini listeye ekledim
-        listeleriGuncelle();
-        
-        const tamLink = window.location.origin + window.location.pathname + "?oda=" + kod;
-        document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: tamLink, width: 100, height: 100 });
-        ekranDegis('ekran-admin');
+    function listeleriGuncelle() {
+        const aL = document.getElementById('adminOyuncuListesi');
+        const bL = document.getElementById('beklemeOyuncuListesi');
+        if(aL) aL.innerHTML = odadakiOyuncular.map((ad, i) => `<div class="oyuncu-satir"><span>${ad}</span></div>`).join('');
+        if(bL) bL.innerHTML = odadakiOyuncular.map(ad => `<div class="oyuncu-satir"><span>${ad}</span><small style="color:var(--yesil)">Odada</small></div>`).join('');
     }
 
     function kopyala() {
-        const kod = document.getElementById('adminKodYazi').innerText;
-        navigator.clipboard.writeText(kod).then(() => alert("Kod kopyalandı!"));
+        navigator.clipboard.writeText(document.getElementById('adminKodYazi').innerText);
+        alert("Kod kopyalandı!");
     }
-
-    function at(i) { odadakiOyuncular.splice(i, 1); listeleriGuncelle(); }
 
     function manuelKatil() {
         const k = document.getElementById('manuelKod').value.toUpperCase();
-        if(!k) return;
-        document.getElementById('beklemeKodYazi').innerText = k;
-        odadakiOyuncular.push(oyuncu.isim); // İSMİ LİSTEYE EKLEDİM
-        listeleriGuncelle(); // LİSTEYİ GÜNCELLEDİM
-        ekranDegis('ekran-bekleme');
+        if(k) baglan(k);
     }
 </script>
 </body>
