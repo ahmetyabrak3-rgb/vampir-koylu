@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Tam Yetki</title>
+    <title>Vampir Köylü - Rol Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -13,7 +13,6 @@
         .ekran { display: none; }
         .ekran.aktif { display: block; animation: fadeIn 0.3s; }
         
-        /* KARAKTER TASARIMI */
         .character-box { width: 100%; height: 120px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
         .char-base { width: 45px; height: 65px; background: var(--vurgu); border-radius: 20px 20px 10px 10px; position: relative; animation: bounce 2s infinite; }
         .eye { position: absolute; width: 6px; height: 8px; background: #000; border-radius: 50%; top: 20px; }
@@ -22,7 +21,6 @@
         .renk-topu { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .renk-topu.secili { border-color: white; box-shadow: 0 0 10px white; }
 
-        /* ADMIN PANELİ */
         .ayar-kapsayici { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
         .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
         .ayar-satir input { width: 50px; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; text-align: center; }
@@ -83,7 +81,7 @@
             <span class="rol-belirteci" id="rol-icon">❓</span>
             <span id="rol-metin" style="font-weight:900; font-size:24px;">ROLÜN BEKLENİYOR</span>
         </div>
-        <p id="talimat" style="font-size:14px; color:#94a3b8;">Sıranızı bekleyin...</p>
+        <p id="talimat" style="font-size:14px; color:#94a3b8;">Lütfen bekleyin...</p>
         <div id="hedef-listesi" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
 
@@ -101,12 +99,6 @@
     let geceVerisi = { katilHedef: null, doktorHedef: null };
     let oylamaVerisi = {};
 
-    function ekranDegis(id) {
-        document.querySelectorAll('.ekran').forEach(e => e.classList.remove('aktif'));
-        document.getElementById(id).classList.add('aktif');
-    }
-
-    // Renk ve Karakter Seçimi (ASLA DEĞİŞMEDİ)
     const renkler = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899', '#f8fafc'];
     const palet = document.getElementById('renkPaleti');
     renkler.forEach((r, i) => {
@@ -116,6 +108,11 @@
             document.querySelectorAll('.renk-topu').forEach(x => x.classList.remove('secili')); t.classList.add('secili');
         }; palet.appendChild(t);
     });
+
+    function ekranDegis(id) {
+        document.querySelectorAll('.ekran').forEach(e => e.classList.remove('aktif'));
+        document.getElementById(id).classList.add('aktif');
+    }
 
     function devamEt() {
         oyuncu.isim = document.getElementById('oyuncuIsmi').value.trim();
@@ -139,16 +136,16 @@
         peer.on('connection', c => {
             c.on('data', data => {
                 if(data.tip === "katil") {
-                    odadakiOyuncular.push({id: c.peer, isim: data.isim, rol: "Köylü", hayatta: true});
+                    if(!odadakiOyuncular.find(x => x.id === c.peer)) {
+                        odadakiOyuncular.push({id: c.peer, isim: data.isim, rol: "Köylü", hayatta: true});
+                    }
                     listeGuncelle();
                     broadcast({tip: "liste", liste: odadakiOyuncular});
                 }
                 if(data.tip === "secim") {
                     if(data.rol === "Vampir") geceVerisi.katilHedef = data.hedef;
                     if(data.rol === "Doktor") geceVerisi.doktorHedef = data.hedef;
-                    if(data.rol === "Oy") {
-                        oylamaVerisi[data.hedef] = (oylamaVerisi[data.hedef] || 0) + 1;
-                    }
+                    if(data.rol === "Oy") oylamaVerisi[data.hedef] = (oylamaVerisi[data.hedef] || 0) + 1;
                 }
             });
         });
@@ -174,19 +171,28 @@
 
     function oyunuBaslat() {
         if(odadakiOyuncular.length < 3) return alert("En az 3 kişi gerekli!");
+        
         let roller = ["Vampir", "Doktor"];
         while(roller.length < odadakiOyuncular.length) roller.push("Köylü");
         roller = roller.sort(() => Math.random() - 0.5);
 
         odadakiOyuncular.forEach((p, i) => {
             p.rol = roller[i];
-            if(p.id === oyuncu.id) rolAta(p.rol);
-            else {
-                const c = peer.connect(p.id);
-                c.on('open', () => c.send({tip: "rol", rol: p.rol}));
+            if(p.id === oyuncu.id) {
+                rolAta(p.rol);
+            } else {
+                // ROLÜ TEKRAR TEKRAR GÖNDERME GARANTİSİ
+                const gonder = () => {
+                    const c = peer.connect(p.id);
+                    c.on('open', () => {
+                        c.send({tip: "rol", rol: p.rol});
+                        c.send({tip: "liste", liste: odadakiOyuncular});
+                    });
+                };
+                gonder();
             }
         });
-        geceDongusu();
+        setTimeout(() => geceDongusu(), 2000);
     }
 
     function rolAta(rol) {
@@ -214,32 +220,28 @@
             fazYönet({ad: "DOKTOR SIRASI", sure: dS, hedef: "Doktor"});
 
             setTimeout(() => {
-                geceHesapla(tS, oS);
+                let mesaj = "Doktor başarılı! Kimse ölmedi.";
+                if(geceVerisi.katilHedef && geceVerisi.katilHedef !== geceVerisi.doktorHedef) {
+                    const kurban = odadakiOyuncular.find(p => p.id === geceVerisi.katilHedef);
+                    kurban.hayatta = false;
+                    mesaj = "Gece öldürülen: " + kurban.isim;
+                } else if (geceVerisi.katilHedef && geceVerisi.katilHedef === geceVerisi.doktorHedef) {
+                    mesaj = "Doktor korudu! Kimse ölmedi.";
+                }
+                broadcast({tip: "bilgi", mesaj: mesaj});
+                broadcast({tip: "liste", liste: odadakiOyuncular});
+                alert(mesaj);
+
+                broadcast({tip: "faz", ad: "TARTIŞMA", sure: tS, hedef: "Hepsi"});
+                fazYönet({ad: "TARTIŞMA", sure: tS, hedef: "Hepsi"});
+
+                setTimeout(() => {
+                    oylamaVerisi = {};
+                    broadcast({tip: "faz", ad: "OYLAMA", sure: oS, hedef: "Oylama"});
+                    fazYönet({ad: "OYLAMA", sure: oS, hedef: "Oylama"});
+                }, tS * 1000 + 1000);
             }, dS * 1000 + 1000);
         }, vS * 1000 + 1000);
-    }
-
-    function geceHesapla(tS, oS) {
-        let mesaj = "Doktor başarılı! Kimse ölmedi.";
-        if(geceVerisi.katilHedef && geceVerisi.katilHedef !== geceVerisi.doktorHedef) {
-            const kurban = odadakiOyuncular.find(p => p.id === geceVerisi.katilHedef);
-            kurban.hayatta = false;
-            mesaj = "Gece öldürülen: " + kurban.isim;
-        } else if (geceVerisi.katilHedef === geceVerisi.doktorHedef && geceVerisi.katilHedef) {
-            mesaj = "Doktor doğru kişiyi korudu! Kimse ölmedi.";
-        }
-        broadcast({tip: "bilgi", mesaj: mesaj});
-        broadcast({tip: "liste", liste: odadakiOyuncular});
-        alert(mesaj);
-
-        broadcast({tip: "faz", ad: "TARTIŞMA", sure: tS, hedef: "Hepsi"});
-        fazYönet({ad: "TARTIŞMA", sure: tS, hedef: "Hepsi"});
-
-        setTimeout(() => {
-            oylamaVerisi = {};
-            broadcast({tip: "faz", ad: "OYLAMA", sure: oS, hedef: "Oylama"});
-            fazYönet({ad: "OYLAMA", sure: oS, hedef: "Oylama"});
-        }, tS * 1000 + 1000);
     }
 
     function fazYönet(data) {
@@ -269,12 +271,8 @@
                         liste.appendChild(btn);
                     }
                 });
-            } else {
-                document.getElementById('talimat').innerText = "Vampirin kim olduğunu tartışın.";
-            }
-        } else {
-            document.getElementById('talimat').innerText = "Diğerleri işlem yapıyor, bekle...";
-        }
+            } else document.getElementById('talimat').innerText = "Tartışma başladı!";
+        } else document.getElementById('talimat').innerText = "Sıranı bekle...";
         timerBaslat(data.sure);
     }
 
@@ -289,7 +287,11 @@
     }
 
     function broadcast(data) {
-        Object.values(peer.connections).forEach(conns => conns[0].send(data));
+        if(peer && peer.connections) {
+            Object.values(peer.connections).forEach(conns => {
+                if(conns[0].open) conns[0].send(data);
+            });
+        }
     }
 
     function listeGuncelle() {
