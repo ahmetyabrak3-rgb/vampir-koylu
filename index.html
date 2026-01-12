@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Final Lobi</title>
+    <title>Vampir Köylü - Final Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -13,7 +13,6 @@
         .ekran { display: none; }
         .ekran.aktif { display: block; animation: fadeIn 0.3s; }
         
-        /* KARAKTER TASARIMI */
         .character-box { width: 100%; height: 120px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
         .char-base { width: 45px; height: 65px; background: var(--vurgu); border-radius: 20px 20px 10px 10px; position: relative; animation: bounce 2s infinite; }
         .eye { position: absolute; width: 6px; height: 8px; background: #000; border-radius: 50%; top: 20px; }
@@ -22,17 +21,17 @@
         .renk-topu { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .renk-topu.secili { border-color: white; box-shadow: 0 0 10px white; }
 
-        /* ADMIN PANELİ & QR ALANI */
         .ayar-kapsayici { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
         .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
         .ayar-satir input { width: 50px; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; text-align: center; }
         
-        /* QR VE ODA KODU YAN YANA */
         .qr-ve-kod-alani { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 15px 0; background: rgba(15, 23, 42, 0.5); padding: 15px; border-radius: 20px; border: 1px solid #334155; }
         #qrcode { background: white; padding: 8px; border-radius: 10px; }
         .kod-bilgi { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .kod-text { font-size: 20px; font-weight: 800; color: var(--altin); letter-spacing: 1px; }
-        .kopyala-btn { background: var(--admin-mavi); color: white; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+        .kod-text { font-size: 20px; font-weight: 800; color: var(--altin); }
+
+        .liste-kutu { background: #0f172a; border-radius: 15px; padding: 12px; margin: 10px 0; text-align: left; min-height: 40px; border-left: 4px solid var(--altin); }
+        .oyuncu-ad { font-weight: bold; color: var(--metin); margin-bottom: 5px; display: block; }
 
         .baslat-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: 800; background: var(--yesil); color: white; cursor: pointer; font-size: 16px; text-transform: uppercase; }
         input[type="text"] { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; color: white; border: 2px solid #334155; margin-bottom: 15px; text-align: center; outline: none; }
@@ -60,32 +59,42 @@
 
     <div id="ekran-admin" class="ekran">
         <h3 style="color:var(--admin-mavi); margin-top:0;">ADMİN PANELİ</h3>
-        
         <div class="ayar-kapsayici">
             <div class="ayar-satir"><span>Vampir Süresi</span> <input type="number" id="s-vampir" value="30"></div>
             <div class="ayar-satir"><span>Doktor Süresi</span> <input type="number" id="s-doktor" value="20"></div>
             <div class="ayar-satir"><span>Tartışma Süresi</span> <input type="number" id="s-tartisma" value="60"></div>
             <div class="ayar-satir"><span>Oylama Süresi</span> <input type="number" id="s-oylama" value="30"></div>
         </div>
-
+        <div class="liste-kutu" id="adminListe"></div>
         <div class="qr-ve-kod-alani">
             <div id="qrcode"></div>
             <div class="kod-bilgi">
-                <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Oda Kodu</span>
-                <span class="kod-text" id="odaKodYazi">VK-0000</span>
-                <button class="kopyala-btn" onclick="kopyala()">📄 KOPYALALA</button>
+                <span class="kod-text" id="odaKodYazi">...</span>
+                <button onclick="kopyala()" style="background:var(--admin-mavi); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">📄 KOPYALA</button>
             </div>
         </div>
+        <button class="baslat-btn">OYUNU BAŞLAT</button>
+    </div>
 
-        <button class="baslat-btn" onclick="baslat()">OYUNU BAŞLAT</button>
+    <div id="ekran-bekleme" class="ekran">
+        <h2 style="color:var(--yesil);">ODADASIN</h2>
+        <p id="bekleme-yazi" style="color:var(--altin); font-size:14px;">Diğer oyuncular bekleniyor...</p>
+        <div class="liste-kutu" id="oyuncuListe"></div>
+    </div>
+
+    <div id="ekran-katil-manuel" class="ekran">
+        <h2>ODA KODU</h2>
+        <input type="text" id="manuelKod" placeholder="VK-XXXX">
+        <button class="baslat-btn" onclick="manuelKatil()">KATIL</button>
     </div>
 </div>
 
 <script>
     let oyuncu = { isim: "", renk: "#ef4444" };
-    const renkler = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899', '#f8fafc'];
+    let odadakiOyuncular = [];
+    let peer, conn;
 
-    // Renkleri oluştur
+    const renkler = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899', '#f8fafc'];
     const palet = document.getElementById('renkPaleti');
     renkler.forEach((r, i) => {
         const t = document.createElement('div');
@@ -106,24 +115,76 @@
     }
 
     function devamEt() {
-        if(!document.getElementById('oyuncuIsmi').value.trim()) return alert("İsim yaz!");
-        ekranDegis('ekran-lobi');
+        oyuncu.isim = document.getElementById('oyuncuIsmi').value.trim();
+        if(!oyuncu.isim) return alert("İsim yaz!");
+        const urlParams = new URLSearchParams(window.location.search);
+        const kod = urlParams.get('oda');
+        if(kod) baglan(kod); else ekranDegis('ekran-lobi');
     }
 
     function odaKur() {
         const kod = "VK-" + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById('odaKodYazi').innerText = kod;
-        document.getElementById('qrcode').innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: kod, width: 80, height: 80 });
-        ekranDegis('ekran-admin');
+        peer = new Peer(kod);
+        peer.on('open', (id) => {
+            document.getElementById('odaKodYazi').innerText = id;
+            odadakiOyuncular = [oyuncu.isim];
+            listeGuncelle();
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), { 
+                text: window.location.origin + window.location.pathname + "?oda=" + id, 
+                width: 80, height: 80 
+            });
+            ekranDegis('ekran-admin');
+        });
+        peer.on('connection', (c) => {
+            c.on('data', (data) => {
+                if(data.tip === "katil") {
+                    if(!odadakiOyuncular.includes(data.isim)) odadakiOyuncular.push(data.isim);
+                    listeGuncelle();
+                    broadcast({tip: "liste", liste: odadakiOyuncular});
+                }
+            });
+        });
+    }
+
+    function baglan(kod) {
+        peer = new Peer();
+        peer.on('open', () => {
+            conn = peer.connect(kod);
+            conn.on('open', () => {
+                conn.send({tip: "katil", isim: oyuncu.isim});
+                ekranDegis('ekran-bekleme');
+            });
+            conn.on('data', (data) => {
+                if(data.tip === "liste") {
+                    odadakiOyuncular = data.liste;
+                    listeGuncelle();
+                }
+            });
+        });
+    }
+
+    function listeGuncelle() {
+        const html = odadakiOyuncular.map(ad => `<span class="oyuncu-ad">• ${ad}</span>`).join('');
+        const aL = document.getElementById('adminListe');
+        const oL = document.getElementById('oyuncuListe');
+        if(aL) aL.innerHTML = html;
+        if(oL) oL.innerHTML = html;
+    }
+
+    function broadcast(data) {
+        Object.values(peer.connections).forEach(conns => conns[0].send(data));
     }
 
     function kopyala() {
-        const kod = document.getElementById('odaKodYazi').innerText;
-        navigator.clipboard.writeText(kod).then(() => alert("Kod Kopyalandı: " + kod));
+        navigator.clipboard.writeText(document.getElementById('odaKodYazi').innerText);
+        alert("Kod kopyalandı!");
     }
 
-    function baslat() { alert("Oyun Başlatılıyor..."); }
+    function manuelKatil() {
+        const k = document.getElementById('manuelKod').value.toUpperCase();
+        if(k) baglan(k);
+    }
 </script>
 </body>
 </html>
