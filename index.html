@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Rol Fix</title>
+    <title>Vampir Köylü - Kesin Çözüm</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
@@ -13,6 +13,7 @@
         .ekran { display: none; }
         .ekran.aktif { display: block; animation: fadeIn 0.3s; }
         
+        /* KARAKTER TASARIMI (DOKUNULMADI) */
         .character-box { width: 100%; height: 120px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
         .char-base { width: 45px; height: 65px; background: var(--vurgu); border-radius: 20px 20px 10px 10px; position: relative; animation: bounce 2s infinite; }
         .eye { position: absolute; width: 6px; height: 8px; background: #000; border-radius: 50%; top: 20px; }
@@ -21,6 +22,7 @@
         .renk-topu { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .renk-topu.secili { border-color: white; box-shadow: 0 0 10px white; }
 
+        /* ADMIN PANELİ (DOKUNULMADI) */
         .ayar-kapsayici { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
         .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
         .ayar-satir input { width: 50px; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; text-align: center; }
@@ -33,6 +35,9 @@
         
         #timer { font-size: 32px; font-weight: 900; color: var(--altin); margin: 15px 0; }
         .rol-belirteci { font-size: 40px; margin: 10px; display: block; }
+
+        /* ÖLÜM EKRANI STİLİ */
+        .olu-mesaj { color: var(--vurgu); font-size: 24px; font-weight: 900; margin-top: 20px; border: 2px solid var(--vurgu); padding: 20px; border-radius: 20px; background: rgba(239, 68, 68, 0.1); }
 
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -64,25 +69,28 @@
             <div class="ayar-satir"><span>Oylama Süresi</span> <input type="number" id="s-oylama" value="30"></div>
         </div>
         <div class="liste-kutu" id="adminListe"></div>
-        <div class="qr-ve-kod-alani">
-            <div id="qrcode"></div>
-            <div style="display:flex; flex-direction:column; gap:5px;">
-                <b id="odaKodYazi" style="color:var(--altin); font-size:18px;">...</b>
-                <button onclick="kopyala()" style="background:var(--admin-mavi); color:white; border:none; padding:5px 10px; border-radius:5px; font-size:10px; cursor:pointer;">📄 KOPYALA</button>
-            </div>
+        <div id="qrcode" style="display:flex; justify-content:center; margin-bottom:10px;"></div>
+        <div style="margin-bottom:15px;">
+            <b id="odaKodYazi" style="color:var(--altin); font-size:18px;">...</b>
+            <button onclick="kopyala()" style="background:var(--admin-mavi); color:white; border:none; padding:5px 10px; border-radius:5px; font-size:10px; cursor:pointer; margin-left:10px;">📄 KOPYALA</button>
         </div>
         <button class="baslat-btn" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
     </div>
 
     <div id="ekran-oyun" class="ekran">
-        <h2 id="faz-baslik" style="color:var(--altin);">HAZIRLAN</h2>
-        <div id="timer">00</div>
-        <div id="rol-kart" style="background:rgba(255,255,255,0.1); padding:15px; border-radius:15px; margin-bottom:15px;">
-            <span class="rol-belirteci" id="rol-icon">❓</span>
-            <span id="rol-metin" style="font-weight:900; font-size:24px;">ROLÜN BEKLENİYOR</span>
+        <div id="oyun-icerik">
+            <h2 id="faz-baslik" style="color:var(--altin);">HAZIRLAN</h2>
+            <div id="timer">00</div>
+            <div id="rol-kart" style="background:rgba(255,255,255,0.1); padding:15px; border-radius:15px; margin-bottom:15px;">
+                <span class="rol-belirteci" id="rol-icon">❓</span>
+                <span id="rol-metin" style="font-weight:900; font-size:24px;">ROLÜN BEKLENİYOR</span>
+            </div>
+            <p id="talimat" style="font-size:14px; color:#94a3b8;">Lütfen bekleyin...</p>
+            <div id="hedef-listesi" style="display: flex; flex-direction: column; gap: 8px;"></div>
         </div>
-        <p id="talimat" style="font-size:14px; color:#94a3b8;">Lütfen bekleyin...</p>
-        <div id="hedef-listesi" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        <div id="olu-ekrani" style="display:none;" class="olu-mesaj">
+            VAMPİR TARAFINDAN ÖLDÜRÜLDÜN!
+        </div>
     </div>
 
     <div id="ekran-katil-manuel" class="ekran">
@@ -99,6 +107,7 @@
     let geceVerisi = { katilHedef: null, doktorHedef: null };
     let oylamaVerisi = {};
 
+    // Karakter Renkleri (Değişmedi)
     const renkler = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899', '#f8fafc'];
     const palet = document.getElementById('renkPaleti');
     renkler.forEach((r, i) => {
@@ -164,9 +173,19 @@
                 if(data.tip === "rol") rolAta(data.rol);
                 if(data.tip === "faz") fazYönet(data);
                 if(data.tip === "bilgi") alert(data.mesaj);
-                if(data.tip === "liste") odadakiOyuncular = data.liste;
+                if(data.tip === "liste") {
+                    odadakiOyuncular = data.liste;
+                    let ben = odadakiOyuncular.find(p => p.id === oyuncu.id);
+                    if(ben && !ben.hayatta) olumuGoster();
+                }
             });
         });
+    }
+
+    function olumuGoster() {
+        oyuncu.hayatta = false;
+        document.getElementById('oyun-icerik').style.display = 'none';
+        document.getElementById('olu-ekrani').style.display = 'block';
     }
 
     function oyunuBaslat() {
@@ -181,17 +200,15 @@
             if(p.id === oyuncu.id) {
                 rolAta(p.rol);
             } else {
-                // ROLÜ TEKRAR TEKRAR GÖNDERME GARANTİSİ
-                const gonder = () => {
-                    const c = peer.connect(p.id);
-                    c.on('open', () => {
-                        c.send({tip: "rol", rol: p.rol});
-                        c.send({tip: "liste", liste: odadakiOyuncular});
-                    });
-                };
-                gonder();
+                // ROLÜ OYUNCUYA TEKRAR TEKRAR GÖNDERMEK YERİNE PEER AÇILDIĞINDA GÖNDER
+                const c = peer.connect(p.id);
+                c.on('open', () => {
+                    c.send({tip: "rol", rol: p.rol});
+                    c.send({tip: "liste", liste: odadakiOyuncular});
+                });
             }
         });
+        
         setTimeout(() => geceDongusu(), 2000);
     }
 
@@ -228,6 +245,7 @@
                 } else if (geceVerisi.katilHedef && geceVerisi.katilHedef === geceVerisi.doktorHedef) {
                     mesaj = "Doktor korudu! Kimse ölmedi.";
                 }
+                
                 broadcast({tip: "bilgi", mesaj: mesaj});
                 broadcast({tip: "liste", liste: odadakiOyuncular});
                 alert(mesaj);
@@ -245,6 +263,7 @@
     }
 
     function fazYönet(data) {
+        if(!oyuncu.hayatta) return;
         document.getElementById('faz-baslik').innerText = data.ad;
         const liste = document.getElementById('hedef-listesi');
         liste.innerHTML = "";
@@ -253,7 +272,7 @@
             if(data.ad !== "TARTIŞMA") {
                 document.getElementById('talimat').innerText = "Seçimini yap!";
                 odadakiOyuncular.forEach(p => {
-                    if(p.hayatta) {
+                    if(p.hayatta && p.id !== oyuncu.id) { // Kendini seçemesin
                         const btn = document.createElement('button');
                         btn.className = "aksiyon-btn";
                         btn.innerText = p.isim;
@@ -271,7 +290,7 @@
                         liste.appendChild(btn);
                     }
                 });
-            } else document.getElementById('talimat').innerText = "Tartışma başladı!";
+            } else document.getElementById('talimat').innerText = "Vampir kim olabilir? Tartışın!";
         } else document.getElementById('talimat').innerText = "Sıranı bekle...";
         timerBaslat(data.sure);
     }
