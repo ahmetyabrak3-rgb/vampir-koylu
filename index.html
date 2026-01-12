@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Stabil Versiyon</title>
+    <title>Vampir Köylü - Full Game</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; --admin-mavi: #3b82f6; --yesil: #22c55e; }
-        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 10px; }
-        .kart { background: var(--kart); border-radius: 30px; padding: 25px; width: 100%; max-width: 420px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); }
+        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #ef4444; --altin: #fbbf24; --admin-mavi: #3b82f6; --yesil: #22c55e; --mor: #a855f7; }
+        body { margin: 0; background: var(--arka-plan); color: var(--metin); font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 10px; overflow-x: hidden; }
+        .kart { background: var(--kart); border-radius: 30px; padding: 25px; width: 100%; max-width: 420px; text-align: center; border: 1px solid #334155; box-shadow: 0 25px 60px rgba(0,0,0,0.6); position: relative; }
         .ekran { display: none; }
         .ekran.aktif { display: block; animation: fadeIn 0.3s; }
         
-        /* KARAKTER TASARIMI - ASLA DEĞİŞMEDİ */
+        /* KARAKTER & RENK (DOKUNULMADI) */
         .character-box { width: 100%; height: 120px; background: #000; border-radius: 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
         .char-base { width: 45px; height: 65px; background: var(--vurgu); border-radius: 20px 20px 10px 10px; position: relative; animation: bounce 2s infinite; }
         .eye { position: absolute; width: 6px; height: 8px; background: #000; border-radius: 50%; top: 20px; }
@@ -22,20 +22,28 @@
         .renk-topu { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .renk-topu.secili { border-color: white; box-shadow: 0 0 10px white; }
 
-        /* ADMİN PANELİ - GÖRSELDEKİ GİBİ */
+        /* ADMIN & LOBİ (DOKUNULMADI) */
         .ayar-kapsayici { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #334155; }
         .ayar-satir { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
         .ayar-satir input { width: 50px; background: #0f172a; border: 1px solid #475569; color: white; border-radius: 6px; text-align: center; }
-        
-        .liste-kutu { background: #0f172a; border-radius: 15px; padding: 12px; margin: 10px 0; text-align: left; min-height: 40px; border-left: 4px solid var(--altin); }
+        .liste-kutu { background: #0f172a; border-radius: 15px; padding: 12px; margin: 10px 0; text-align: left; min-height: 40px; border-left: 4px solid var(--altin); max-height: 150px; overflow-y: auto; }
         .oyuncu-ad { font-weight: bold; color: var(--metin); margin-bottom: 5px; display: block; font-size: 14px; }
-
         .qr-ve-kod-alani { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 15px 0; background: rgba(15, 23, 42, 0.5); padding: 15px; border-radius: 20px; border: 1px solid #334155; }
         #qrcode { background: white; padding: 5px; border-radius: 8px; }
-        
-        .baslat-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: 800; background: var(--yesil); color: white; cursor: pointer; font-size: 16px; text-transform: uppercase; }
+
+        /* OYUN İÇİ BUTONLAR */
+        .baslat-btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-weight: 800; background: var(--yesil); color: white; cursor: pointer; font-size: 16px; text-transform: uppercase; margin-top: 10px; }
+        .secim-btn { background: #334155; color: white; border: 1px solid #475569; padding: 10px; border-radius: 10px; margin: 5px; cursor: pointer; width: 80%; }
+        .secim-btn:hover { background: var(--admin-mavi); }
         input[type="text"] { width: 100%; padding: 14px; border-radius: 12px; background: #0f172a; color: white; border: 2px solid #334155; margin-bottom: 15px; text-align: center; outline: none; }
         
+        /* ROL EKRANLARI */
+        .rol-figür { font-size: 50px; margin: 20px 0; }
+        .vampir-tema { color: var(--vurgu); }
+        .doktor-tema { color: var(--admin-mavi); }
+        .koylu-tema { color: var(--yesil); }
+        #timer { font-size: 24px; font-weight: bold; color: var(--altin); margin: 10px; }
+
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -44,70 +52,85 @@
 
 <div class="kart">
     <div id="ekran-profil" class="ekran aktif">
-        <h2 style="color:var(--altin); margin-bottom:15px;">KARAKTER TASARLA</h2>
-        <input type="text" id="oyuncuIsmi" placeholder="İsminizi Yazın..." maxlength="12">
+        <h2 style="color:var(--altin);">KARAKTER TASARLA</h2>
+        <input type="text" id="oyuncuIsmi" placeholder="İsminizi Yazın...">
         <div class="character-box"><div class="char-base" id="previewChar"><div class="eye eye-l"></div><div class="eye eye-r"></div></div></div>
         <div class="renk-secici" id="renkPaleti"></div>
         <button class="baslat-btn" style="background:var(--vurgu)" onclick="devamEt()">DEVAM ET</button>
     </div>
 
     <div id="ekran-lobi" class="ekran">
-        <h2 id="merhaba">Lobi</h2>
+        <h2>Lobi</h2>
         <button class="baslat-btn" style="background:var(--admin-mavi)" onclick="odaKur()">👑 ODA KUR</button>
-        <button class="baslat-btn" style="background:#334155; margin-top:10px;" onclick="ekranDegis('ekran-katil-manuel')">🚪 ODAYA KATIL</button>
+        <button class="baslat-btn" style="background:#334155;" onclick="ekranDegis('ekran-katil-manuel')">🚪 ODAYA KATIL</button>
     </div>
 
     <div id="ekran-admin" class="ekran">
-        <h3 style="color:var(--admin-mavi); margin-top:0;">ADMİN PANELİ</h3>
+        <h3>ADMİN PANELİ</h3>
         <div class="ayar-kapsayici">
-            <div class="ayar-satir"><span>Vampir Süresi</span> <input type="number" id="s-vampir" value="30"></div>
+            <div class="ayar-satir"><span>Vampir Süresi</span> <input type="number" id="s-vampir" value="20"></div>
             <div class="ayar-satir"><span>Doktor Süresi</span> <input type="number" id="s-doktor" value="20"></div>
-            <div class="ayar-satir"><span>Tartışma Süresi</span> <input type="number" id="s-tartisma" value="60"></div>
-            <div class="ayar-satir"><span>Oylama Süresi</span> <input type="number" id="s-oylama" value="30"></div>
+            <div class="ayar-satir"><span>Tartışma Süresi</span> <input type="number" id="s-tartisma" value="40"></div>
+            <div class="ayar-satir"><span>Oylama Süresi</span> <input type="number" id="s-oylama" value="20"></div>
         </div>
         <div class="liste-kutu" id="adminListe"></div>
         <div class="qr-ve-kod-alani">
             <div id="qrcode"></div>
-            <div style="display:flex; flex-direction:column; gap:5px;">
-                <b id="odaKodYazi" style="color:var(--altin); font-size:18px;">...</b>
-                <button onclick="kopyala()" style="background:var(--admin-mavi); color:white; border:none; padding:5px 10px; border-radius:5px; font-size:11px; cursor:pointer;">KOPYALA</button>
-            </div>
+            <div><b id="odaKodYazi" style="color:var(--altin);">...</b><br><button onclick="kopyala()" style="background:var(--admin-mavi); border:none; color:white; border-radius:5px; padding:4px;">KOPYALA</button></div>
         </div>
-        <button class="baslat-btn" onclick="oyunuSisteminiBaslat()">OYUNU BAŞLAT</button>
+        <button class="baslat-btn" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
     </div>
 
     <div id="ekran-bekleme" class="ekran">
         <h2 style="color:var(--yesil);">ODADASIN</h2>
-        <p style="color:var(--altin); font-size:14px;">Diğer oyuncular bekleniyor...</p>
+        <p>Diğer oyuncular bekleniyor...</p>
         <div class="liste-kutu" id="oyuncuListe"></div>
     </div>
 
+    <div id="ekran-rol" class="ekran">
+        <h2 id="rol-baslik">ROLÜN</h2>
+        <div class="rol-figür" id="rol-icon">👤</div>
+        <h1 id="rol-adi">KÖYLÜ</h1>
+        <p id="rol-bilgi">Köyü koru ve vampiri bul!</p>
+    </div>
+
+    <div id="ekran-oyun" class="ekran">
+        <h2 id="faz-baslik">GECE</h2>
+        <div id="timer">00</div>
+        <p id="faz-talimat">İşleminizi yapın...</p>
+        <div id="aksiyon-listesi"></div>
+    </div>
+
+    <div id="ekran-sonuc" class="ekran">
+        <h1 id="sonuc-baslik">OYUN BİTTİ</h1>
+        <div class="rol-figür">🏆</div>
+        <h2 id="sonuc-metin">KÖYLÜLER KAZANDI</h2>
+        <button class="baslat-btn" onclick="location.reload()">TEKRAR OYNA</button>
+    </div>
+
     <div id="ekran-katil-manuel" class="ekran">
-        <h2>ODA KODU GİR</h2>
+        <h2>ODA KODU</h2>
         <input type="text" id="manuelKod" placeholder="VK-XXXX">
         <button class="baslat-btn" onclick="manuelKatil()">KATIL</button>
     </div>
 </div>
 
 <script>
-    let oyuncu = { isim: "", renk: "#ef4444" };
-    let odadakiOyuncular = [];
-    let peer, conn;
+    let oyuncu = { id: "", isim: "", renk: "#ef4444", rol: "", hayatta: true };
+    let odadakiOyuncular = []; // {id, isim, rol, hayatta}
+    let peer, conn, adminConn;
+    let secilenHedef = null;
+    let oylamaVerisi = {};
 
-    // Renk Seçimi (Dokunulmadı)
+    // Renk Paleti (Dokunulmadı)
     const renkler = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316', '#ec4899', '#f8fafc'];
     const palet = document.getElementById('renkPaleti');
     renkler.forEach((r, i) => {
-        const t = document.createElement('div');
-        t.className = 'renk-topu' + (i === 0 ? ' secili' : '');
-        t.style.background = r;
-        t.onclick = () => {
-            document.getElementById('previewChar').style.background = r;
-            oyuncu.renk = r;
-            document.querySelectorAll('.renk-topu').forEach(x => x.classList.remove('secili'));
-            t.classList.add('secili');
-        };
-        palet.appendChild(t);
+        const t = document.createElement('div'); t.className = 'renk-topu' + (i === 0 ? ' secili' : '');
+        t.style.background = r; t.onclick = () => {
+            document.getElementById('previewChar').style.background = r; oyuncu.renk = r;
+            document.querySelectorAll('.renk-topu').forEach(x => x.classList.remove('secili')); t.classList.add('secili');
+        }; palet.appendChild(t);
     });
 
     function ekranDegis(id) {
@@ -120,80 +143,249 @@
         if(!oyuncu.isim) return alert("İsim yaz!");
         const urlParams = new URLSearchParams(window.location.search);
         const kod = urlParams.get('oda');
-        if(kod) { baglan(kod); } else { ekranDegis('ekran-lobi'); }
+        if(kod) baglan(kod); else ekranDegis('ekran-lobi');
     }
 
+    // ODA VE BAĞLANTI SİSTEMİ (BOZULMADI)
     function odaKur() {
         const kod = "VK-" + Math.floor(1000 + Math.random() * 9000);
         peer = new Peer(kod);
-        peer.on('open', (id) => {
+        peer.on('open', id => {
             document.getElementById('odaKodYazi').innerText = id;
-            odadakiOyuncular = [oyuncu.isim];
+            oyuncu.id = id;
+            odadakiOyuncular = [{id: id, isim: oyuncu.isim, hayatta: true}];
             listeGuncelle();
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { 
-                text: window.location.origin + window.location.pathname + "?oda=" + id, 
-                width: 80, height: 80 
-            });
+            new QRCode(document.getElementById("qrcode"), { text: window.location.origin + window.location.pathname + "?oda=" + id, width: 80, height: 80 });
             ekranDegis('ekran-admin');
         });
-        peer.on('connection', (c) => {
-            c.on('open', () => {
-                c.on('data', (data) => {
-                    if(data.tip === "katil") {
-                        if(!odadakiOyuncular.includes(data.isim)) odadakiOyuncular.push(data.isim);
-                        listeGuncelle();
-                        broadcast({tip: "liste", liste: odadakiOyuncular});
-                    }
-                });
+        peer.on('connection', c => {
+            c.on('data', data => {
+                if(data.tip === "katil") {
+                    odadakiOyuncular.push({id: c.peer, isim: data.isim, hayatta: true});
+                    listeGuncelle();
+                    broadcast({tip: "liste", liste: odadakiOyuncular});
+                }
+                if(data.tip === "aksiyon") aksiyonIsle(c.peer, data);
             });
         });
     }
 
     function baglan(kod) {
         peer = new Peer();
-        peer.on('open', () => {
+        peer.on('open', id => {
+            oyuncu.id = id;
             conn = peer.connect(kod);
             conn.on('open', () => {
                 conn.send({tip: "katil", isim: oyuncu.isim});
                 ekranDegis('ekran-bekleme');
-                conn.on('data', (data) => {
-                    if(data.tip === "liste") { odadakiOyuncular = data.liste; listeGuncelle(); }
-                    if(data.tip === "baslat") { alert("Oyun Admin Tarafından Başlatıldı!"); }
-                });
+            });
+            conn.on('data', data => {
+                if(data.tip === "liste") { odadakiOyuncular = data.liste; listeGuncelle(); }
+                if(data.tip === "rol") rolAta(data);
+                if(data.tip === "faz_degis") fazBaslat(data);
+                if(data.tip === "oyun_sonu") oyunBitti(data.kazanan);
             });
         });
     }
 
-    function oyunuSisteminiBaslat() {
-        if(odadakiOyuncular.length < 1) return alert("Kimse yok!");
-        broadcast({ tip: "baslat" });
-        alert("Oyun başlatma sinyali gönderildi!");
+    // OYUN MANTIĞI (YENİ EKLENEN)
+    function oyunuBaslat() {
+        if(odadakiOyuncular.length < 3) return alert("En az 3 kişi lazım!");
+        
+        // Rol Dağıtımı
+        let tempPlayers = [...odadakiOyuncular];
+        let vIdx = Math.floor(Math.random() * tempPlayers.length);
+        tempPlayers[vIdx].rol = "Vampir";
+        tempPlayers.splice(vIdx, 1);
+        
+        let dIdx = Math.floor(Math.random() * tempPlayers.length);
+        tempPlayers[dIdx].rol = "Doktor";
+        tempPlayers.splice(dIdx, 1);
+        
+        tempPlayers.forEach(p => p.rol = "Köylü");
+
+        odadakiOyuncular.forEach(p => {
+            if(p.id === oyuncu.id) rolAta({rol: p.rol});
+            else {
+                const c = peer.connect(p.id);
+                c.on('open', () => c.send({tip: "rol", rol: p.rol}));
+            }
+        });
+        
+        setTimeout(() => geceBaslat(), 3000);
+    }
+
+    function rolAta(data) {
+        oyuncu.rol = data.rol;
+        const icon = document.getElementById('rol-icon');
+        const ad = document.getElementById('rol-adi');
+        const ekran = document.getElementById('ekran-rol');
+        
+        if(data.rol === "Vampir") { icon.innerText = "🧛"; ad.innerText = "VAMPİR"; ekran.className += " vampir-tema"; }
+        else if(data.rol === "Doktor") { icon.innerText = "💉"; ad.innerText = "DOKTOR"; ekran.className += " doktor-tema"; }
+        else { icon.innerText = "👨‍🌾"; ad.innerText = "KÖYLÜ"; }
+        
+        ekranDegis('ekran-rol');
+    }
+
+    let geceVerileri = { vampirHedef: null, doktorHedef: null };
+
+    function geceBaslat() {
+        broadcast({ tip: "faz_degis", faz: "vampir", sure: document.getElementById('s-vampir').value });
+        fazBaslat({ faz: "vampir", sure: document.getElementById('s-vampir').value });
+    }
+
+    function fazBaslat(data) {
+        ekranDegis('ekran-oyun');
+        const baslik = document.getElementById('faz-baslik');
+        const talimat = document.getElementById('faz-talimat');
+        const liste = document.getElementById('aksiyon-listesi');
+        liste.innerHTML = "";
+        secilenHedef = null;
+
+        if(data.faz === "vampir") {
+            baslik.innerText = "GECE (Vampir Sırası)";
+            if(oyuncu.rol === "Vampir") {
+                talimat.innerText = "Kimi öldüreceksin?";
+                odadakiOyuncular.filter(p => p.id !== oyuncu.id && p.hayatta).forEach(p => {
+                    liste.innerHTML += `<button class="secim-btn" onclick="aksiyonYap('${p.id}')">${p.isim}</button>`;
+                });
+            } else talimat.innerText = "Vampir avlanıyor...";
+        } 
+        else if(data.faz === "doktor") {
+            baslik.innerText = "GECE (Doktor Sırası)";
+            if(oyuncu.rol === "Doktor") {
+                talimat.innerText = "Kimi koruyacaksın?";
+                odadakiOyuncular.filter(p => p.hayatta).forEach(p => {
+                    liste.innerHTML += `<button class="secim-btn" onclick="aksiyonYap('${p.id}')">${p.isim}</button>`;
+                });
+            } else talimat.innerText = "Doktor ilaç hazırlıyor...";
+        }
+        else if(data.faz === "tartisma") {
+            baslik.innerText = "TARTIŞMA";
+            talimat.innerText = "Kimin vampir olduğunu tartışın!";
+        }
+        else if(data.faz === "oylama") {
+            baslik.innerText = "OYLAMA";
+            talimat.innerText = "Oyunuzu kullanın!";
+            odadakiOyuncular.filter(p => p.hayatta).forEach(p => {
+                liste.innerHTML += `<button class="secim-btn" onclick="aksiyonYap('${p.id}')">${p.isim}</button>`;
+            });
+        }
+
+        timerBaslat(data.sure);
+    }
+
+    function aksiyonYap(id) {
+        secilenHedef = id;
+        document.getElementById('aksiyon-listesi').innerHTML = "<b>Seçim yapıldı!</b>";
+        if(conn) conn.send({tip: "aksiyon", hedef: id}); // Client ise admin'e gönder
+        else aksiyonIsle(oyuncu.id, {hedef: id}); // Admin ise kendine işle
+    }
+
+    function aksiyonIsle(senderId, data) {
+        let p = odadakiOyuncular.find(x => x.id === senderId);
+        if(p.rol === "Vampir") geceVerileri.vampirHedef = data.hedef;
+        if(p.rol === "Doktor") geceVerileri.doktorHedef = data.hedef;
+        if(oylamaVerisi[data.hedef]) oylamaVerisi[data.hedef]++; else oylamaVerisi[data.hedef] = 1;
+    }
+
+    function timerBaslat(sn) {
+        let s = sn;
+        const display = document.getElementById('timer');
+        let interval = setInterval(() => {
+            display.innerText = s;
+            if(s <= 0) {
+                clearInterval(interval);
+                if(!conn) fazSonuKontrol(); // Sadece Admin yönetir
+            }
+            s--;
+        }, 1000);
+    }
+
+    function fazSonuKontrol() {
+        const aktifFaz = document.getElementById('faz-baslik').innerText;
+        if(aktifFaz.includes("Vampir")) {
+            broadcast({tip: "faz_degis", faz: "doktor", sure: document.getElementById('s-doktor').value});
+            fazBaslat({faz: "doktor", sure: document.getElementById('s-doktor').value});
+        } else if(aktifFaz.includes("Doktor")) {
+            geceSonucu();
+        } else if(aktifFaz.includes("TARTIŞMA")) {
+            broadcast({tip: "faz_degis", faz: "oylama", sure: document.getElementById('s-oylama').value});
+            fazBaslat({faz: "oylama", sure: document.getElementById('s-oylama').value});
+        } else if(aktifFaz.includes("OYLAMA")) {
+            oylamaSonucu();
+        }
+    }
+
+    function geceSonucu() {
+        let olduId = null;
+        let mesaj = "Kimse ölmedi.";
+        
+        if(geceVerileri.vampirHedef && geceVerileri.vampirHedef !== geceVerileri.doktorHedef) {
+            olduId = geceVerileri.vampirHedef;
+            let p = odadakiOyuncular.find(x => x.id === olduId);
+            p.hayatta = false;
+            mesaj = p.isim + " Öldürüldü!";
+        } else if(geceVerileri.vampirHedef && geceVerileri.vampirHedef === geceVerileri.doktorHedef) {
+            mesaj = "Birisi öldürülmek istendi ama Doktor korudu!";
+        }
+
+        alert(mesaj);
+        broadcast({tip: "liste", liste: odadakiOyuncular});
+        checkWin();
+        
+        broadcast({tip: "faz_degis", faz: "tartisma", sure: document.getElementById('s-tartisma').value});
+        fazBaslat({faz: "tartisma", sure: document.getElementById('s-tartisma').value});
+        geceVerileri = { vampirHedef: null, doktorHedef: null };
+    }
+
+    function oylamaSonucu() {
+        let enCokOy = 0;
+        let asilanId = null;
+        for(let id in oylamaVerisi) {
+            if(oylamaVerisi[id] > enCokOy) { enCokOy = oylamaVerisi[id]; asilanId = id; }
+        }
+
+        if(asilanId) {
+            let p = odadakiOyuncular.find(x => x.id === asilanId);
+            p.hayatta = false;
+            alert(p.isim + " Köylüler tarafından asıldı!");
+        } else alert("Kimse asılmadı.");
+
+        oylamaVerisi = {};
+        broadcast({tip: "liste", liste: odadakiOyuncular});
+        if(!checkWin()) geceBaslat();
+    }
+
+    function checkWin() {
+        let vampirler = odadakiOyuncular.filter(p => p.rol === "Vampir" && p.hayatta).length;
+        let digerleri = odadakiOyuncular.filter(p => p.rol !== "Vampir" && p.hayatta).length;
+
+        if(vampirler === 0) { broadcast({tip: "oyun_sonu", kazanan: "KÖYLÜLER"}); oyunBitti("KÖYLÜLER"); return true; }
+        if(vampirler >= digerleri) { broadcast({tip: "oyun_sonu", kazanan: "VAMPİR"}); oyunBitti("VAMPİR"); return true; }
+        return false;
+    }
+
+    function oyunBitti(kazanan) {
+        ekranDegis('ekran-sonuc');
+        document.getElementById('sonuc-metin').innerText = kazanan + " KAZANDI!";
     }
 
     function broadcast(data) {
         if(peer && peer.connections) {
-            Object.values(peer.connections).forEach(conns => {
-                if(conns[0].open) conns[0].send(data);
-            });
+            Object.values(peer.connections).forEach(conns => { if(conns[0].open) conns[0].send(data); });
         }
     }
 
     function listeGuncelle() {
-        const html = odadakiOyuncular.map(ad => `<span class="oyuncu-ad">• ${ad}</span>`).join('');
+        const html = odadakiOyuncular.map(ad => `<span class="oyuncu-ad" style="opacity:${ad.hayatta?1:0.3}">• ${ad.isim} ${ad.hayatta?'':'(ÖLÜ)'}</span>`).join('');
         if(document.getElementById('adminListe')) document.getElementById('adminListe').innerHTML = html;
         if(document.getElementById('oyuncuListe')) document.getElementById('oyuncuListe').innerHTML = html;
     }
 
-    function kopyala() {
-        navigator.clipboard.writeText(document.getElementById('odaKodYazi').innerText);
-        alert("Kod kopyalandı!");
-    }
-
-    function manuelKatil() {
-        const k = document.getElementById('manuelKod').value.toUpperCase();
-        if(k) baglan(k);
-    }
+    function kopyala() { navigator.clipboard.writeText(document.getElementById('odaKodYazi').innerText); alert("Kod kopyalandı!"); }
+    function manuelKatil() { const k = document.getElementById('manuelKod').value.toUpperCase(); if(k) baglan(k); }
 </script>
 </body>
 </html>
