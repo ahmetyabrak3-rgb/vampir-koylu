@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+-<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -121,7 +121,7 @@
         ben.ad = document.getElementById('kullaniciAdi').value || "Oyuncu";
         ben.admin = true;
         odaKodu = Math.floor(100000 + Math.random() * 900000).toString();
-        set(ref(db, `v3/${odaKodu}`), { durum: 'lobi' }).then(oyuncuEkle);
+        set(ref(db, v3/${odaKodu}), { durum: 'lobi' }).then(oyuncuEkle);
     };
 
     window.odayaKatil = () => {
@@ -131,7 +131,7 @@
     };
 
     function oyuncuEkle() {
-        const pRef = push(ref(db, `v3/${odaKodu}/oyuncular`), { 
+        const pRef = push(ref(db, v3/${odaKodu}/oyuncular), { 
             ad: ben.ad, avatar: seciliAvatar, rol: '?', durum: 'sag', oy: 0 
         });
         ben.id = pRef.key;
@@ -143,7 +143,7 @@
     }
 
     function odayiDinle() {
-        onValue(ref(db, `v3/${odaKodu}`), (snap) => {
+        onValue(ref(db, v3/${odaKodu}), (snap) => {
             const veri = snap.val();
             if(!veri) return;
             oyunVerisi = veri;
@@ -161,7 +161,7 @@
                     document.getElementById('lobi-ekrani').style.display = 'none';
                     document.getElementById('oyun-alani').style.display = 'block';
                     ben.rol = veri.oyuncular[ben.id].rol;
-                    document.getElementById('benimBilgi').innerHTML = `${seciliAvatar} <span style="font-size:12px">${ben.rol}</span>`;
+                    document.getElementById('benimBilgi').innerHTML = ${seciliAvatar} <span style="font-size:12px">${ben.rol}</span>;
                     katmaniGoster(ben.rol === 'VAMPİR' ? '🧛‍♂️' : '🛡️', "ROLÜN: " + ben.rol, "Kimin gerçek, kimin vampir olduğunu bul!");
                 }
                 arayuzGuncelle(veri);
@@ -204,13 +204,13 @@
                 const btn = document.createElement('div');
                 btn.className = 'buton buton-ikincil';
                 btn.style.padding = "10px";
-                btn.innerHTML = `<span style="font-size:20px">${p.avatar}</span><br><small>${p.ad}</small>`;
+                btn.innerHTML = <span style="font-size:20px">${p.avatar}</span><br><small>${p.ad}</small>;
                 btn.onclick = () => {
-                    if(tip === 'oldur') update(ref(db, `v3/${odaKodu}/aksiyon`), { v: id });
-                    if(tip === 'iyilestir') update(ref(db, `v3/${odaKodu}/aksiyon`), { d: id });
+                    if(tip === 'oldur') update(ref(db, v3/${odaKodu}/aksiyon), { v: id });
+                    if(tip === 'iyilestir') update(ref(db, v3/${odaKodu}/aksiyon), { d: id });
                     if(tip === 'dikizle') katmaniGoster(p.avatar, p.ad + " Rolü:", p.rol);
                     if(tip === 'oyla') {
-                        update(ref(db, `v3/${odaKodu}/oyuncular/${id}`), { oy: (p.oy || 0) + 1 });
+                        update(ref(db, v3/${odaKodu}/oyuncular/${id}), { oy: (p.oy || 0) + 1 });
                         aksiyon.innerHTML = "Oy Verildi.";
                     }
                 };
@@ -227,7 +227,7 @@
         ids.forEach((id, i) => {
             let r = 'KÖYLÜ';
             if(i === 0) r = 'VAMPİR'; else if(i === 1) r = 'DOKTOR'; else if(i === 2) r = 'GUARD';
-            updates[`v3/${odaKodu}/oyuncular/${id}/rol`] = r;
+            updates[v3/${odaKodu}/oyuncular/${id}/rol] = r;
         });
         update(ref(db), updates).then(oyunDongusu);
     };
@@ -235,14 +235,14 @@
     async function oyunDongusu() {
         while(true) {
             await asama('gece', 15, "Gece vakti...");
-            const aks = (await (await getSnap(`v3/${odaKodu}/aksiyon`)).val()) || {};
+            const aks = (await (await getSnap(v3/${odaKodu}/aksiyon)).val()) || {};
             let olay = "Gece kimse ölmedi.";
             if(aks.v && aks.v !== aks.d) {
-                await update(ref(db, `v3/${odaKodu}/oyuncular/${aks.v}`), { durum: 'olu' });
+                await update(ref(db, v3/${odaKodu}/oyuncular/${aks.v}), { durum: 'olu' });
                 olay = "Maalesef gece bir köylü aramızdan ayrıldı.";
             } else if(aks.v && aks.v === aks.d) olay = "Doktor büyük bir faciayı önledi!";
             
-            await update(ref(db, `v3/${odaKodu}/aksiyon`), { v: "", d: "" });
+            await update(ref(db, v3/${odaKodu}/aksiyon), { v: "", d: "" });
             if(await bittiMi()) break;
             await asama('tartisma', 25, olay);
             await asama('oylama', 15, "Şüpheliyi seçin!");
@@ -252,29 +252,29 @@
     }
 
     async function asama(d, s, o) {
-        await update(ref(db, `v3/${odaKodu}`), { durum: d, sayac: s, olay: o });
+        await update(ref(db, v3/${odaKodu}), { durum: d, sayac: s, olay: o });
         for(let i=s; i>=0; i--) {
-            await update(ref(db, `v3/${odaKodu}`), { sayac: i });
+            await update(ref(db, v3/${odaKodu}), { sayac: i });
             await new Promise(r => setTimeout(r, 1000));
         }
     }
 
     async function oylamaSonuc() {
-        const p = (await getSnap(`v3/${odaKodu}/oyuncular`)).val();
+        const p = (await getSnap(v3/${odaKodu}/oyuncular)).val();
         let enCok = 0, kurban = null;
         Object.entries(p).forEach(([id, u]) => {
             if(u.oy > enCok) { enCok = u.oy; kurban = id; }
-            update(ref(db, `v3/${odaKodu}/oyuncular/${id}`), { oy: 0 });
+            update(ref(db, v3/${odaKodu}/oyuncular/${id}), { oy: 0 });
         });
-        if(kurban) await update(ref(db, `v3/${odaKodu}/oyuncular/${kurban}`), { durum: 'olu' });
+        if(kurban) await update(ref(db, v3/${odaKodu}/oyuncular/${kurban}), { durum: 'olu' });
     }
 
     async function bittiMi() {
-        const p = Object.values((await getSnap(`v3/${odaKodu}/oyuncular`)).val());
+        const p = Object.values((await getSnap(v3/${odaKodu}/oyuncular)).val());
         const v = p.filter(x => x.rol === 'VAMPİR' && x.durum === 'sag').length;
         const k = p.filter(x => x.rol !== 'VAMPİR' && x.durum === 'sag').length;
-        if(v === 0) { update(ref(db, `v3/${odaKodu}`), { kazanan: 'KÖYLÜLER' }); return true; }
-        if(v >= k) { update(ref(db, `v3/${odaKodu}`), { kazanan: 'VAMPİRLER' }); return true; }
+        if(v === 0) { update(ref(db, v3/${odaKodu}), { kazanan: 'KÖYLÜLER' }); return true; }
+        if(v >= k) { update(ref(db, v3/${odaKodu}), { kazanan: 'VAMPİRLER' }); return true; }
         return false;
     }
 
