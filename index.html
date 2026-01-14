@@ -20,6 +20,9 @@
         #qr-cerceve { background: white; padding: 10px; border-radius: 12px; display: inline-block; margin: 10px 0; }
         .panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: left; border: 1px dashed var(--vurgu); }
         .sayac { font-size: 45px; font-weight: 800; color: var(--vurgu); }
+        .ayar-grubu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .ayar-item { display: flex; flex-direction: column; }
+        .ayar-item label { font-size: 10px; color: #94a3b8; font-weight: bold; margin-bottom: 2px; text-transform: uppercase; }
         .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--arka-plan); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; text-align: center; padding: 20px; }
     </style>
 </head>
@@ -53,24 +56,39 @@
 
         <div id="admin-ayarlari" class="panel" style="display:none;">
             <p style="text-align:center; margin:0; font-weight:bold; color:var(--vurgu);">OYUN AYARLARI</p>
-            <label style="font-size:11px; font-weight:bold; display:block; margin-top:10px;">ROLÜNÜZ</label>
+            
+            <label style="font-size:11px; font-weight:bold; display:block; margin-top:10px;">ADMIN ROLÜ</label>
             <select id="adminOyuncuMu">
                 <option value="true">Oyuncu Olarak Katıl</option>
                 <option value="false">Sadece İzleyici Kal</option>
             </select>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
-                <input type="number" id="sureGece" value="15" title="Vampir">
-                <input type="number" id="sureDoktor" value="15" title="Doktor">
-                <input type="number" id="sureTartisma" value="45" title="Tartışma">
-                <input type="number" id="sureOylama" value="20" title="Oylama">
+
+            <div class="ayar-grubu">
+                <div class="ayar-item">
+                    <label>Vampir (sn)</label>
+                    <input type="number" id="sureGece" value="15">
+                </div>
+                <div class="ayar-item">
+                    <label>Doktor (sn)</label>
+                    <input type="number" id="sureDoktor" value="15">
+                </div>
+                <div class="ayar-item">
+                    <label>Tartışma (sn)</label>
+                    <input type="number" id="sureTartisma" value="45">
+                </div>
+                <div class="ayar-item">
+                    <label>Oylama (sn)</label>
+                    <input type="number" id="sureOylama" value="20">
+                </div>
             </div>
-            <button class="buton buton-ana" style="margin-top:10px;" onclick="oyunuBaslat()">Oyunu Başlat</button>
+
+            <button class="buton buton-ana" style="margin-top:15px;" onclick="oyunuBaslat()">Oyunu Başlat</button>
         </div>
         <div id="oyuncuListesi" style="margin-top:15px; text-align:left;"></div>
     </div>
 
     <div id="oyun-alani" style="display: none;">
-        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800;">...</div>
+        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800; text-transform: uppercase;">...</div>
         <div id="sayacGosterge" class="sayac">00:00</div>
         <div id="oyunAksiyonListesi"></div>
     </div>
@@ -135,11 +153,10 @@
         onValue(ref(db, `rooms/${mevcutOda}`), (snap) => {
             const veri = snap.val(); if(!veri) return;
             if(veri.winner) { 
-                const vampirAdi = veri.vampireName || "Bilinmiyor";
-                katmaniGoster(veri.winner.includes('VAMPİR') ? '🧛‍♂️' : '🏆', veri.winner, `Vampir: ${vampirAdi}`, true); 
+                const vAdi = veri.vampireName || "Bilinmiyor";
+                katmaniGoster(veri.winner.includes('VAMPİR') ? '🧛‍♂️' : '🏆', veri.winner, `Vampir Kimdi? : ${vAdi}`, true); 
                 return; 
             }
-            
             if(veri.phase === 'lobi') {
                 const liste = document.getElementById('oyuncuListesi'); liste.innerHTML = "";
                 Object.values(veri.players || {}).forEach(p => liste.innerHTML += `<div style="padding:5px; border-bottom:1px solid #334155;">• ${p.ad}</div>`);
@@ -153,7 +170,7 @@
                 if(!window.rolGosterildi && rolum !== "?") {
                     window.rolGosterildi = true;
                     const emoji = rolum === 'VAMPİR' ? '🩸' : (rolum === 'DOKTOR' ? '🏥' : '👨‍🌾');
-                    katmaniGoster(emoji, rolum, "Görevin Başladı!");
+                    katmaniGoster(emoji, rolum, "Oyun Başladı, Görevin Hazır!");
                 }
                 arayuzuGuncelle(veri);
             }
@@ -167,16 +184,10 @@
             benimAnahtarim = pRef.key;
             await new Promise(r => setTimeout(r, 800));
         }
-
-        const nS = parseInt(document.getElementById('sureGece').value);
-        const drS = parseInt(document.getElementById('sureDoktor').value);
-        const dS = parseInt(document.getElementById('sureTartisma').value);
-        const vS = parseInt(document.getElementById('sureOylama').value);
-        
         const s = await get(ref(db, `rooms/${mevcutOda}/players`));
-        const oyuncular = s.val(); if(!oyuncular) return alert("Oyuncu yok!");
+        const oyuncular = s.val(); if(!oyuncular) return;
         const anahtarlar = Object.keys(oyuncular);
-        if(anahtarlar.length < 3) return alert("En az 3 kişi gereklidir!");
+        if(anahtarlar.length < 3) return alert("Doktorlu oyun için en az 3 kişi!");
 
         let karisik = [...anahtarlar].sort(() => Math.random() - 0.5);
         const vKey = karisik.pop();
@@ -189,25 +200,20 @@
         updates[`rooms/${mevcutOda}/vampireName`] = oyuncular[vKey].ad;
         updates[`rooms/${mevcutOda}/phase`] = 'night';
         await update(ref(db), updates);
-        oyunDongusu(nS, drS, dS, vS);
+        oyunDongusu(parseInt(document.getElementById('sureGece').value), parseInt(document.getElementById('sureDoktor').value), parseInt(document.getElementById('sureTartisma').value), parseInt(document.getElementById('sureOylama').value));
     };
 
     async function oyunDongusu(n, dr, d, v) {
         await update(ref(db, `rooms/${mevcutOda}`), { target: "", shield: "" });
         await asamaKos('night', n);
         await asamaKos('doctor_phase', dr);
-        
         const snap = await get(ref(db, `rooms/${mevcutOda}`));
         const veri = snap.val();
         let msg = "Gece kimse ölmedi.";
-        
         if(veri.target && veri.target !== veri.shield) {
             await update(ref(db, `rooms/${mevcutOda}/players/${veri.target}`), { status: 'dead' });
             msg = veri.players[veri.target].ad + " öldürüldü!";
-        } else if (veri.target && veri.target === veri.shield) {
-            msg = "Doktor başarılı bir müdahale ile ölümü engelledi!";
-        }
-
+        } else if (veri.target && veri.target === veri.shield) { msg = "Doktor harika bir zamanlamayla hayat kurtardı!"; }
         await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: msg });
         if(await kazananKontrol()) return;
         await asamaKos('discussion', d);
@@ -218,29 +224,25 @@
     }
 
     function arayuzuGuncelle(veri) {
-        const etiket = { night: "🌙 VAMPİR SEÇİMİ", doctor_phase: "🏥 DOKTOR KORUMASI", discussion: "🗣️ TARTIŞMA", voting: "🗳️ OYLAMA" };
+        const etiket = { night: "🌙 VAMPİR SEÇİM YAPIYOR", doctor_phase: "🏥 DOKTOR KORUYOR", discussion: "🗣️ TARTIŞMA", voting: "🗳️ OYLAMA" };
         document.getElementById('asamaEtiketi').textContent = etiket[veri.phase] || "OYUN";
         document.getElementById('sayacGosterge').textContent = "00:" + (veri.timer || 0).toString().padStart(2,'0');
-        
         const liste = document.getElementById('oyunAksiyonListesi'); liste.innerHTML = "";
-        if(!hayattaMiyim && rolum !== "?") { liste.innerHTML = "<h3 style='color:red'>ÖLDÜNÜZ - İZLEYİCİSİNİZ</h3>"; return; }
-
+        if(!hayattaMiyim && rolum !== "?") { liste.innerHTML = "<h3 style='color:red'>ÖLDÜNÜZ - İZLEYİCİ</h3>"; return; }
         if(veri.phase === 'night' && rolum === 'VAMPİR') {
             Object.entries(veri.players).forEach(([k, p]) => {
-                if(p.status === 'alive' && p.rol !== 'VAMPİR')
-                    liste.innerHTML += `<button class="buton" style="background:var(--vampir-renk)" onclick="secimYap('target','${k}')">${p.ad}</button>`;
+                if(p.status === 'alive' && p.rol !== 'VAMPİR') liste.innerHTML += `<button class="buton" style="background:var(--vampir-renk)" onclick="secimYap('target','${k}')">${p.ad}</button>`;
             });
         } else if(veri.phase === 'doctor_phase' && rolum === 'DOKTOR') {
             Object.entries(veri.players).forEach(([k, p]) => {
-                if(p.status === 'alive')
-                    liste.innerHTML += `<button class="buton" style="background:var(--doktor-renk)" onclick="secimYap('shield','${k}')">${p.ad} KORU</button>`;
+                if(p.status === 'alive') liste.innerHTML += `<button class="buton" style="background:var(--doktor-renk)" onclick="secimYap('shield','${k}')">${p.ad} KORU</button>`;
             });
         } else if(veri.phase === 'voting' && hayattaMiyim && !oyVerdimMi) {
             Object.entries(veri.players).forEach(([k, p]) => {
                 if(p.status === 'alive') liste.innerHTML += `<button class="buton buton-ikincil" onclick="vVote('${k}')">${p.ad}</button>`;
             });
         } else if(veri.phase === 'discussion') {
-            liste.innerHTML = `<div class='panel' style='text-align:center'>${veri.lastEvent || "Yeni gün başladı."}</div>`;
+            liste.innerHTML = `<div class='panel' style='text-align:center'>${veri.lastEvent || "Yeni gün ışıyor..."}</div>`;
             oyVerdimMi = false;
         }
     }
@@ -270,14 +272,13 @@
         });
         if(adaylar.length === 1) {
             await update(ref(db, `rooms/${mevcutOda}/players/${adaylar[0]}`), { status: 'dead' });
-            await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: oyuncular[adaylar[0]].ad + " oy çokluğuyla asıldı!" });
-        } else await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: "Oylar eşit çıktı, kimse asılmadı." });
+            await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: oyuncular[adaylar[0]].ad + " oy birliğiyle asıldı!" });
+        } else await update(ref(db, `rooms/${mevcutOda}`), { lastEvent: "Eşitlik bozulmadı, kimse ölmedi." });
     }
 
     async function kazananKontrol() {
         const s = await get(ref(db, `rooms/${mevcutOda}/players`));
-        const oyuncular = s.val(); if(!oyuncular) return false;
-        const pArr = Object.values(oyuncular);
+        const pArr = Object.values(s.val() || {});
         const vA = pArr.some(p => p.rol === 'VAMPİR' && p.status === 'alive');
         const kA = pArr.filter(p => p.rol !== 'VAMPİR' && p.status === 'alive').length;
         if(!vA) { await update(ref(db, `rooms/${mevcutOda}`), { winner: 'KÖYLÜLER' }); return true; }
