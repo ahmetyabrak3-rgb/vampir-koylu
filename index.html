@@ -3,35 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Avatar + Full Admin</title>
+    <title>Vampir Köylü - 3D Avatar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --doktor-renk: #10b981; --ikincil: #334155; }
+        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --doktor-renk: #10b981; --ikincil: #334155; --golge-renk: rgba(0,0,0,0.5); }
         body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; background: var(--arka-plan); color: var(--metin); overflow: hidden; }
-        .kart { background: var(--kart); border-radius: 28px; padding: 25px; width: 95%; max-width: 450px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255,255,255,0.05); overflow-y: auto; max-height: 90vh; }
-        h1 { font-size: 24px; font-weight: 800; color: var(--vurgu); margin-bottom: 15px; }
-        input, select { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; }
-        .buton { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; position: relative; }
-        .buton-ana { background: var(--vurgu); color: #1e293b; }
-        .buton-ikincil { background: var(--ikincil); color: white; }
-        .secili-buton { border: 3px solid white !important; transform: scale(0.95); }
-        .panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-top: 15px; text-align: left; border: 1px dashed var(--vurgu); }
-        .sayac { font-size: 45px; font-weight: 800; color: var(--vurgu); }
-        .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--arka-plan); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; text-align: center; padding: 20px; }
-        .ayar-grubu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .ayar-item label { font-size: 10px; color: #94a3b8; font-weight: bold; text-transform: uppercase; }
-        #chat-bolumu { background: rgba(0,0,0,0.3); border-radius: 15px; margin-top: 15px; padding: 10px; display: none; flex-direction: column; }
-        #chat-mesajlar { height: 120px; overflow-y: auto; text-align: left; font-size: 13px; margin-bottom: 5px; }
-        .mesaj { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .mesaj-yazar { color: var(--vurgu); font-weight: bold; }
+        .kart { background: var(--kart); border-radius: 24px; padding: 30px; width: 95%; max-width: 480px; box-shadow: 0 25px 50px -12px var(--golge-renk); text-align: center; border: 1px solid rgba(255,255,255,0.08); overflow-y: auto; max-height: 90vh; }
         
-        /* --- YENİ EKLENEN AVATAR STİLLERİ --- */
-        .avatar-kutu { width: 100px; height: 100px; margin: 0 auto 10px; background: #0f172a; border-radius: 15px; border: 2px solid var(--vurgu); position: relative; overflow: hidden; }
-        .avatar-svg { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
-        .ozellestirme-cubugu { display: flex; justify-content: space-between; gap: 5px; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; font-size: 12px; }
-        .mini-btn { background: var(--ikincil); border: none; color: white; border-radius: 5px; padding: 5px 8px; cursor: pointer; }
-        .oyuncu-satir { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 8px; }
-        .oyuncu-avatar-kucuk { width: 35px; height: 35px; border-radius: 50%; background: #000; position: relative; overflow: hidden; border: 1px solid #555; }
+        /* --- YENİ 3D AVATAR STİLLERİ --- */
+        .avatar-sahne { width: 140px; height: 140px; margin: 0 auto 25px; position: relative; perspective: 500px; }
+        .avatar-svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 10px var(--golge-renk)); }
+        /* SVG içindeki elementlere gölge efekti vererek 3D hissi yaratıyoruz */
+        .svg-golgeli { filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.4)); }
+
+        .ozellestirme-paneli { background: #162032; padding: 15px; border-radius: 16px; margin-bottom: 20px; }
+        .renk-paleti { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 15px; }
+        .renk-kutu { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .renk-kutu.secili { border-color: var(--vurgu); transform: scale(1.1); box-shadow: 0 0 15px var(--vurgu); }
+
+        .aksesuar-satir { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+        .mini-btn { background: var(--ikincil); border: none; color: white; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        .mini-btn:hover { background: #475569; }
+        
+        /* --- OYUN İÇİ GÖRÜNÜM STİLLERİ --- */
+        .oyuncu-satir { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; transition: background 0.2s; }
+        .oyuncu-satir:hover { background: rgba(255,255,255,0.08); }
+        .mini-avatar-kutu { width: 50px; height: 50px; border-radius: 10px; background: #0f172a; border: 2px solid var(--vurgu); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .mini-avatar-svg { width: 100%; height: 100%; }
+        .oyuncu-bilgi { display: flex; flex-direction: column; align-items: flex-start; }
+        .oyuncu-ad { font-weight: 700; font-size: 15px; }
+        .oyuncu-durum { font-size: 12px; color: #94a3b8; }
+
+        /* --- GENEL STİLLER --- */
+        h1 { font-size: 28px; font-weight: 900; color: var(--vurgu); margin-bottom: 20px; letter-spacing: -0.5px; }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; font-family: 'Inter'; }
+        .buton { width: 100%; padding: 16px; margin: 8px 0; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
+        .buton-ana { background: var(--vurgu); color: #1e293b; box-shadow: 0 4px 0 #d97706; }
+        .buton-ana:hover { transform: translateY(2px); box-shadow: 0 2px 0 #d97706; }
+        .buton-ikincil { background: var(--ikincil); color: white; }
+        .buton-aksiyon { background: var(--ikincil); display: flex; align-items: center; justify-content: flex-start; gap: 15px; padding: 10px; text-align: left; }
+        .secili-buton { background: var(--vurgu) !important; color: #1e293b !important; box-shadow: 0 0 20px var(--vurgu) !important; border: 2px solid white !important; }
+        .panel { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 16px; margin-top: 20px; text-align: left; border: 1px dashed var(--vurgu); }
+        .sayac { font-size: 50px; font-weight: 900; color: var(--vurgu); margin: 10px 0; text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; text-align: center; padding: 20px; backdrop-filter: blur(5px); }
+        .ayar-grubu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .ayar-item label { font-size: 11px; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        #chat-bolumu { background: rgba(0,0,0,0.3); border-radius: 16px; margin-top: 20px; padding: 15px; display: none; flex-direction: column; }
+        #chat-mesajlar { height: 150px; overflow-y: auto; text-align: left; font-size: 13px; margin-bottom: 10px; padding-right: 5px; }
+        .mesaj { margin-bottom: 6px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .mesaj-yazar { color: var(--vurgu); font-weight: bold; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -39,63 +60,72 @@
 <div id="durumKatmani" class="katman">
     <div id="katmanEmoji" style="font-size: 100px; margin-bottom: 20px;"></div>
     <div id="katmanBaslik" style="font-size: 32px; font-weight: 900; color: var(--vurgu);"></div>
-    <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8; font-size: 18px;"></div>
+    <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8; font-size: 18px; max-width: 400px; line-height: 1.5;"></div>
     <button id="katmanButon" class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">ANLADIM</button>
 </div>
 
 <div class="kart">
     <div id="giris-ekrani">
-        <h1>VAMPİR KÖYLÜ</h1>
+        <h1>KARAKTERİNİ OLUŞTUR</h1>
         
-        <div class="avatar-kutu" id="girisAvatar"></div>
-        <div class="ozellestirme-cubugu">
-            <div>🎩 <button class="mini-btn" onclick="ayar('sapka', -1)"> < </button> <button class="mini-btn" onclick="ayar('sapka', 1)"> > </button></div>
-            <div>🎭 <button class="mini-btn" onclick="ayar('maske', -1)"> < </button> <button class="mini-btn" onclick="ayar('maske', 1)"> > </button></div>
-            <div>🧔 <button class="mini-btn" onclick="ayar('sakal', -1)"> < </button> <button class="mini-btn" onclick="ayar('sakal', 1)"> > </button></div>
+        <div class="avatar-sahne" id="girisAvatar"></div>
+        
+        <div class="ozellestirme-paneli">
+            <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 10px;">GÖVDE RENGİ</div>
+            <div class="renk-paleti" id="renkPaleti"></div>
+            
+            <div class="aksesuar-satir"><span>🎩 ŞAPKA:</span> <div><button class="mini-btn" onclick="ayar('sapka', -1)">◀</button> <span id="t-sapka" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('sapka', 1)">▶</button></div></div>
+            <div class="aksesuar-satir"><span>👓 GÖZLÜK:</span> <div><button class="mini-btn" onclick="ayar('gozluk', -1)">◀</button> <span id="t-gozluk" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('gozluk', 1)">▶</button></div></div>
+            <div class="aksesuar-satir"><span>🎭 MASKE:</span> <div><button class="mini-btn" onclick="ayar('maske', -1)">◀</button> <span id="t-maske" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('maske', 1)">▶</button></div></div>
+            <div class="aksesuar-satir"><span>🧔 SAKAL:</span> <div><button class="mini-btn" onclick="ayar('sakal', -1)">◀</button> <span id="t-sakal" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('sakal', 1)">▶</button></div></div>
         </div>
-        <input type="text" id="kullaniciAdi" placeholder="Adınız">
-        <button class="buton buton-ana" onclick="odaOlustur()">Oda Oluştur (Admin)</button>
-        <input type="text" id="odaKoduGiris" placeholder="Oda Kodu">
-        <button class="buton buton-ikincil" onclick="odayaKatil()">Odaya Katıl</button>
+        <input type="text" id="kullaniciAdi" placeholder="Rumuzunu yaz..." maxlength="12">
+        <button class="buton buton-ana" onclick="odaOlustur()">ODA KUR (HOST)</button>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="odaKoduGiris" placeholder="Oda Kodu" style="flex: 1;">
+            <button class="buton buton-ikincil" onclick="odayaKatil()" style="flex: 1;">KATIL</button>
+        </div>
     </div>
 
     <div id="lobi-ekrani" style="display: none;">
-        <div style="font-size: 12px; color: #64748b;">ODA KODU</div>
-        <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-            <span id="odaKoduGoster" style="font-size: 32px; font-weight: 800;">000000</span>
-            <button onclick="koduKopyala()" style="background:none; border:none; color:var(--vurgu); cursor:pointer; font-size:20px;">📋</button>
+        <div style="font-size: 12px; color: #64748b; font-weight: bold; letter-spacing: 1px;">ODA KODU</div>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0 20px;">
+            <span id="odaKoduGoster" style="font-size: 36px; font-weight: 900; color: white;">000000</span>
+            <button onclick="koduKopyala()" style="background:var(--ikincil); border:none; color:white; padding:8px; border-radius:8px; cursor:pointer;">📋</button>
         </div>
-        <div id="qr-kapsayici" style="display:none; margin: 15px 0;"><div id="qrcode" style="padding:10px; background:white; border-radius:10px; display:inline-block;"></div></div>
+        <div id="qr-kapsayici" style="display:none; margin-bottom: 20px;"><div id="qrcode" style="padding:10px; background:white; border-radius:12px; display:inline-block; box-shadow: 0 0 20px rgba(255,255,255,0.1);"></div></div>
 
         <div id="admin-ayarlari" class="panel" style="display:none;">
-            <p style="text-align:center; font-weight:bold; color:var(--vurgu); margin:0;">ADMİN PANELİ</p>
-            <select id="adminRolSecimi" style="margin-top:10px;">
-                <option value="izleyici">Sadece İzleyici</option>
+            <p style="text-align:center; font-weight:bold; color:var(--vurgu); margin:0 0 15px;">OYUN AYARLARI</p>
+            <select id="adminRolSecimi">
+                <option value="izleyici">Sadece İzleyici (Yönetici)</option>
                 <option value="oyuncu">Oyuncu Olarak Katıl</option>
             </select>
             <div class="ayar-grubu">
-                <div class="ayar-item"><label>Vampir</label><input type="number" id="sureGece" value="15"></div>
-                <div class="ayar-item"><label>Doktor</label><input type="number" id="sureDoktor" value="15"></div>
-                <div class="ayar-item"><label>Tartışma</label><input type="number" id="sureTartisma" value="45"></div>
-                <div class="ayar-item"><label>Oylama</label><input type="number" id="sureOylama" value="20"></div>
+                <div class="ayar-item"><label>GECE (SN)</label><input type="number" id="sureGece" value="20"></div>
+                <div class="ayar-item"><label>DOKTOR (SN)</label><input type="number" id="sureDoktor" value="15"></div>
+                <div class="ayar-item"><label>TARTIŞMA (SN)</label><input type="number" id="sureTartisma" value="60"></div>
+                <div class="ayar-item"><label>OYLAMA (SN)</label><input type="number" id="sureOylama" value="25"></div>
             </div>
-            <button class="buton buton-ana" style="margin-top:15px;" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
+            <button class="buton buton-ana" style="margin-top:20px;" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
         </div>
-        <div id="oyuncuListesi" style="margin-top:20px;"></div>
+
+        <div style="text-align: left; font-weight: bold; color: #94a3b8; margin-bottom: 10px;">OYUNCULAR</div>
+        <div id="oyuncuListesi"></div>
     </div>
 
     <div id="oyun-alani" style="display: none;">
-        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800;">...</div>
+        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800; font-size: 18px; letter-spacing: 1px;">...</div>
         <div id="sayacGosterge" class="sayac">00:00</div>
         
         <div id="chat-bolumu">
             <div id="chat-mesajlar"></div>
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="chatInput" placeholder="Yaz..." onkeypress="if(event.key==='Enter') mesajGonder()">
-                <button onclick="mesajGonder()" style="background:var(--vurgu); border:none; border-radius:10px; padding:0 15px;">🚀</button>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="chatInput" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter') mesajGonder()" style="margin:0;">
+                <button onclick="mesajGonder()" style="background:var(--vurgu); border:none; border-radius:10px; padding:0 20px; cursor:pointer;">🚀</button>
             </div>
         </div>
-        <div id="oyunAksiyonListesi"></div>
+        <div id="oyunAksiyonListesi" style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
 </div>
 
@@ -114,36 +144,71 @@
     const db = getDatabase(app);
     let mevcutOda = null, benimAdim = "", benimAnahtarim = "", liderMiyim = false, rolum = "?", hayattaMiyim = true, secimim = null;
 
-    // --- YENİ EKLENEN AVATAR FONKSİYONLARI ---
-    let avatarSecim = { sapka: 0, maske: 0, sakal: 0 };
+    // --- YENİ 3D AVATAR SİSTEMİ ---
+    let avatarSecim = { renk: "#f6ad55", sapka: 0, gozluk: 0, maske: 0, sakal: 0 };
     
+    const renkler = ["#f6ad55", "#f87171", "#fbbf24", "#a3e635", "#34d399", "#22d3ee", "#818cf8", "#c084fc", "#f472b6", "#e2e8f0", "#94a3b8", "#475569"];
+    const data = {
+        sapka: ["Yok", "Silindir", "Kovboy", "Viking", "Kasket", "Parti"],
+        gozluk: ["Yok", "Güneş", "Pilot", "Yuvarlak", "Kalp", "3D"],
+        maske: ["Yok", "Cerrahi", "Venedik", "Ninja", "Palyaço", "Kuru Kafa"],
+        sakal: ["Yok", "Kirli", "Keçi", "Pala", "Tam", "Bıyık"]
+    };
+
+    function renkPaletiOlustur() {
+        const palet = document.getElementById('renkPaleti');
+        renkler.forEach(renk => {
+            const kutu = document.createElement('div');
+            kutu.className = `renk-kutu ${renk === avatarSecim.renk ? 'secili' : ''}`;
+            kutu.style.backgroundColor = renk;
+            kutu.onclick = () => {
+                avatarSecim.renk = renk;
+                document.querySelectorAll('.renk-kutu').forEach(k => k.classList.remove('secili'));
+                kutu.classList.add('secili');
+                avatarCiz(avatarSecim, "girisAvatar");
+            };
+            palet.appendChild(kutu);
+        });
+    }
+    renkPaletiOlustur();
+
     function avatarCiz(conf, id) {
-        let h = `<svg viewBox="0 0 100 100" class="avatar-svg">
-        <rect x="0" y="0" width="100" height="100" fill="#2d3748"/>
-        <path d="M20,100 Q50,70 80,100 Z" fill="#4a5568"/>
-        <circle cx="50" cy="45" r="25" fill="#f6ad55"/>
-        <circle cx="42" cy="42" r="3" fill="#000"/><circle cx="58" cy="42" r="3" fill="#000"/>`;
+        const anaRenk = conf.renk;
+        let h = `<svg viewBox="0 0 200 200" class="avatar-svg">
+        <defs>
+            <linearGradient id="govdeGrad-${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:${anaRenk};stop-opacity:1" />
+                <stop offset="100%" style="stop-color:${anaRenk};stop-opacity:0.6" />
+            </linearGradient>
+            <filter id="golge-${id}"><feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/></filter>
+        </defs>
+        <rect x="60" y="80" width="80" height="100" rx="40" fill="url(#govdeGrad-${id})" filter="url(#golge-${id})" />
+        <circle cx="85" cy="110" r="6" fill="#1e293b" /><circle cx="115" cy="110" r="6" fill="#1e293b" />`;
         
-        // Şapkalar
-        if(conf.sapka==1) h+=`<rect x="30" y="15" width="40" height="20" fill="#000"/><rect x="25" y="32" width="50" height="3" fill="#000"/>`;
-        if(conf.sapka==2) h+=`<path d="M25,30 Q50,10 75,30 L75,35 L25,35 Z" fill="#744210"/>`;
-        if(conf.sapka==3) h+=`<path d="M30,25 Q50,15 70,25 L70,35 Q50,40 30,35 Z" fill="#e53e3e"/>`;
-        if(conf.sapka==4) h+=`<rect x="25" y="20" width="50" height="15" fill="#2b6cb0"/><rect x="60" y="20" width="15" height="15" fill="#4299e1"/>`;
-        if(conf.sapka==5) h+=`<path d="M20,30 L50,10 L80,30 L50,25 Z" fill="#2d3748"/>`;
+        // Şapkalar (Gölge efektli SVG'ler)
+        const sG = `filter="url(#golge-${id})"`;
+        if(conf.sapka==1) h+=`<g ${sG}><rect x="70" y="40" width="60" height="40" fill="#1e293b"/><rect x="60" y="75" width="80" height="10" fill="#1e293b"/><rect x="70" y="65" width="60" height="10" fill="#ef4444"/></g>`;
+        if(conf.sapka==2) h+=`<path d="M50,70 Q100,30 150,70 L150,85 L50,85 Z" fill="#78350f" ${sG}/>`;
+        if(conf.sapka==3) h+=`<path d="M60,60 L100,20 L140,60 L100,80 Z" fill="#9ca3af" ${sG}/><path d="M70,60 L60,30 M130,60 L140,30" stroke="#d1d5db" stroke-width="8" stroke-linecap="round"/>`;
+        if(conf.sapka==4) h+=`<path d="M60,65 L140,65 L150,80 L50,80 Z" fill="#374151" ${sG}/><rect x="65" y="55" width="70" height="20" fill="#4b5563"/>`;
+        if(conf.sapka==5) h+=`<path d="M70,80 L100,10 L130,80 Z" fill="#ec4899" ${sG}/><circle cx="100" cy="10" r="8" fill="#fbbf24"/>`;
+
+        // Gözlükler
+        if(conf.gozluk==1) h+=`<g ${sG}><rect x="75" y="100" width="20" height="15" fill="#1e293b"/><rect x="105" y="100" width="20" height="15" fill="#1e293b"/><line x1="95" y1="107" x2="105" y2="107" stroke="#1e293b" stroke-width="3"/></g>`;
+        if(conf.gozluk==2) h+=`<g ${sG}><path d="M70,100 Q85,125 100,100 T130,100" fill="none" stroke="#f59e0b" stroke-width="4"/><path d="M75,105 Q85,120 95,105" fill="#1e293b" opacity="0.8"/><path d="M105,105 Q115,120 125,105" fill="#1e293b" opacity="0.8"/></g>`;
+        if(conf.gozluk==3) h+=`<g ${sG}><circle cx="85" cy="110" r="12" fill="none" stroke="#1e293b" stroke-width="3"/><circle cx="115" cy="110" r="12" fill="none" stroke="#1e293b" stroke-width="3"/><line x1="97" y1="110" x2="103" y2="110" stroke="#1e293b" stroke-width="3"/></g>`;
 
         // Maskeler
-        if(conf.maske==1) h+=`<rect x="35" y="50" width="30" height="15" fill="#63b3ed" opacity="0.9"/>`;
-        if(conf.maske==2) h+=`<circle cx="42" cy="42" r="8" fill="#000"/><path d="M38,38 L25,25" stroke="#000" stroke-width="2"/>`;
-        if(conf.maske==3) h+=`<rect x="25" y="40" width="50" height="10" fill="#000"/>`;
-        if(conf.maske==4) h+=`<circle cx="50" cy="50" r="10" fill="#e53e3e" opacity="0.5"/>`;
-        if(conf.maske==5) h+=`<path d="M30,45 Q50,35 70,45 L65,55 Q50,60 35,55 Z" fill="#fff"/>`;
-
+        if(conf.maske==1) h+=`<rect x="75" y="120" width="50" height="25" rx="5" fill="#3b82f6" ${sG}/><line x1="75" y1="125" x2="60" y2="115" stroke="#fff" stroke-width="2"/><line x1="125" y1="125" x2="140" y2="115" stroke="#fff" stroke-width="2"/>`;
+        if(conf.maske==2) h+=`<path d="M70,100 Q100,80 130,100 L120,140 Q100,150 80,140 Z" fill="#f8fafc" ${sG} /><circle cx="85" cy="110" r="5" fill="#1e293b"/><circle cx="115" cy="110" r="5" fill="#1e293b"/>`;
+        if(conf.maske==3) h+=`<rect x="65" y="105" width="70" height="30" fill="#1e293b" ${sG}/>`;
+        
         // Sakallar
-        if(conf.sakal==1) h+=`<path d="M35,55 Q50,80 65,55 L50,60 Z" fill="#2d3748"/>`;
-        if(conf.sakal==2) h+=`<path d="M45,60 L55,60 L50,70 Z" fill="#2d3748"/>`;
-        if(conf.sakal==3) h+=`<path d="M30,50 Q50,70 70,50 Q50,80 30,50" fill="#2d3748"/>`;
-        if(conf.sakal==4) h+=`<path d="M25,45 Q50,65 75,45" fill="none" stroke="#2d3748" stroke-width="3"/>`;
-        if(conf.sakal==5) h+=`<path d="M35,60 Q50,90 65,60" fill="#cbd5e0"/>`;
+        if(conf.sakal==1) h+=`<path d="M75,130 Q100,160 125,130 L115,125 Q100,140 85,125 Z" fill="#1e293b" opacity="0.8"/>`;
+        if(conf.sakal==2) h+=`<path d="M95,140 L105,140 L100,160 Z" fill="#78350f" ${sG}/>`;
+        if(conf.sakal==3) h+=`<path d="M60,125 Q100,170 140,125 L140,115 Q100,150 60,115 Z" fill="#1e293b" ${sG}/>`;
+        if(conf.sakal==4) h+=`<path d="M65,115 Q100,180 135,115" fill="#78350f" ${sG}/>`;
+        if(conf.sakal==5) h+=`<path d="M80,125 Q100,110 120,125 Q100,135 80,125" fill="#1e293b" ${sG}/>`;
 
         h+=`</svg>`;
         const el = document.getElementById(id);
@@ -152,13 +217,15 @@
 
     window.ayar = (k, y) => {
         avatarSecim[k] += y;
-        if(avatarSecim[k] < 0) avatarSecim[k] = 5;
-        if(avatarSecim[k] > 5) avatarSecim[k] = 0;
+        const max = data[k].length - 1;
+        if(avatarSecim[k] < 0) avatarSecim[k] = max;
+        if(avatarSecim[k] > max) avatarSecim[k] = 0;
+        document.getElementById(`t-${k}`).textContent = data[k][avatarSecim[k]];
         avatarCiz(avatarSecim, "girisAvatar");
     };
-    avatarCiz(avatarSecim, "girisAvatar"); // Başlangıçta çiz
-    // --- AVATAR BİTİŞ ---
+    avatarCiz(avatarSecim, "girisAvatar");
 
+    // --- OYUN MANTIĞI (Admin Yetkileri Korundu) ---
     window.onload = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const urlOda = urlParams.get('room');
@@ -166,17 +233,16 @@
     };
 
     window.odaOlustur = () => {
-        benimAdim = document.getElementById('kullaniciAdi').value || "Admin";
+        benimAdim = document.getElementById('kullaniciAdi').value || "Host";
         mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
         liderMiyim = true;
-        // Avatar bilgisini de ekledim
         set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi', adminName: benimAdim, adminAvatar: avatarSecim }).then(() => odayaGir());
     };
 
     window.odayaKatil = () => {
         benimAdim = document.getElementById('kullaniciAdi').value;
         mevcutOda = document.getElementById('odaKoduGiris').value;
-        if(!benimAdim) return alert("Lütfen adınızı yazın!");
+        if(!benimAdim) return alert("Lütfen bir rumuz yaz!");
         if(benimAdim && mevcutOda) odayaGir();
     };
 
@@ -186,7 +252,6 @@
         document.getElementById('odaKoduGoster').textContent = mevcutOda;
         if(liderMiyim) { document.getElementById('admin-ayarlari').style.display = 'block'; qrOlustur(mevcutOda); }
         else {
-            // Avatarı oyuncu verisine de ekledim
             const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, avatar: avatarSecim, rol: '?', status: 'alive', votes: 0 });
             benimAnahtarim = pRef.key;
         }
@@ -197,18 +262,16 @@
         onValue(ref(db, `rooms/${mevcutOda}`), (snap) => {
             const veri = snap.val(); if(!veri) return;
             const liste = document.getElementById('oyuncuListesi');
-            
-            // Listeyi Avatar'lı olarak yenileme
             liste.innerHTML = "";
-            let adminHTML = `<div class="oyuncu-satir"><div class="oyuncu-avatar-kucuk" id="av-admin"></div> <span>👑 ${veri.adminName} (Admin)</span></div>`;
-            liste.innerHTML += adminHTML;
-            // Admin avatarını çiz
+            
+            // Admin Satırı
+            liste.innerHTML += createPlayerRow("admin", veri.adminName, veri.adminAvatar, true);
             setTimeout(() => { if(veri.adminAvatar) avatarCiz(veri.adminAvatar, "av-admin"); }, 50);
 
+            // Oyuncu Satırları
             if(veri.players) {
                 Object.entries(veri.players).forEach(([k, p]) => {
-                    liste.innerHTML += `<div class="oyuncu-satir"><div class="oyuncu-avatar-kucuk" id="av-${k}"></div> <span>• ${p.ad} ${p.status==='dead'?'(ÖLDÜ)':''}</span></div>`;
-                    // Oyuncu avatarını çiz
+                    liste.innerHTML += createPlayerRow(k, p.ad, p.avatar, false, p.status);
                     setTimeout(() => { if(p.avatar) avatarCiz(p.avatar, `av-${k}`); }, 50);
                 });
             }
@@ -223,7 +286,7 @@
                     if(!window.rolDuyuruldu && rolum !== "?") {
                         window.rolDuyuruldu = true;
                         const rInfo = rolum === 'VAMPİR' ? {e:'🧛‍♂️', r:'VAMPİRSİN'} : (rolum === 'DOKTOR' ? {e:'🏥', r:'DOKTORSUN'} : {e:'👨‍🌾', r:'KÖYLÜSÜN'});
-                        katmaniGoster(rInfo.e, rInfo.r, "Göreviniz belirlendi.");
+                        katmaniGoster(rInfo.e, rInfo.r, "Gizli görevin sana bildirildi. Kimseye güvenme!");
                     }
                 }
                 if(veri.deathEvent && veri.deathEvent !== window.lastDeath) {
@@ -241,6 +304,18 @@
         });
     }
 
+    // Yardımcı Fonksiyon: Oyuncu Satırı HTML'i
+    function createPlayerRow(id, name, avatar, isAdmin, status = 'alive') {
+        return `
+        <div class="oyuncu-satir" style="${status==='dead'?'opacity:0.5; filter:grayscale(1);':''}">
+            <div class="mini-avatar-kutu"><div id="av-${id}" class="mini-avatar-svg"></div></div>
+            <div class="oyuncu-bilgi">
+                <div class="oyuncu-ad">${isAdmin ? '👑 ' : ''}${name}</div>
+                <div class="oyuncu-durum">${isAdmin ? 'Oda Yöneticisi' : (status==='alive'?'Hayatta':'💀 Öldü')}</div>
+            </div>
+        </div>`;
+    }
+
     window.oyunuBaslat = async () => {
         const adminRol = document.getElementById('adminRolSecimi').value;
         if(adminRol === 'oyuncu' && !benimAnahtarim) {
@@ -249,7 +324,7 @@
             await new Promise(r => setTimeout(r, 500));
         }
         const s = await get(ref(db, `rooms/${mevcutOda}/players`));
-        const oyuncular = s.val(); if(!oyuncular || Object.keys(oyuncular).length < 3) return alert("En az 3 oyuncu!");
+        const oyuncular = s.val(); if(!oyuncular || Object.keys(oyuncular).length < 3) return alert("En az 3 oyuncu gerekli!");
         const anahtarlar = Object.keys(oyuncular);
         let karisik = [...anahtarlar].sort(() => Math.random() - 0.5);
         const vKey = karisik.pop(), dKey = karisik.pop();
@@ -259,7 +334,6 @@
         updates[`rooms/${mevcutOda}/phase`] = 'night';
         await update(ref(db), updates);
         
-        // SÜRELERİ TEKRAR ALIP FONKSİYONA GÖNDERİYORUZ
         oyunDongusu(
             parseInt(document.getElementById('sureGece').value), 
             parseInt(document.getElementById('sureDoktor').value), 
@@ -288,16 +362,24 @@
     }
 
     function arayuzuGuncelle(veri) {
-        document.getElementById('asamaEtiketi').textContent = veri.phase.toUpperCase();
+        document.getElementById('asamaEtiketi').textContent = veri.phase.toUpperCase().replace('_', ' ');
         document.getElementById('sayacGosterge').textContent = "00:" + (veri.timer || 0).toString().padStart(2,'0');
         document.getElementById('chat-bolumu').style.display = (veri.phase === 'discussion') ? 'flex' : 'none';
         const liste = document.getElementById('oyunAksiyonListesi'); liste.innerHTML = "";
-        if(!benimAnahtarim) { liste.innerHTML = "Gözlemci Modu..."; return; }
-        if(!hayattaMiyim) { liste.innerHTML = "<h3>ÖLDÜNÜZ</h3>"; return; }
+        if(!benimAnahtarim) { liste.innerHTML = "<div style='text-align:center;color:#94a3b8;'>İzleyici Modu</div>"; return; }
+        if(!hayattaMiyim) { liste.innerHTML = "<div style='text-align:center;font-weight:bold;color:var(--vampir-renk);'>💀 ÖLDÜNÜZ</div>"; return; }
+        
         if((veri.phase === 'night' && rolum === 'VAMPİR') || (veri.phase === 'doctor_phase' && rolum === 'DOKTOR') || (veri.phase === 'voting')) {
             Object.entries(veri.players).forEach(([k, p]) => {
                 if(p.status === 'alive' && (veri.phase !== 'night' || p.rol !== 'VAMPİR')) {
-                    liste.innerHTML += `<button class="buton ${secimim===k?'secili-buton':''}" style="background:var(--ikincil); display:flex; align-items:center; gap:10px; justify-content:center;" onclick="tikla('${veri.phase}','${k}')"><div id="btn-av-${k}" style="width:30px;height:30px;border-radius:50%;background:black;overflow:hidden;"></div> ${p.ad}</button>`;
+                    const btn = document.createElement('button');
+                    btn.className = `buton buton-aksiyon ${secimim===k?'secili-buton':''}`;
+                    btn.onclick = () => tikla(veri.phase, k);
+                    btn.innerHTML = `
+                        <div class="mini-avatar-kutu" style="width:40px;height:40px;"><div id="btn-av-${k}" class="mini-avatar-svg"></div></div>
+                        <span>${p.ad}</span>
+                    `;
+                    liste.appendChild(btn);
                     setTimeout(() => { if(p.avatar) avatarCiz(p.avatar, `btn-av-${k}`); }, 50);
                 }
             });
@@ -328,7 +410,7 @@
         });
         if(adaylar.length === 1) {
             await update(ref(db, `rooms/${mevcutOda}/players/${adaylar[0]}`), { status: 'dead' });
-            await update(ref(db, `rooms/${mevcutOda}`), { deathEvent: oyuncular[adaylar[0]].ad + " asıldı!" });
+            await update(ref(db, `rooms/${mevcutOda}`), { deathEvent: oyuncular[adaylar[0]].ad + " oylama sonucu asıldı!" });
         }
     }
 
@@ -357,10 +439,10 @@
     function qrOlustur(kod) { 
         document.getElementById('qrcode').innerHTML = ""; 
         const link = window.location.origin + window.location.pathname + "?room=" + kod;
-        new QRCode(document.getElementById("qrcode"), { text: link, width: 120, height: 120 }); 
+        new QRCode(document.getElementById("qrcode"), { text: link, width: 120, height: 120, colorDark : "#000000", colorLight : "#ffffff" }); 
         document.getElementById('qr-kapsayici').style.display = 'block'; 
     }
-    window.koduKopyala = () => { navigator.clipboard.writeText(document.getElementById('odaKoduGoster').textContent).then(() => alert("Kopyalandı!")); };
+    window.koduKopyala = () => { navigator.clipboard.writeText(document.getElementById('odaKoduGoster').textContent).then(() => alert("Kodu kopyaladın!")); };
 </script>
 </body>
 </html>
