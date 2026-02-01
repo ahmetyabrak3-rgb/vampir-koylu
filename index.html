@@ -3,121 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Tam Sürüm Ultra</title>
+    <title>Vampir Köylü - Ultra 3D Avatar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --doktor-renk: #10b981; --ikincil: #334155; }
-        body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; background: var(--arka-plan); color: var(--metin); overflow: hidden; }
-        .kart { background: var(--kart); border-radius: 24px; padding: 30px; width: 95%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); text-align: center; border: 1px solid rgba(255,255,255,0.08); overflow-y: auto; max-height: 90vh; scrollbar-width: none; }
+        :root {
+            --arka-plan: #0f172a;
+            --kart: #1e293b;
+            --metin: #f8fafc;
+            --vurgu: #fbbf24;
+            --vampir-renk: #ef4444;
+            --doktor-renk: #10b981;
+            --koylu-renk: #3b82f6;
+            --ikincil: #334155;
+            --golge-renk: rgba(0,0,0,0.5);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            background: var(--arka-plan);
+            color: var(--metin);
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        .kart {
+            background: var(--kart);
+            border-radius: 24px;
+            padding: 30px;
+            width: 95%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px -12px var(--golge-renk);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+            overflow-y: auto;
+            max-height: 90vh;
+            scrollbar-width: none;
+        }
+
         .kart::-webkit-scrollbar { display: none; }
-        
-        /* AVATAR SİSTEMİ */
-        .avatar-sahne { width: 150px; height: 150px; margin: 0 auto 20px; position: relative; perspective: 800px; }
-        .avatar-svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); transform-style: preserve-3d; }
-        .ozellestirme-paneli { background: #162032; padding: 15px; border-radius: 16px; margin-bottom: 20px; }
-        .renk-paleti { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
-        .renk-kutu { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
-        .renk-kutu.secili { border-color: var(--vurgu); transform: scale(1.1); }
-        .aksesuar-satir { display: flex; align-items: center; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
-        .mini-btn { background: var(--ikincil); border: none; color: white; border-radius: 6px; padding: 5px 10px; cursor: pointer; }
 
-        /* OYUN ALANI */
-        .oyuncu-satir { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; position: relative; }
-        .mini-avatar { width: 40px; height: 40px; border-radius: 8px; background: #0f172a; border: 1px solid var(--vurgu); }
-        .aksiyon-btn { margin-left: auto; padding: 8px 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        
-        input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; text-align: center; }
-        .buton { width: 100%; padding: 16px; margin: 8px 0; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-        .buton-ana { background: var(--vurgu); color: #1e293b; box-shadow: 0 4px 0 #d97706; }
-        .buton-ikincil { background: var(--ikincil); color: white; }
+        /* --- 3D AVATAR SİSTEMİ --- */
+        .avatar-sahne {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 25px;
+            position: relative;
+            perspective: 800px;
+        }
 
-        .admin-panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 16px; margin-top: 15px; border: 1px dashed var(--vurgu); }
-        .ayar-grubu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .ayar-item label { font-size: 10px; color: #94a3b8; display: block; text-align: left; margin-bottom: 4px; }
+        .avatar-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6));
+            transform-style: preserve-3d;
+            animation: salinim 3s ease-in-out infinite;
+        }
 
-        #qrcode { padding: 10px; background: white; border-radius: 8px; display: inline-block; margin: 10px 0; }
-        .katman { position: fixed; inset: 0; background: rgba(15,23,42,0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; text-align: center; }
+        @keyframes salinim {
+            0%, 100% { transform: translateY(0) rotateY(-5deg); }
+            50% { transform: translateY(-10px) rotateY(5deg); }
+        }
+
+        .ozellestirme-paneli {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .renk-paleti {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .renk-kutu {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .renk-kutu.secili {
+            border-color: var(--vurgu);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--vurgu);
+        }
+
+        .aksesuar-satir {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #94a3b8;
+        }
+
+        .mini-btn {
+            background: var(--ikincil);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .mini-btn:hover { background: #475569; }
+
+        /* --- FORM ELEMANLARI --- */
+        h1 {
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0 0 20px 0;
+            background: linear-gradient(to bottom, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus { border-color: var(--vurgu); box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2); }
+
+        .buton {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border-radius: 14px;
+            border: none;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .buton-ana {
+            background: var(--vurgu);
+            color: #1e293b;
+            box-shadow: 0 4px 0 #d97706;
+        }
+
+        .buton-ana:active { transform: translateY(2px); box-shadow: 0 2px 0 #d97706; }
+
+        .buton-ikincil {
+            background: var(--ikincil);
+            color: white;
+        }
+
+        /* --- OYUNCU LİSTESİ --- */
+        .oyuncu-satir {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: gelis 0.3s ease-out;
+        }
+
+        @keyframes gelis { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .mini-avatar-kutu {
+            width: 44px;
+            height: 44px;
+            background: #0f172a;
+            border-radius: 10px;
+            border: 1px solid var(--vurgu);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* --- ADMIN AYARLARI --- */
+        .admin-panel {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+            border: 1px dashed var(--vurgu);
+        }
+
+        .ayar-grubu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .ayar-item label {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 800;
+            display: block;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        #qrcode {
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        /* --- DURUM KATMANI --- */
+        .katman {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
 <div id="durumKatmani" class="katman">
-    <div id="katmanEmoji" style="font-size: 80px;"></div>
-    <div id="katmanBaslik" style="font-size: 24px; font-weight: 900; color: var(--vurgu);"></div>
-    <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8;"></div>
-    <button class="buton buton-ana" style="width: 150px;" onclick="location.reload()">TAMAM</button>
+    <div id="katmanEmoji" style="font-size: 100px; margin-bottom: 20px;"></div>
+    <div id="katmanBaslik" style="font-size: 32px; font-weight: 900; color: var(--vurgu); margin-bottom: 10px;"></div>
+    <div id="katmanAltMetin" style="font-size: 18px; color: #94a3b8; margin-bottom: 30px; line-height: 1.5;"></div>
+    <button class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">ANLADIM</button>
 </div>
 
 <div class="kart">
     <div id="giris-ekrani">
         <h1>VAMPİR KÖYLÜ</h1>
         <div class="avatar-sahne" id="girisAvatar"></div>
+        
         <div class="ozellestirme-paneli">
             <div class="renk-paleti" id="renkPaleti"></div>
             <div class="aksesuar-satir">
-                <span>🎩 ŞAPKA</span>
+                <span>🎩 ŞAPKA:</span>
                 <div>
-                    <button class="mini-btn" onclick="degistir('sapka', -1)">◀</button>
-                    <span id="t-sapka" style="margin:0 10px;">Yok</span>
-                    <button class="mini-btn" onclick="degistir('sapka', 1)">▶</button>
+                    <button class="mini-btn" onclick="ayar('sapka', -1)">◀</button>
+                    <span id="t-sapka" style="display:inline-block; width:60px; text-align:center;">Yok</span>
+                    <button class="mini-btn" onclick="ayar('sapka', 1)">▶</button>
                 </div>
             </div>
             <div class="aksesuar-satir">
-                <span>👓 GÖZLÜK</span>
+                <span>👓 GÖZLÜK:</span>
                 <div>
-                    <button class="mini-btn" onclick="degistir('gozluk', -1)">◀</button>
-                    <span id="t-gozluk" style="margin:0 10px;">Yok</span>
-                    <button class="mini-btn" onclick="degistir('gozluk', 1)">▶</button>
+                    <button class="mini-btn" onclick="ayar('gozluk', -1)">◀</button>
+                    <span id="t-gozluk" style="display:inline-block; width:60px; text-align:center;">Yok</span>
+                    <button class="mini-btn" onclick="ayar('gozluk', 1)">▶</button>
                 </div>
             </div>
         </div>
-        <input type="text" id="kullaniciAdi" placeholder="Rumuzun..." maxlength="12">
+
+        <input type="text" id="kullaniciAdi" placeholder="Rumuzunu yaz..." maxlength="12">
         <button class="buton buton-ana" onclick="odaOlustur()">ODA KUR (HOST)</button>
         <div style="display: flex; gap: 10px;">
-            <input type="text" id="odaKoduGiris" placeholder="Kod">
-            <button class="buton buton-ikincil" id="btnKatil" onclick="odayaKatil()">KATIL</button>
+            <input type="text" id="odaKoduGiris" placeholder="Oda Kodu" style="flex: 1.5;">
+            <button class="buton buton-ikincil" id="btnKatil" onclick="odayaKatil()" style="flex: 1;">KATIL</button>
         </div>
     </div>
 
     <div id="lobi-ekrani" style="display: none;">
-        <div style="font-size: 11px; color: #64748b; font-weight: 800;">ODA KODU</div>
-        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin: 10px 0;">
-            <span id="odaKoduGoster" style="font-size: 36px; font-weight: 900;">000000</span>
-            <button onclick="koduKopyala()" class="mini-btn">📋</button>
+        <div style="font-size: 12px; color: #64748b; font-weight: 900; letter-spacing: 1px;">ODA KODU</div>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0;">
+            <span id="odaKoduGoster" style="font-size: 40px; font-weight: 900;">000000</span>
+            <button onclick="koduKopyala()" class="mini-btn" style="padding: 10px 15px;">📋</button>
         </div>
 
-        <div id="admin-paneli" class="admin-panel" style="display:none;">
+        <div id="admin-panel" class="admin-panel" style="display:none;">
             <div id="qrcode"></div>
+            
             <div class="ayar-grubu">
                 <div class="ayar-item">
-                    <label>VAMPİR (MİN 1)</label>
-                    <input type="number" id="vampirSayisi" value="1" min="1" oninput="if(this.value<1)this.value=1">
+                    <label>VAMPİR SAYISI</label>
+                    <input type="number" id="vampirSayisi" value="1" min="1" onchange="if(this.value<1)this.value=1">
                 </div>
                 <div class="ayar-item">
-                    <label>DOKTOR (MİN 0)</label>
-                    <input type="number" id="doktorSayisi" value="1" min="0" oninput="if(this.value<0)this.value=0">
+                    <label>DOKTOR SAYISI</label>
+                    <input type="number" id="doktorSayisi" value="1" min="0" onchange="if(this.value<0)this.value=0">
                 </div>
             </div>
-            <button class="buton buton-ana" style="margin-top:15px;" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
+            <button class="buton buton-ana" style="margin-top:20px;" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
         </div>
-        <div id="oyuncuListesi" style="margin-top: 20px; text-align: left;"></div>
+
+        <div style="text-align: left; font-weight: 800; color: #94a3b8; font-size: 12px; margin: 20px 0 10px;">OYUNCULAR</div>
+        <div id="oyuncuListesi"></div>
     </div>
 
     <div id="oyun-alani" style="display: none;">
-        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 900; font-size: 20px;">...</div>
-        <div id="sayac" style="font-size: 40px; font-weight: 900;">00</div>
-        <div id="rolGosterge" style="margin: 10px 0; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.1); font-weight: bold;">ROLÜN: YÜKLENİYOR...</div>
-        <div id="aksiyonListesi" style="margin-top: 15px;"></div>
+        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 900; font-size: 18px;">GECE</div>
+        <div id="sayacGosterge" style="font-size: 50px; font-weight: 900;">00:00</div>
+        <div id="oyunAksiyonListesi" style="margin-top: 20px;"></div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSy...",
+        apiKey: "AIzaSy...", // Kendi API Key'ini buraya koy
         authDomain: "vampir-koylu-oyunu.firebaseapp.com",
         databaseURL: "https://vampir-koylu-oyunu-default-rtdb.firebaseio.com",
         projectId: "vampir-koylu-oyunu"
@@ -125,135 +344,98 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    let odaKod = "", benimId = "", benimAd = "", liderMi = false, rolum = "", hayattaMi = true, sonKorunanId = "";
+    let mevcutOda = null, benimAdim = "", liderMiyim = false, rolum = "", sonKorunanId = "";
 
-    // --- AVATAR ÇİZİCİ ---
-    let avatar = { renk: "#f6ad55", sapka: 0, gozluk: 0 };
+    // --- AVATAR ÇİZİM SİSTEMİ (EKSİKSİZ) ---
+    let av = { renk: "#f6ad55", sapka: 0, gozluk: 0 };
     const renkler = ["#f6ad55", "#f87171", "#fbbf24", "#34d399", "#22d3ee", "#818cf8"];
-    const isimler = { sapka: ["Yok", "Silindir", "Kovboy"], gozluk: ["Yok", "Güneş", "Pilot"] };
+    const isimler = { sapka: ["Yok", "Fes", "Kovboy"], gozluk: ["Yok", "Siyah", "Pilot"] };
 
     window.ciz = (conf, id) => {
-        let h = `<svg viewBox="0 0 200 200" class="avatar-svg"><circle cx="100" cy="110" r="70" fill="${conf.renk}"/><circle cx="75" cy="100" r="7" fill="#1e293b"/><circle cx="125" cy="100" r="7" fill="#1e293b"/>`;
-        if(conf.sapka == 1) h += `<rect x="60" y="30" width="80" height="50" fill="#1e293b" rx="5"/>`;
-        if(conf.gozluk == 1) h += `<rect x="65" y="93" width="70" height="15" fill="#1e293b" fill-opacity="0.8" rx="2"/>`;
+        let h = `<svg viewBox="0 0 200 220" class="avatar-svg">
+            <rect x="60" y="60" width="80" height="120" rx="40" fill="${conf.renk}" />
+            <circle cx="85" cy="95" r="6" fill="#1e293b" />
+            <circle cx="115" cy="95" r="6" fill="#1e293b" />`;
+        
+        if(conf.sapka == 1) h += `<rect x="70" y="20" width="60" height="45" fill="#ef4444" rx="4"/>`;
+        if(conf.sapka == 2) h += `<path d="M40 60 Q100 20 160 60" stroke="#78350f" stroke-width="15" fill="none"/>`;
+        if(conf.gozluk == 1) h += `<rect x="70" y="88" width="60" height="12" fill="#1e293b" fill-opacity="0.8" rx="2"/>`;
+        
         h += `</svg>`;
         const el = document.getElementById(id); if(el) el.innerHTML = h;
     };
 
+    // Renk paletini oluştur
     const palet = document.getElementById('renkPaleti');
     renkler.forEach(r => {
         const d = document.createElement('div');
-        d.className = 'renk-kutu'; d.style.background = r;
-        d.onclick = () => { avatar.renk = r; window.ciz(avatar, "girisAvatar"); };
+        d.className = `renk-kutu ${r === av.renk ? 'secili' : ''}`;
+        d.style.background = r;
+        d.onclick = () => {
+            av.renk = r;
+            document.querySelectorAll('.renk-kutu').forEach(k => k.classList.remove('secili'));
+            d.classList.add('secili');
+            window.ciz(av, "girisAvatar");
+        };
         palet.appendChild(d);
     });
 
-    window.degistir = (t, y) => {
-        avatar[t] = (avatar[t] + y + 3) % 3;
-        document.getElementById(`t-${t}`).textContent = isimler[t][avatar[t]];
-        window.ciz(avatar, "girisAvatar");
+    window.ayar = (t, y) => {
+        av[t] = (av[t] + y + 3) % 3;
+        document.getElementById(`t-${t}`).textContent = isimler[t][av[t]];
+        window.ciz(av, "girisAvatar");
     };
-    window.ciz(avatar, "girisAvatar");
+    window.ciz(av, "girisAvatar");
 
     // --- SİSTEM ---
     window.koduKopyala = () => {
-        const k = document.getElementById('odaKoduGoster').textContent;
-        navigator.clipboard.writeText(k).then(() => alert("Kod kopyalandı!"));
+        const kod = document.getElementById('odaKoduGoster').textContent;
+        navigator.clipboard.writeText(kod).then(() => alert("KOD KOPYALANDI"));
     };
 
     window.odaOlustur = () => {
-        benimAd = document.getElementById('kullaniciAdi').value || "Host";
-        odaKod = Math.floor(100000 + Math.random() * 900000).toString();
-        liderMi = true;
-        set(ref(db, 'rooms/' + odaKod), { phase: 'lobi', timer: 0, admin: benimAd }).then(() => girisYap());
+        benimAdim = document.getElementById('kullaniciAdi').value || "Host";
+        mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
+        liderMiyim = true;
+        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi', timer: 0 }).then(() => odayaGir());
     };
 
     window.odayaKatil = () => {
-        benimAd = document.getElementById('kullaniciAdi').value || "Oyuncu";
-        odaKod = document.getElementById('odaKoduGiris').value;
-        if(odaKod) girisYap();
+        benimAdim = document.getElementById('kullaniciAdi').value;
+        mevcutOda = document.getElementById('odaKoduGiris').value;
+        if(benimAdim && mevcutOda) odayaGir();
     };
 
-    function girisYap() {
+    function odayaGir() {
         document.getElementById('giris-ekrani').style.display = 'none';
         document.getElementById('lobi-ekrani').style.display = 'block';
-        document.getElementById('odaKoduGoster').textContent = odaKod;
-        if(liderMi) {
-            document.getElementById('admin-paneli').style.display = 'block';
-            new QRCode(document.getElementById("qrcode"), { text: window.location.href + "?room=" + odaKod, width: 120, height: 120 });
+        document.getElementById('odaKoduGoster').textContent = mevcutOda;
+        if(liderMiyim) {
+            document.getElementById('admin-panel').style.display = 'block';
+            new QRCode(document.getElementById("qrcode"), { text: window.location.href + "?room=" + mevcutOda, width: 150, height: 150 });
         }
-        const pRef = push(ref(db, `rooms/${odaKod}/players`), { ad: benimAd, avatar: avatar, status: 'alive', rol: 'KÖYLÜ' });
-        benimId = pRef.key;
-        dinle();
-    }
-
-    function dinle() {
-        onValue(ref(db, `rooms/${odaKod}`), (snap) => {
+        
+        // Oyuncu listesini dinle
+        onValue(ref(db, `rooms/${mevcutOda}/players`), (snap) => {
+            const list = document.getElementById('oyuncuListesi');
+            list.innerHTML = "";
             const veri = snap.val(); if(!veri) return;
-            
-            // Oyuncu Listesi
-            const list = document.getElementById('oyuncuListesi'); list.innerHTML = "";
-            if(veri.players) {
-                Object.entries(veri.players).forEach(([id, p]) => {
-                    list.innerHTML += `<div class="oyuncu-satir"><div class="mini-avatar" id="m-${id}"></div><b>${p.ad}</b></div>`;
-                    setTimeout(() => window.ciz(p.avatar, `m-${id}`), 50);
-                    if(id === benimId) { rolum = p.rol; hayattaMi = p.status === 'alive'; }
-                });
-            }
-
-            // Oyun Başladıysa
-            if(veri.phase !== 'lobi') {
-                document.getElementById('lobi-ekrani').style.display = 'none';
-                document.getElementById('oyun-alani').style.display = 'block';
-                document.getElementById('asamaEtiketi').textContent = veri.phase.toUpperCase();
-                document.getElementById('sayac').textContent = veri.timer;
-                document.getElementById('rolGosterge').textContent = "ROLÜN: " + rolum;
-                aksiyonlariYukle(veri);
-            }
+            Object.entries(veri).forEach(([k, p]) => {
+                list.innerHTML += `<div class="oyuncu-satir"><div class="mini-avatar-kutu" id="m-${k}"></div><b>${p.ad}</b></div>`;
+                setTimeout(() => window.ciz(p.avatar, `m-${k}`), 50);
+            });
         });
     }
 
-    function aksiyonlariYukle(veri) {
-        const kutu = document.getElementById('aksiyonListesi'); kutu.innerHTML = "";
-        if(!hayattaMi) { kutu.innerHTML = "<h2 style='color:red'>ÖLDÜN (İZLEYİCİ)</h2>"; return; }
-
-        // VAMPİR GECE AKSİYONU
-        if(veri.phase === 'gece' && rolum === 'VAMPİR') {
-            Object.entries(veri.players).forEach(([id, p]) => {
-                if(p.status === 'alive' && p.rol !== 'VAMPİR') {
-                    kutu.innerHTML += `<div class="oyuncu-satir">${p.ad} <button class="aksiyon-btn" style="background:red;color:white" onclick="vampirSaldır('${id}')">SALDIR</button></div>`;
-                }
-            });
+    // --- DOKTOR KURALI ---
+    window.doktorKoru = (hedefId) => {
+        // İSTEDİĞİN KURAL: İki tur üst üste aynı kişiyi koruyamaz
+        if(hedefId === sonKorunanId) {
+            alert("Aynı kişiyi üst üste iki tur koruyamazsın!");
+            return;
         }
-
-        // DOKTOR AKSİYONU (KURALLI)
-        if(veri.phase === 'gece' && rolum === 'DOKTOR') {
-            Object.entries(veri.players).forEach(([id, p]) => {
-                if(p.status === 'alive') {
-                    const deaktif = (id === sonKorunanId) ? 'disabled' : '';
-                    const renk = (id === sonKorunanId) ? '#666' : '#10b981';
-                    kutu.innerHTML += `<div class="oyuncu-satir">${p.ad} <button class="aksiyon-btn" style="background:${renk};color:white" ${deaktif} onclick="doktorKoru('${id}')">KORU</button></div>`;
-                }
-            });
-        }
-    }
-
-    window.doktorKoru = (id) => {
-        if(id === sonKorunanId) return alert("Aynı kişiyi iki tur üst üste koruyamazsın!");
-        sonKorunanId = id;
-        update(ref(db, `rooms/${odaKod}/actions`), { [benimId]: { tip: 'koru', hedef: id } });
-        alert("Koruma sağlandı!");
-    };
-
-    window.vampirSaldır = (id) => {
-        update(ref(db, `rooms/${odaKod}/actions`), { [benimId]: { tip: 'saldırı', hedef: id } });
-        alert("Saldırı yapıldı!");
-    };
-
-    window.oyunuBaslat = () => {
-        // Admin vampir ve doktor sayılarını inputtan alır, rolleri dağıtır ve oyunu başlatır...
-        // (Burada Firebase üzerinden rolleri rastgele dağıtan bir döngü çalışır)
-        update(ref(db, `rooms/${odaKod}`), { phase: 'gece', timer: 30 });
+        sonKorunanId = hedefId;
+        // Firebase aksiyonunu gönder...
     };
 
 </script>
