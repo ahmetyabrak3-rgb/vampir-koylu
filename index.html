@@ -12,7 +12,7 @@
         .kart { background: var(--kart); border-radius: 24px; padding: 30px; width: 95%; max-width: 480px; box-shadow: 0 25px 50px -12px var(--golge-renk); text-align: center; border: 1px solid rgba(255,255,255,0.08); overflow-y: auto; max-height: 90vh; scrollbar-width: none; }
         .kart::-webkit-scrollbar { display: none; }
         
-        /* --- 3D AVATAR SİSTEMİ (Orijinal Tasarım) --- */
+        /* --- 3D AVATAR SİSTEMİ --- */
         .avatar-sahne { width: 160px; height: 160px; margin: 0 auto 25px; position: relative; perspective: 800px; }
         .avatar-svg { width: 100%; height: 100%; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6)); transform-style: preserve-3d; }
         
@@ -25,23 +25,22 @@
         .mini-btn { background: var(--ikincil); border: none; color: white; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; }
 
         /* --- OYUNCU LİSTESİ --- */
-        .oyuncu-satir { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; position: relative; }
+        .oyuncu-satir { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; }
         .mini-avatar-kutu { width: 50px; height: 50px; border-radius: 10px; background: #0f172a; border: 2px solid var(--vurgu); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-        .kick-btn { background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: auto; }
 
         /* --- FORM ELEMANLARI --- */
         h1 { font-size: 28px; font-weight: 900; color: var(--vurgu); margin-bottom: 20px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; text-align: center; }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; text-align: center; font-weight: bold; }
         .buton { width: 100%; padding: 16px; margin: 8px 0; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
         .buton-ana { background: var(--vurgu); color: #1e293b; box-shadow: 0 4px 0 #d97706; }
-        .buton-ikincil { background: var(--ikincil); color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+        .buton-ikincil { background: var(--ikincil); color: white; }
 
-        /* --- ADMIN PANEL (Ekran Görüntüsüyle Aynı) --- */
+        /* --- ADMIN PANEL --- */
         .admin-panel { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 16px; margin-top: 20px; border: 1px dashed var(--vurgu); }
         .ayar-grubu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
         .ayar-item label { font-size: 11px; color: #94a3b8; font-weight: bold; display: block; margin-bottom: 5px; text-align: left; }
 
-        #qrcode { padding: 15px; background: white; border-radius: 12px; display: inline-block; margin: 15px 0; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        #qrcode { padding: 15px; background: white; border-radius: 12px; display: inline-block; margin: 15px 0; }
         .katman { position: fixed; inset: 0; background: rgba(15,23,42,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; text-align: center; padding: 20px; }
     </style>
 </head>
@@ -51,7 +50,7 @@
     <div id="katmanEmoji" style="font-size: 100px; margin-bottom: 20px;"></div>
     <div id="katmanBaslik" style="font-size: 32px; font-weight: 900; color: var(--vurgu);"></div>
     <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8; font-size: 18px;"></div>
-    <button class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">ANLADIM</button>
+    <button class="buton buton-ana" style="width: 200px;" onclick="location.reload()">ANLADIM</button>
 </div>
 
 <div class="kart">
@@ -60,10 +59,24 @@
         <div class="avatar-sahne" id="girisAvatar"></div>
         <div class="ozellestirme-paneli">
             <div class="renk-paleti" id="renkPaleti"></div>
-            <div class="aksesuar-satir"><span>🎩 ŞAPKA:</span> <div><button class="mini-btn" onclick="ayar('sapka', -1)">◀</button> <span id="t-sapka">Yok</span> <button class="mini-btn" onclick="ayar('sapka', 1)">▶</button></div></div>
-            <div class="aksesuar-satir"><span>👓 GÖZLÜK:</span> <div><button class="mini-btn" onclick="ayar('gozluk', -1)">◀</button> <span id="t-gozluk">Yok</span> <button class="mini-btn" onclick="ayar('gozluk', 1)">▶</button></div></div>
+            <div class="aksesuar-satir">
+                <span>🎩 ŞAPKA:</span>
+                <div>
+                    <button class="mini-btn" onclick="ayarDegistir('sapka', -1)">◀</button>
+                    <span id="t-sapka" style="margin:0 10px;">Yok</span>
+                    <button class="mini-btn" onclick="ayarDegistir('sapka', 1)">▶</button>
+                </div>
+            </div>
+            <div class="aksesuar-satir">
+                <span>👓 GÖZLÜK:</span>
+                <div>
+                    <button class="mini-btn" onclick="ayarDegistir('gozluk', -1)">◀</button>
+                    <span id="t-gozluk" style="margin:0 10px;">Yok</span>
+                    <button class="mini-btn" onclick="ayarDegistir('gozluk', 1)">▶</button>
+                </div>
+            </div>
         </div>
-        <input type="text" id="kullaniciAdi" placeholder="Rumuzunu yaz..." maxlength="12">
+        <input type="text" id="kullaniciAdi" placeholder="Rumuzun..." maxlength="12">
         <button class="buton buton-ana" onclick="odaOlustur()">ODA KUR (HOST)</button>
         <div style="display: flex; gap: 10px;">
             <input type="text" id="odaKoduGiris" placeholder="Oda Kodu" style="flex: 1;">
@@ -75,23 +88,22 @@
         <div style="font-size: 12px; color: #64748b; font-weight: bold;">ODA KODU</div>
         <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0;">
             <span id="odaKoduGoster" style="font-size: 40px; font-weight: 900; color: white;">000000</span>
-            <button onclick="koduKopyala()" class="mini-btn" title="Kodu Kopyala">📋</button>
+            <button onclick="koduKopyala()" class="mini-btn" style="padding: 10px;">📋</button>
         </div>
 
-        <div id="admin-ayarlari" class="admin-panel" style="display:none;">
+        <div id="admin-panel" class="admin-panel" style="display:none;">
             <div style="font-weight:bold; color:var(--vurgu); margin-bottom:10px; text-transform:uppercase;">Oyun Ayarları</div>
-            <div id="qrcode"></div> <select id="adminRolSecimi">
-                <option value="izleyici">Sadece İzleyici (Yönetici)</option>
-                <option value="oyuncu">Oyuncu Olarak Katıl</option>
-            </select>
-
+            <div id="qrcode"></div>
+            
             <div class="ayar-grubu">
-                <div class="ayar-item"><label>VAMPİR SAYISI</label><input type="number" id="vampirSayisi" value="1" min="1" oninput="if(this.value<1)this.value=1"></div>
-                <div class="ayar-item"><label>DOKTOR SAYISI</label><input type="number" id="doktorSayisi" value="1" min="0" oninput="if(this.value<0)this.value=0"></div>
-            </div>
-            <div class="ayar-grubu">
-                <div class="ayar-item"><label>GECE (SN)</label><input type="number" id="sureGece" value="20"></div>
-                <div class="ayar-item"><label>DOKTOR (SN)</label><input type="number" id="sureDoktor" value="15"></div>
+                <div class="ayar-item">
+                    <label>VAMPİR (MİN 1)</label>
+                    <input type="number" id="vampirSayisi" value="1" min="1" oninput="if(this.value<1)this.value=1">
+                </div>
+                <div class="ayar-item">
+                    <label>DOKTOR (MİN 0)</label>
+                    <input type="number" id="doktorSayisi" value="1" min="0" oninput="if(this.value<0)this.value=0">
+                </div>
             </div>
             <button class="buton buton-ana" style="margin-top:20px;" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
         </div>
@@ -99,28 +111,14 @@
         <div style="text-align: left; font-weight: bold; color: #94a3b8; margin: 20px 0 10px;">OYUNCULAR</div>
         <div id="oyuncuListesi"></div>
     </div>
-
-    <div id="oyun-alani" style="display: none;">
-        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800; font-size: 18px;">GECE</div>
-        <div id="sayacGosterge" style="font-size: 50px; font-weight: 900; color: var(--vurgu);">00:00</div>
-        <div id="chat-bolumu" style="display:none; margin-top:20px;">
-            <div id="chat-mesajlar" style="height: 150px; overflow-y: auto; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; font-size: 13px;"></div>
-            <div style="display:flex; gap:8px; margin-top:10px;">
-                <input type="text" id="chatInput" placeholder="Mesaj..." style="margin:0;">
-                <button onclick="mesajGonder()" class="buton-ana" style="padding:0 15px; border-radius:12px;">🚀</button>
-            </div>
-        </div>
-        <div id="oyunAksiyonListesi" style="margin-top:20px;"></div>
-    </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // Firebase ayarlarını buraya kendi projenizden ekleyin
     const firebaseConfig = {
-        apiKey: "AIzaSy...",
+        apiKey: "AIzaSyBBXkGLUFGXfQsXhZ8uKpJZf6Y5hTjdK-8",
         authDomain: "vampir-koylu-oyunu.firebaseapp.com",
         databaseURL: "https://vampir-koylu-oyunu-default-rtdb.firebaseio.com",
         projectId: "vampir-koylu-oyunu"
@@ -128,42 +126,61 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    let mevcutOda = null, benimAdim = "", benimAnahtarim = "", liderMiyim = false, hayattaMiyim = true, sonKorunanId = "";
+    let mevcutOda = null, benimAdim = "", liderMiyim = false, sonKorunanId = "";
 
-    // --- KOPYALAMA (Sadece Kodu Kopyalar) ---
+    // --- AVATAR ÇİZİM VE ÖZELLERİ ---
+    let avatarSecim = { renk: "#f6ad55", sapka: 0, gozluk: 0 };
+    const renkler = ["#f6ad55", "#f87171", "#fbbf24", "#34d399", "#22d3ee", "#818cf8"];
+    const aksesuarlar = { sapka: ["Yok", "Silindir", "Kovboy"], gozluk: ["Yok", "Güneş", "Pilot"] };
+
+    window.avatarCiz = (conf, id) => {
+        let h = `<svg viewBox="0 0 200 220" class="avatar-svg">
+            <rect x="60" y="60" width="80" height="120" rx="40" fill="${conf.renk}" />
+            <circle cx="85" cy="95" r="6" fill="#1e293b" />
+            <circle cx="115" cy="95" r="6" fill="#1e293b" />`;
+        if(conf.sapka == 1) h += `<rect x="65" y="20" width="70" height="45" fill="#1e293b" rx="5"/>`;
+        if(conf.gozluk == 1) h += `<rect x="70" y="88" width="60" height="12" fill="#1e293b" rx="2" opacity="0.8"/>`;
+        h += `</svg>`;
+        const el = document.getElementById(id); if(el) el.innerHTML = h;
+    };
+
+    const palet = document.getElementById('renkPaleti');
+    renkler.forEach(r => {
+        const d = document.createElement('div');
+        d.className = 'renk-kutu'; d.style.background = r;
+        if(r === avatarSecim.renk) d.classList.add('secili');
+        d.onclick = () => {
+            avatarSecim.renk = r;
+            document.querySelectorAll('.renk-kutu').forEach(k => k.classList.remove('secili'));
+            d.classList.add('secili');
+            avatarCiz(avatarSecim, "girisAvatar");
+        };
+        palet.appendChild(d);
+    });
+
+    window.ayarDegistir = (tip, yon) => {
+        avatarSecim[tip] = (avatarSecim[tip] + yon + 3) % 3;
+        document.getElementById(`t-${tip}`).textContent = aksesuarlar[tip][avatarSecim[tip]];
+        avatarCiz(avatarSecim, "girisAvatar");
+    };
+    avatarCiz(avatarSecim, "girisAvatar");
+
+    // --- SİSTEM FONKSİYONLARI ---
     window.koduKopyala = () => {
         const kod = document.getElementById('odaKoduGoster').textContent;
         navigator.clipboard.writeText(kod).then(() => alert("Oda Kodu Kopyalandı: " + kod));
     };
 
-    // --- QR KOD ---
-    function qrOlustur(kod) {
-        const qrDiv = document.getElementById("qrcode");
-        qrDiv.innerHTML = "";
-        new QRCode(qrDiv, { text: window.location.href.split('?')[0] + "?room=" + kod, width: 180, height: 180 });
-    }
-
-    // --- DOKTOR MANTIĞI ---
-    window.doktorKoru = (hedefId) => {
-        if(hedefId === sonKorunanId) {
-            alert("Dikkat: Üst üste aynı kişiyi koruyamazsın!");
-            return;
-        }
-        sonKorunanId = hedefId;
-        // Firebase güncelleme kodları buraya...
-    };
-
-    // --- GİRİŞ / LOBİ / OYUN ---
     window.odaOlustur = () => {
         benimAdim = document.getElementById('kullaniciAdi').value || "Host";
         mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
         liderMiyim = true;
-        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi', adminName: benimAdim }).then(() => odayaGir());
+        set(ref(db, 'rooms/'+mevcutOda), { phase: 'lobi', adminName: benimAdim, adminAvatar: avatarSecim }).then(() => odayaGir());
     };
 
     window.odayaKatil = () => {
         const btn = document.getElementById('btnKatil');
-        btn.disabled = true; // ÇİFT TIKLAMA ENGELİ
+        btn.disabled = true;
         benimAdim = document.getElementById('kullaniciAdi').value;
         mevcutOda = document.getElementById('odaKoduGiris').value;
         if(benimAdim && mevcutOda) odayaGir(); else btn.disabled = false;
@@ -173,12 +190,32 @@
         document.getElementById('giris-ekrani').style.display = 'none';
         document.getElementById('lobi-ekrani').style.display = 'block';
         document.getElementById('odaKoduGoster').textContent = mevcutOda;
-        if(liderMiyim) { document.getElementById('admin-ayarlari').style.display = 'block'; qrOlustur(mevcutOda); }
-        odayiDinle();
+        if(liderMiyim) {
+            document.getElementById('admin-panel').style.display = 'block';
+            new QRCode(document.getElementById("qrcode"), { text: window.location.href.split('?')[0] + "?room=" + mevcutOda, width: 160, height: 160 });
+        }
+        onValue(ref(db, `rooms/${mevcutOda}/players`), (snap) => {
+            const liste = document.getElementById('oyuncuListesi');
+            liste.innerHTML = "";
+            const veri = snap.val(); if(!veri) return;
+            Object.entries(veri).forEach(([k, p]) => {
+                liste.innerHTML += `<div class="oyuncu-satir"><div class="mini-avatar-kutu" id="av-${k}"></div><b>${p.ad}</b></div>`;
+                setTimeout(() => avatarCiz(p.avatar, `av-${k}`), 50);
+            });
+        });
     }
 
-    // Diğer avatar çizim ve Firebase dinleme fonksiyonları buraya orijinal koddaki gibi eklenecektir...
-    function odayiDinle() { /* ... Orijinal Firebase dinleme yapısı ... */ }
+    // Doktorun üst üste aynı kişiyi korumasını engelleyen mantık
+    window.koruOyuncu = (id) => {
+        if(id === sonKorunanId) return alert("Aynı kişiyi iki tur üst üste koruyamazsın!");
+        sonKorunanId = id;
+        // Firebase koruma işlemleri...
+    };
+
+    window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('room')) document.getElementById('odaKoduGiris').value = params.get('room');
+    };
 </script>
 </body>
 </html>
