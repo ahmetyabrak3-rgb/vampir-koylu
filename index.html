@@ -3,93 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vampir Köylü - Ultra 3D v2</title>
+    <title>Vampir Köylü - Ultra 3D Avatar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --arka-plan: #0f172a; --kart: #1e293b; --metin: #f8fafc; --vurgu: #fbbf24; --vampir-renk: #ef4444; --doktor-renk: #10b981; --ikincil: #334155; --golge-renk: rgba(0,0,0,0.5); }
         body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; background: var(--arka-plan); color: var(--metin); overflow: hidden; }
-        .kart { background: var(--kart); border-radius: 24px; padding: 30px; width: 95%; max-width: 480px; box-shadow: 0 25px 50px -12px var(--golge-renk); text-align: center; border: 1px solid rgba(255,255,255,0.08); overflow-y: auto; max-height: 90vh; scrollbar-width: thin; }
+        .kart { background: var(--kart); border-radius: 24px; padding: 30px; width: 95%; max-width: 480px; box-shadow: 0 25px 50px -12px var(--golge-renk); text-align: center; border: 1px solid rgba(255,255,255,0.08); overflow-y: auto; max-height: 90vh; }
         
+        /* --- GÜÇLENDİRİLMİŞ 3D STİLLER --- */
         .avatar-sahne { width: 160px; height: 160px; margin: 0 auto 25px; position: relative; perspective: 800px; }
-        .avatar-svg { width: 100%; height: 100%; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6)); }
+        .avatar-svg { width: 100%; height: 100%; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6)); transform-style: preserve-3d; }
         
         .ozellestirme-paneli { background: #162032; padding: 15px; border-radius: 16px; margin-bottom: 20px; }
         .renk-paleti { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 15px; }
-        .renk-kutu { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .renk-kutu { width: 100%; aspect-ratio: 1; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.2); }
         .renk-kutu.secili { border-color: var(--vurgu); transform: scale(1.1); box-shadow: 0 0 15px var(--vurgu); }
 
-        .oyuncu-satir { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; }
-        .mini-avatar-kutu { width: 50px; height: 50px; border-radius: 10px; background: #0f172a; border: 2px solid var(--vurgu); overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        
-        input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-        .buton { width: 100%; padding: 16px; margin: 8px 0; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
-        .buton-ana { background: var(--vurgu); color: #1e293b; box-shadow: 0 4px 0 #d97706; }
-        .buton-ikincil { background: var(--ikincil); color: white; }
-        .buton-aksiyon { background: var(--ikincil); display: flex; align-items: center; gap: 15px; padding: 10px; text-align: left; margin-bottom: 8px; }
-        .secili-buton { border: 2px solid var(--vurgu) !important; background: rgba(251, 191, 36, 0.1) !important; }
+        .aksesuar-satir { display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+        .mini-btn { background: var(--ikincil); border: none; color: white; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; transition: background 0.2s; box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        .mini-btn:hover { background: #475569; transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
+        .mini-btn:active { transform: translateY(2px); box-shadow: none; }
 
+        /* --- OYUN İÇİ GÖRÜNÜM STİLLERİ --- */
+        .oyuncu-satir { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; transition: background 0.2s; }
+        .oyuncu-satir:hover { background: rgba(255,255,255,0.08); }
+        .mini-avatar-kutu { width: 50px; height: 50px; border-radius: 10px; background: #0f172a; border: 2px solid var(--vurgu); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+        .mini-avatar-svg { width: 100%; height: 100%; }
+        .oyuncu-bilgi { display: flex; flex-direction: column; align-items: flex-start; }
+        .oyuncu-ad { font-weight: 700; font-size: 15px; }
+        .oyuncu-durum { font-size: 12px; color: #94a3b8; }
+
+        /* --- GENEL STİLLER --- */
+        h1 { font-size: 28px; font-weight: 900; color: var(--vurgu); margin-bottom: 20px; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; outline: none; font-family: 'Inter'; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .buton { width: 100%; padding: 16px; margin: 8px 0; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
+        .buton-ana { background: var(--vurgu); color: #1e293b; box-shadow: 0 4px 0 #d97706; }
+        .buton-ana:hover { transform: translateY(2px); box-shadow: 0 2px 0 #d97706; }
+        .buton-ana:active { transform: translateY(4px); box-shadow: none; }
+        .buton-ikincil { background: var(--ikincil); color: white; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+        .buton-ikincil:hover { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+        .buton-ikincil:active { transform: translateY(4px); box-shadow: none; }
+        .buton-aksiyon { background: var(--ikincil); display: flex; align-items: center; justify-content: flex-start; gap: 15px; padding: 10px; text-align: left; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+        .secili-buton { background: var(--vurgu) !important; color: #1e293b !important; box-shadow: 0 0 20px var(--vurgu), 0 4px 0 #d97706 !important; border: 2px solid white !important; }
+        .panel { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 16px; margin-top: 20px; text-align: left; border: 1px dashed var(--vurgu); }
+        .sayac { font-size: 50px; font-weight: 900; color: var(--vurgu); margin: 10px 0; text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        .katman { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; text-align: center; padding: 20px; backdrop-filter: blur(8px); }
+        .ayar-grubu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .ayar-item label { font-size: 11px; color: #94a3b8; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
         #chat-bolumu { background: rgba(0,0,0,0.3); border-radius: 16px; margin-top: 20px; padding: 15px; display: none; flex-direction: column; }
-        #chat-mesajlar { height: 120px; overflow-y: auto; text-align: left; font-size: 13px; margin-bottom: 10px; }
-        .mesaj { margin-bottom: 4px; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.05); }
-        .mesaj-olu { color: #94a3b8; font-style: italic; border-left: 3px solid #ef4444; }
-        .katman { position: fixed; inset: 0; background: rgba(15,23,42,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(8px); }
-        .dead-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(239, 68, 68, 0.1); pointer-events: none; }
+        #chat-mesajlar { height: 150px; overflow-y: auto; text-align: left; font-size: 13px; margin-bottom: 10px; padding-right: 5px; }
+        .mesaj { margin-bottom: 6px; padding: 6px 10px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .mesaj-yazar { color: var(--vurgu); font-weight: bold; margin-right: 5px; }
     </style>
 </head>
 <body>
 
 <div id="durumKatmani" class="katman">
-    <div id="katmanEmoji" style="font-size: 80px; margin-bottom: 10px;"></div>
-    <div id="katmanBaslik" style="font-size: 28px; font-weight: 900; color: var(--vurgu);"></div>
-    <div id="katmanAltMetin" style="margin: 15px; color: #94a3b8; font-size: 16px;"></div>
-    <button class="buton buton-ana" style="width: 150px;" onclick="katmaniKapat()">TAMAM</button>
+    <div id="katmanEmoji" style="font-size: 100px; margin-bottom: 20px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));"></div>
+    <div id="katmanBaslik" style="font-size: 32px; font-weight: 900; color: var(--vurgu);"></div>
+    <div id="katmanAltMetin" style="margin: 20px; color: #94a3b8; font-size: 18px; max-width: 400px; line-height: 1.5;"></div>
+    <button id="katmanButon" class="buton buton-ana" style="width: 200px;" onclick="katmaniKapat()">ANLADIM</button>
 </div>
 
 <div class="kart">
     <div id="giris-ekrani">
-        <h1>AVATARINI SEÇ</h1>
+        <h1>KARAKTERİNİ OLUŞTUR</h1>
+        
         <div class="avatar-sahne" id="girisAvatar"></div>
+        
         <div class="ozellestirme-paneli">
+            <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 10px;">GÖVDE RENGİ</div>
             <div class="renk-paleti" id="renkPaleti"></div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button class="buton-ikincil buton" onclick="ayar('sapka', 1)">🎩 ŞAPKA</button>
-                <button class="buton-ikincil buton" onclick="ayar('gozluk', 1)">👓 GÖZLÜK</button>
-            </div>
+            
+            <div class="aksesuar-satir"><span>🎩 ŞAPKA:</span> <div><button class="mini-btn" onclick="ayar('sapka', -1)">◀</button> <span id="t-sapka" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('sapka', 1)">▶</button></div></div>
+            <div class="aksesuar-satir"><span>👓 GÖZLÜK:</span> <div><button class="mini-btn" onclick="ayar('gozluk', -1)">◀</button> <span id="t-gozluk" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('gozluk', 1)">▶</button></div></div>
+            <div class="aksesuar-satir"><span>🎭 MASKE:</span> <div><button class="mini-btn" onclick="ayar('maske', -1)">◀</button> <span id="t-maske" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('maske', 1)">▶</button></div></div>
+            <div class="aksesuar-satir"><span>🧔 SAKAL:</span> <div><button class="mini-btn" onclick="ayar('sakal', -1)">◀</button> <span id="t-sakal" style="display:inline-block; width:80px; text-align:center;">Yok</span> <button class="mini-btn" onclick="ayar('sakal', 1)">▶</button></div></div>
         </div>
-        <input type="text" id="kullaniciAdi" placeholder="Adın ne?" maxlength="12">
-        <button class="buton buton-ana" onclick="odaOlustur()">ODA KUR</button>
+        <input type="text" id="kullaniciAdi" placeholder="Rumuzunu yaz..." maxlength="12">
+        <button class="buton buton-ana" onclick="odaOlustur()">ODA KUR (HOST)</button>
         <div style="display: flex; gap: 10px;">
-            <input type="text" id="odaKoduGiris" placeholder="Oda Kodu">
-            <button class="buton buton-ikincil" onclick="odayaKatil()">KATIL</button>
+            <input type="text" id="odaKoduGiris" placeholder="Oda Kodu" style="flex: 1;">
+            <button class="buton buton-ikincil" onclick="odayaKatil()" style="flex: 1;">KATIL</button>
         </div>
     </div>
 
     <div id="lobi-ekrani" style="display: none;">
-        <div style="font-size: 12px; color: #94a3b8;">ODA KODU</div>
-        <h2 id="odaKoduGoster" style="margin: 5px 0 20px; font-size: 32px; letter-spacing: 5px;">000000</h2>
-        <div id="qrcode" style="margin-bottom: 20px; display: inline-block; padding: 10px; background: white; border-radius: 10px;"></div>
-        
-        <div id="admin-ayarlari" class="ozellestirme-paneli" style="display:none; text-align: left;">
-            <label style="font-size:12px;">YÖNETİCİ ROLÜ:</label>
-            <select id="adminRolSecimi"><option value="izleyici">İzleyici (Moderatör)</option><option value="oyuncu">Oyuncu</option></select>
-            <button class="buton buton-ana" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
+        <div style="font-size: 12px; color: #64748b; font-weight: bold; letter-spacing: 1px;">ODA KODU</div>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0 20px;">
+            <span id="odaKoduGoster" style="font-size: 36px; font-weight: 900; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">000000</span>
+            <button onclick="koduKopyala()" style="background:var(--ikincil); border:none; color:white; padding:8px; border-radius:8px; cursor:pointer; box-shadow: 0 2px 0 rgba(0,0,0,0.3);">📋</button>
         </div>
+        <div id="qr-kapsayici" style="display:none; margin-bottom: 20px;"><div id="qrcode" style="padding:10px; background:white; border-radius:12px; display:inline-block; box-shadow: 0 0 20px rgba(255,255,255,0.1);"></div></div>
+
+        <div id="admin-ayarlari" class="panel" style="display:none;">
+            <p style="text-align:center; font-weight:bold; color:var(--vurgu); margin:0 0 15px;">OYUN AYARLARI</p>
+            <select id="adminRolSecimi">
+                <option value="izleyici">Sadece İzleyici (Yönetici)</option>
+                <option value="oyuncu">Oyuncu Olarak Katıl</option>
+            </select>
+            <div class="ayar-grubu">
+                <div class="ayar-item"><label>GECE (SN)</label><input type="number" id="sureGece" value="20"></div>
+                <div class="ayar-item"><label>DOKTOR (SN)</label><input type="number" id="sureDoktor" value="15"></div>
+                <div class="ayar-item"><label>TARTIŞMA (SN)</label><input type="number" id="sureTartisma" value="60"></div>
+                <div class="ayar-item"><label>OYLAMA (SN)</label><input type="number" id="sureOylama" value="25"></div>
+            </div>
+            <button class="buton buton-ana" style="margin-top:20px;" onclick="oyunuBaslat()">OYUNU BAŞLAT</button>
+        </div>
+
+        <div style="text-align: left; font-weight: bold; color: #94a3b8; margin-bottom: 10px;">OYUNCULAR</div>
         <div id="oyuncuListesi"></div>
     </div>
 
     <div id="oyun-alani" style="display: none;">
-        <h3 id="asamaEtiketi" style="color: var(--vurgu);">GECE</h3>
-        <div id="sayacGosterge" style="font-size: 40px; font-weight: 900;">00:20</div>
+        <div id="asamaEtiketi" style="color: var(--vurgu); font-weight: 800; font-size: 18px; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">...</div>
+        <div id="sayacGosterge" class="sayac">00:00</div>
         
         <div id="chat-bolumu">
             <div id="chat-mesajlar"></div>
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="chatInput" placeholder="Mesaj..." onkeypress="if(event.key==='Enter') mesajGonder()" style="margin:0;">
-                <button onclick="mesajGonder()" class="buton-ana" style="border:none; border-radius:10px; padding:0 15px;">></button>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="chatInput" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter') mesajGonder()" style="margin:0;">
+                <button onclick="mesajGonder()" style="background:var(--vurgu); border:none; border-radius:10px; padding:0 20px; cursor:pointer; box-shadow: 0 4px 0 #d97706;">🚀</button>
             </div>
         </div>
-        <div id="oyunAksiyonListesi" style="margin-top: 15px;"></div>
+        <div id="oyunAksiyonListesi" style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
 </div>
 
@@ -108,45 +146,109 @@
     const db = getDatabase(app);
     let mevcutOda = null, benimAdim = "", benimAnahtarim = "", liderMiyim = false, rolum = "?", hayattaMiyim = true, secimim = null;
 
-    // --- AVATAR MOTORU ---
+    // --- YENİ ULTRA 3D AVATAR SİSTEMİ ---
     let avatarSecim = { renk: "#f6ad55", sapka: 0, gozluk: 0, maske: 0, sakal: 0 };
-    const renkler = ["#f6ad55", "#f87171", "#fbbf24", "#a3e635", "#34d399", "#22d3ee", "#818cf8", "#c084fc"];
+    
+    const renkler = ["#f6ad55", "#f87171", "#fbbf24", "#a3e635", "#34d399", "#22d3ee", "#818cf8", "#c084fc", "#f472b6", "#e2e8f0", "#94a3b8", "#475569"];
+    const data = {
+        sapka: ["Yok", "Silindir", "Kovboy", "Viking", "Kasket", "Parti"],
+        gozluk: ["Yok", "Güneş", "Pilot", "Yuvarlak", "Kalp", "3D"],
+        maske: ["Yok", "Cerrahi", "Venedik", "Ninja", "Palyaço", "Kuru Kafa"],
+        sakal: ["Yok", "Kirli", "Keçi", "Pala", "Tam", "Bıyık"]
+    };
 
     function renkPaletiOlustur() {
         const palet = document.getElementById('renkPaleti');
-        renkler.forEach(r => {
-            const d = document.createElement('div');
-            d.className = 'renk-kutu'; d.style.background = r;
-            d.onclick = () => { avatarSecim.renk = r; avatarCiz(avatarSecim, "girisAvatar"); };
-            palet.appendChild(d);
+        renkler.forEach(renk => {
+            const kutu = document.createElement('div');
+            kutu.className = `renk-kutu ${renk === avatarSecim.renk ? 'secili' : ''}`;
+            kutu.style.backgroundColor = renk;
+            kutu.onclick = () => {
+                avatarSecim.renk = renk;
+                document.querySelectorAll('.renk-kutu').forEach(k => k.classList.remove('secili'));
+                kutu.classList.add('secili');
+                avatarCiz(avatarSecim, "girisAvatar");
+            };
+            palet.appendChild(kutu);
         });
     }
+    renkPaletiOlustur();
 
-    function avatarCiz(conf, id, isDead = false) {
-        const anaRenk = isDead ? "#94a3b8" : conf.renk;
-        let h = `<svg viewBox="0 0 200 220" class="avatar-svg" style="${isDead ? 'filter: grayscale(0.8) opacity(0.6);' : ''}">
-            <rect x="60" y="60" width="80" height="120" rx="40" fill="${anaRenk}" />`;
+    function avatarCiz(conf, id) {
+        const anaRenk = conf.renk;
+        // Gövdeyi uzattık (height: 120) ve koordinatları ona göre ayarladık.
+        let h = `<svg viewBox="0 0 200 220" class="avatar-svg">
+        <defs>
+            <linearGradient id="govdeGrad-${id}" x1="20%" y1="0%" x2="80%" y2="100%">
+                <stop offset="0%" style="stop-color:${anaRenk};stop-opacity:1" />
+                <stop offset="50%" style="stop-color:${anaRenk};stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#000;stop-opacity:0.3" />
+            </linearGradient>
+            <filter id="icGolge-${id}">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+                <feOffset in="blur" dx="0" dy="4" result="offsetBlur"/>
+                <feSpecularLighting in="blur" surfaceScale="5" specularConstant="1" specularExponent="20" lighting-color="#ffffff" result="specOut">
+                    <fePointLight x="-5000" y="-10000" z="20000"/>
+                </feSpecularLighting>
+                <feComposite in="specOut" in2="SourceAlpha" operator="in" result="specOut"/>
+                <feComposite in="SourceGraphic" in2="specOut" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litPaint"/>
+            </filter>
+            <filter id="aksGolge-${id}"><feDropShadow dx="1" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.5"/></filter>
+        </defs>
         
-        if(isDead) {
-            // Çarpı Gözler
-            h += `<path d="M80,90 L95,105 M95,90 L80,105" stroke="white" stroke-width="4"/>`;
-            h += `<path d="M105,90 L120,105 M120,90 L105,105" stroke="white" stroke-width="4"/>`;
-        } else {
-            h += `<circle cx="85" cy="95" r="6" fill="#1e293b" /><circle cx="115" cy="95" r="6" fill="#1e293b" />`;
-        }
+        <rect x="60" y="60" width="80" height="120" rx="40" fill="url(#govdeGrad-${id})" filter="url(#icGolge-${id})" />
+        
+        <circle cx="85" cy="95" r="6" fill="#1e293b" filter="url(#aksGolge-${id})" />
+        <circle cx="115" cy="95" r="6" fill="#1e293b" filter="url(#aksGolge-${id})" />`;
+        
+        const sG = `filter="url(#aksGolge-${id})"`;
 
-        // Aksesuarlar (Basit Versiyon)
-        if(conf.sapka > 0) h += `<rect x="60" y="30" width="80" height="40" fill="#1e293b" rx="5"/>`;
-        if(conf.gozluk > 0) h += `<path d="M70,95 L130,95" stroke="#1e293b" stroke-width="8" opacity="0.6"/>`;
+        // Şapkalar (Tam oturtuldu)
+        if(conf.sapka==1) h+=`<g ${sG}><rect x="70" y="20" width="60" height="45" fill="#1e293b"/><rect x="60" y="60" width="80" height="12" fill="#1e293b"/><rect x="70" y="50" width="60" height="12" fill="#ef4444"/></g>`;
+        if(conf.sapka==2) h+=`<path d="M50,55 Q100,10 150,55 L150,70 L50,70 Z" fill="#78350f" ${sG}/>`;
+        if(conf.sapka==3) h+=`<path d="M60,45 L100,5 L140,45 L100,65 Z" fill="#9ca3af" ${sG}/><path d="M70,45 L60,15 M130,45 L140,15" stroke="#d1d5db" stroke-width="8" stroke-linecap="round"/>`;
+        if(conf.sapka==4) h+=`<path d="M60,50 L140,50 L150,65 L50,65 Z" fill="#374151" ${sG}/><rect x="65" y="40" width="70" height="20" fill="#4b5563"/>`;
+        if(conf.sapka==5) h+=`<path d="M70,65 L100,-5 L130,65 Z" fill="#ec4899" ${sG}/><circle cx="100" cy="-5" r="8" fill="#fbbf24"/>`;
+
+        // Gözlükler (Tam oturtuldu)
+        if(conf.gozluk==1) h+=`<g ${sG}><rect x="75" y="85" width="22" height="16" fill="#1e293b"/><rect x="103" y="85" width="22" height="16" fill="#1e293b"/><line x1="97" y1="92" x2="103" y2="92" stroke="#1e293b" stroke-width="3"/></g>`;
+        if(conf.gozluk==2) h+=`<g ${sG}><path d="M70,85 Q85,110 100,85 T130,85" fill="none" stroke="#f59e0b" stroke-width="4"/><path d="M75,90 Q85,105 95,90" fill="#1e293b" opacity="0.8"/><path d="M105,90 Q115,105 125,90" fill="#1e293b" opacity="0.8"/></g>`;
+        if(conf.gozluk==3) h+=`<g ${sG}><circle cx="86" cy="95" r="13" fill="none" stroke="#1e293b" stroke-width="3"/><circle cx="114" cy="95" r="13" fill="none" stroke="#1e293b" stroke-width="3"/><line x1="99" y1="95" x2="101" y2="95" stroke="#1e293b" stroke-width="3"/></g>`;
+
+        // Maskeler (Tam oturtuldu)
+        if(conf.maske==1) h+=`<rect x="75" y="105" width="50" height="30" rx="8" fill="#3b82f6" ${sG}/><line x1="75" y1="110" x2="60" y2="100" stroke="#fff" stroke-width="2"/><line x1="125" y1="110" x2="140" y2="100" stroke="#fff" stroke-width="2"/>`;
+        if(conf.maske==2) h+=`<path d="M70,85 Q100,65 130,85 L120,130 Q100,140 80,130 Z" fill="#f8fafc" ${sG} /><circle cx="85" cy="95" r="5" fill="#1e293b"/><circle cx="115" cy="95" r="5" fill="#1e293b"/>`;
+        if(conf.maske==3) h+=`<rect x="65" y="90" width="70" height="40" fill="#1e293b" ${sG}/>`;
         
-        h += `</svg>`;
+        // Sakallar (Tam oturtuldu)
+        if(conf.sakal==1) h+=`<path d="M75,115 Q100,150 125,115 L115,110 Q100,125 85,110 Z" fill="#1e293b" opacity="0.9" ${sG}/>`;
+        if(conf.sakal==2) h+=`<path d="M95,125 L105,125 L100,150 Z" fill="#78350f" ${sG}/>`;
+        if(conf.sakal==3) h+=`<path d="M60,110 Q100,165 140,110 L140,100 Q100,140 60,100 Z" fill="#1e293b" ${sG}/>`;
+        if(conf.sakal==4) h+=`<path d="M65,100 Q100,175 135,100" fill="#78350f" ${sG}/>`;
+        if(conf.sakal==5) h+=`<path d="M80,110 Q100,95 120,110 Q100,120 80,110" fill="#1e293b" ${sG}/>`;
+
+        h+=`</svg>`;
         const el = document.getElementById(id);
         if(el) el.innerHTML = h;
     }
 
-    // --- OYUN MANTIĞI ---
-    window.ayar = (k, v) => { avatarSecim[k] = (avatarSecim[k] + 1) % 2; avatarCiz(avatarSecim, "girisAvatar"); };
-    
+    window.ayar = (k, y) => {
+        avatarSecim[k] += y;
+        const max = data[k].length - 1;
+        if(avatarSecim[k] < 0) avatarSecim[k] = max;
+        if(avatarSecim[k] > max) avatarSecim[k] = 0;
+        document.getElementById(`t-${k}`).textContent = data[k][avatarSecim[k]];
+        avatarCiz(avatarSecim, "girisAvatar");
+    };
+    avatarCiz(avatarSecim, "girisAvatar");
+
+    // --- OYUN MANTIĞI (Değişmedi) ---
+    window.onload = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlOda = urlParams.get('room');
+        if (urlOda) document.getElementById('odaKoduGiris').value = urlOda;
+    };
+
     window.odaOlustur = () => {
         benimAdim = document.getElementById('kullaniciAdi').value || "Host";
         mevcutOda = Math.floor(100000 + Math.random() * 900000).toString();
@@ -157,6 +259,7 @@
     window.odayaKatil = () => {
         benimAdim = document.getElementById('kullaniciAdi').value;
         mevcutOda = document.getElementById('odaKoduGiris').value;
+        if(!benimAdim) return alert("Lütfen bir rumuz yaz!");
         if(benimAdim && mevcutOda) odayaGir();
     };
 
@@ -164,9 +267,7 @@
         document.getElementById('giris-ekrani').style.display = 'none';
         document.getElementById('lobi-ekrani').style.display = 'block';
         document.getElementById('odaKoduGoster').textContent = mevcutOda;
-        new QRCode(document.getElementById("qrcode"), { text: mevcutOda, width: 100, height: 100 });
-        
-        if(liderMiyim) document.getElementById('admin-ayarlari').style.display = 'block';
+        if(liderMiyim) { document.getElementById('admin-ayarlari').style.display = 'block'; qrOlustur(mevcutOda); }
         else {
             const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, avatar: avatarSecim, rol: '?', status: 'alive', votes: 0 });
             benimAnahtarim = pRef.key;
@@ -177,124 +278,134 @@
     function odayiDinle() {
         onValue(ref(db, `rooms/${mevcutOda}`), (snap) => {
             const veri = snap.val(); if(!veri) return;
+            const liste = document.getElementById('oyuncuListesi');
+            liste.innerHTML = "";
             
-            // Oyuncu Listesi Güncelleme
-            const liste = document.getElementById('oyuncuListesi'); liste.innerHTML = "";
+            liste.innerHTML += createPlayerRow("admin", veri.adminName, veri.adminAvatar, true);
+            setTimeout(() => { if(veri.adminAvatar) avatarCiz(veri.adminAvatar, "av-admin"); }, 50);
+
             if(veri.players) {
                 Object.entries(veri.players).forEach(([k, p]) => {
-                    const d = document.createElement('div');
-                    d.className = 'oyuncu-satir';
-                    d.innerHTML = `<div class="mini-avatar-kutu" id="av-${k}"></div><div><b>${p.ad}</b><br><small>${p.status === 'dead' ? '💀 ÖLÜ' : 'HAYATTA'}</small></div>`;
-                    liste.appendChild(d);
-                    avatarCiz(p.avatar, `av-${k}`, p.status === 'dead');
-                    if(k === benimAnahtarim) {
-                        rolum = p.rol;
-                        hayattaMiyim = p.status === 'alive';
-                    }
+                    liste.innerHTML += createPlayerRow(k, p.ad, p.avatar, false, p.status);
+                    setTimeout(() => { if(p.avatar) avatarCiz(p.avatar, `av-${k}`); }, 50);
                 });
             }
 
-            // Faz Geçişleri
+            if(veri.winner) { katmaniGoster(veri.winner.includes('VAMPİR') ? '🧛‍♂️' : '🏆', veri.winner, `Vampir: ${veri.vampireName}`, true); return; }
             if(veri.phase !== 'lobi') {
                 document.getElementById('lobi-ekrani').style.display = 'none';
                 document.getElementById('oyun-alani').style.display = 'block';
+                if(veri.players && veri.players[benimAnahtarim]) {
+                    rolum = veri.players[benimAnahtarim].rol;
+                    hayattaMiyim = veri.players[benimAnahtarim].status === 'alive';
+                    if(!window.rolDuyuruldu && rolum !== "?") {
+                        window.rolDuyuruldu = true;
+                        const rInfo = rolum === 'VAMPİR' ? {e:'🧛‍♂️', r:'VAMPİRSİN'} : (rolum === 'DOKTOR' ? {e:'🏥', r:'DOKTORSUN'} : {e:'👨‍🌾', r:'KÖYLÜSÜN'});
+                        katmaniGoster(rInfo.e, rInfo.r, "Gizli görevin sana bildirildi. Kimseye güvenme!");
+                    }
+                }
+                if(veri.deathEvent && veri.deathEvent !== window.lastDeath) {
+                    window.lastDeath = veri.deathEvent;
+                    const isDoc = veri.deathEvent.includes("engelledi");
+                    katmaniGoster(isDoc ? '🏥' : '💀', isDoc ? 'KORUMA BAŞARILI!' : 'BİRİ ÖLDÜ!', veri.deathEvent);
+                }
                 arayuzuGuncelle(veri);
             }
-
-            if(veri.winner) {
-                katmaniGoster('🏆', veri.winner, 'Oyun Sona Erdi!', true);
-            }
         });
-
-        // Sohbet Dinle
         onValue(ref(db, `rooms/${mevcutOda}/chat`), (snap) => {
-            const chat = document.getElementById('chat-mesajlar'); chat.innerHTML = "";
-            if(snap.val()) {
-                Object.values(snap.val()).forEach(m => {
-                    const d = document.createElement('div');
-                    d.className = `mesaj ${m.isGhost ? 'mesaj-olu' : ''}`;
-                    d.innerHTML = `<b>${m.isGhost ? '👻 ' : ''}${m.sender}:</b> ${m.text}`;
-                    chat.appendChild(d);
-                });
-                chat.scrollTop = chat.scrollHeight;
-            }
+            const m = snap.val(); const l = document.getElementById('chat-mesajlar'); l.innerHTML = "";
+            if(m) Object.values(m).forEach(x => l.innerHTML += `<div class="mesaj"><span class="mesaj-yazar">${x.gonderen}:</span> ${x.metin}</div>`);
+            l.scrollTop = l.scrollHeight;
         });
     }
 
-    function arayuzuGuncelle(veri) {
-        document.getElementById('asamaEtiketi').textContent = veri.phase.toUpperCase();
-        document.getElementById('sayacGosterge').textContent = "00:" + (veri.timer || 0).toString().padStart(2, '0');
+    function createPlayerRow(id, name, avatar, isAdmin, status = 'alive') {
+        return `
+        <div class="oyuncu-satir" style="${status==='dead'?'opacity:0.5; filter:grayscale(1);':''}">
+            <div class="mini-avatar-kutu"><div id="av-${id}" class="mini-avatar-svg"></div></div>
+            <div class="oyuncu-bilgi">
+                <div class="oyuncu-ad">${isAdmin ? '👑 ' : ''}${name}</div>
+                <div class="oyuncu-durum">${isAdmin ? 'Oda Yöneticisi' : (status==='alive'?'Hayatta':'💀 Öldü')}</div>
+            </div>
+        </div>`;
+    }
+
+    window.oyunuBaslat = async () => {
+        const adminRol = document.getElementById('adminRolSecimi').value;
+        if(adminRol === 'oyuncu' && !benimAnahtarim) {
+            const pRef = push(ref(db, `rooms/${mevcutOda}/players`), { ad: benimAdim, avatar: avatarSecim, rol: '?', status: 'alive', votes: 0 });
+            benimAnahtarim = pRef.key;
+            await new Promise(r => setTimeout(r, 500));
+        }
+        const s = await get(ref(db, `rooms/${mevcutOda}/players`));
+        const oyuncular = s.val(); if(!oyuncular || Object.keys(oyuncular).length < 3) return alert("En az 3 oyuncu gerekli!");
+        const anahtarlar = Object.keys(oyuncular);
+        let karisik = [...anahtarlar].sort(() => Math.random() - 0.5);
+        const vKey = karisik.pop(), dKey = karisik.pop();
+        const updates = {};
+        anahtarlar.forEach(k => updates[`rooms/${mevcutOda}/players/${k}/rol`] = (k === vKey ? 'VAMPİR' : (k === dKey ? 'DOKTOR' : 'KÖYLÜ')));
+        updates[`rooms/${mevcutOda}/vampireName`] = oyuncular[vKey].ad;
+        updates[`rooms/${mevcutOda}/phase`] = 'night';
+        await update(ref(db), updates);
         
-        // Sohbet sadece gündüz veya ölüysen açık
-        const chatAcik = (veri.phase === 'discussion' || !hayattaMiyim);
-        document.getElementById('chat-bolumu').style.display = chatAcik ? 'flex' : 'none';
+        oyunDongusu(
+            parseInt(document.getElementById('sureGece').value), 
+            parseInt(document.getElementById('sureDoktor').value), 
+            parseInt(document.getElementById('sureTartisma').value), 
+            parseInt(document.getElementById('sureOylama').value)
+        );
+    };
 
-        const liste = document.getElementById('oyunAksiyonListesi');
-        liste.innerHTML = "";
+    async function oyunDongusu(n, dr, d, v) {
+        await update(ref(db, `rooms/${mevcutOda}`), { target: "", shield: "", deathEvent: "" });
+        await remove(ref(db, `rooms/${mevcutOda}/chat`));
+        await asamaKos('night', n); await asamaKos('doctor_phase', dr);
+        const snap = await get(ref(db, `rooms/${mevcutOda}`));
+        const veri = snap.val();
+        let event = "Gece sessiz geçti.";
+        if(veri.target && veri.target !== veri.shield) {
+            await update(ref(db, `rooms/${mevcutOda}/players/${veri.target}`), { status: 'dead' });
+            event = veri.players[veri.target].ad + " Vampir tarafından öldürüldü!";
+        } else if (veri.target && veri.target === veri.shield) { event = "Doktor ölümü engelledi!"; }
+        await update(ref(db, `rooms/${mevcutOda}`), { deathEvent: event, lastEvent: event });
+        if(await kazananKontrol()) return;
+        await asamaKos('discussion', d); await remove(ref(db, `rooms/${mevcutOda}/chat`));
+        await asamaKos('voting', v); await oylariHesapla();
+        if(await kazananKontrol()) return;
+        oyunDongusu(n, dr, d, v);
+    }
 
-        if(hayattaMiyim) {
-            if((veri.phase === 'night' && rolum === 'VAMPİR') || (veri.phase === 'doctor_phase' && rolum === 'DOKTOR') || (veri.phase === 'voting')) {
-                Object.entries(veri.players).forEach(([k, p]) => {
-                    if(p.status === 'alive' && k !== benimAnahtarim) {
-                        const b = document.createElement('button');
-                        b.className = `buton buton-aksiyon ${secimim === k ? 'secili-buton' : ''}`;
-                        b.innerHTML = `Seç: ${p.ad}`;
-                        b.onclick = () => { secimim = k; tikla(veri.phase, k); };
-                        liste.appendChild(b);
-                    }
-                });
-            }
-        } else {
-            liste.innerHTML = "<div style='color:#ef4444; font-weight:bold;'>ÖLDÜN - SADECE DİĞER ÖLÜLERLE KONUŞABİLİRSİN</div>";
+    function arayuzuGuncelle(veri) {
+        document.getElementById('asamaEtiketi').textContent = veri.phase.toUpperCase().replace('_', ' ');
+        document.getElementById('sayacGosterge').textContent = "00:" + (veri.timer || 0).toString().padStart(2,'0');
+        document.getElementById('chat-bolumu').style.display = (veri.phase === 'discussion') ? 'flex' : 'none';
+        const liste = document.getElementById('oyunAksiyonListesi'); liste.innerHTML = "";
+        if(!benimAnahtarim) { liste.innerHTML = "<div style='text-align:center;color:#94a3b8;'>İzleyici Modu</div>"; return; }
+        if(!hayattaMiyim) { liste.innerHTML = "<div style='text-align:center;font-weight:bold;color:var(--vampir-renk);'>💀 ÖLDÜNÜZ</div>"; return; }
+        
+        if((veri.phase === 'night' && rolum === 'VAMPİR') || (veri.phase === 'doctor_phase' && rolum === 'DOKTOR') || (veri.phase === 'voting')) {
+            Object.entries(veri.players).forEach(([k, p]) => {
+                if(p.status === 'alive' && (veri.phase !== 'night' || p.rol !== 'VAMPİR')) {
+                    const btn = document.createElement('button');
+                    btn.className = `buton buton-aksiyon ${secimim===k?'secili-buton':''}`;
+                    btn.onclick = () => tikla(veri.phase, k);
+                    btn.innerHTML = `
+                        <div class="mini-avatar-kutu" style="width:40px;height:40px;"><div id="btn-av-${k}" class="mini-avatar-svg"></div></div>
+                        <span>${p.ad}</span>
+                    `;
+                    liste.appendChild(btn);
+                    setTimeout(() => { if(p.avatar) avatarCiz(p.avatar, `btn-av-${k}`); }, 50);
+                }
+            });
         }
     }
 
     window.tikla = (faz, id) => {
+        secimim = id;
         if(faz === 'night') update(ref(db, `rooms/${mevcutOda}`), { target: id });
-        if(faz === 'doctor_phase') update(ref(db, `rooms/${mevcutOda}`), { shield: id });
-        if(faz === 'voting') {
-            get(ref(db, `rooms/${mevcutOda}/players/${id}/votes`)).then(s => {
-                update(ref(db, `rooms/${mevcutOda}/players/${id}`), { votes: (s.val() || 0) + 1 });
-            });
-        }
+        else if(faz === 'doctor_phase') update(ref(db, `rooms/${mevcutOda}`), { shield: id });
+        else if(faz === 'voting') get(ref(db, `rooms/${mevcutOda}/players/${id}/votes`)).then(s => update(ref(db, `rooms/${mevcutOda}/players/${id}`), { votes: (s.val() || 0) + 1 }));
     };
-
-    window.mesajGonder = () => {
-        const inp = document.getElementById('chatInput');
-        if(!inp.value) return;
-        push(ref(db, `rooms/${mevcutOda}/chat`), {
-            sender: benimAdim,
-            text: inp.value,
-            isGhost: !hayattaMiyim
-        });
-        inp.value = "";
-    };
-
-    window.oyunuBaslat = async () => {
-        const s = await get(ref(db, `rooms/${mevcutOda}/players`));
-        const oyuncular = s.val(); if(!oyuncular || Object.keys(oyuncular).length < 2) return alert("Az oyuncu!");
-        
-        const keys = Object.keys(oyuncular);
-        const vKey = keys[Math.floor(Math.random() * keys.length)];
-        const updates = {};
-        keys.forEach(k => updates[`rooms/${mevcutOda}/players/${k}/rol`] = (k === vKey ? 'VAMPİR' : 'KÖYLÜ'));
-        updates[`rooms/${mevcutOda}/phase`] = 'night';
-        await update(ref(db), updates);
-        donguBaslat();
-    };
-
-    async function donguBaslat() {
-        // Basit Oyun Akışı: Gece (10s) -> Tartışma (20s) -> Oylama (15s)
-        while(true) {
-            await asamaKos('night', 10);
-            await geceSonucu();
-            if(await kazananKontrol()) break;
-            await asamaKos('discussion', 20);
-            await asamaKos('voting', 15);
-            await oylamaSonucu();
-            if(await kazananKontrol()) break;
-        }
-    }
 
     async function asamaKos(ad, sn) {
         for(let i = sn; i >= 0; i--) {
@@ -303,45 +414,49 @@
         }
     }
 
-    async function geceSonucu() {
-        const snap = await get(ref(db, `rooms/${mevcutOda}`));
-        const v = snap.val();
-        if(v.target) {
-            await update(ref(db, `rooms/${mevcutOda}/players/${v.target}`), { status: 'dead' });
-            await update(ref(db, `rooms/${mevcutOda}`), { target: null });
-        }
-    }
-
-    async function oylamaSonucu() {
-        const snap = await get(ref(db, `rooms/${mevcutOda}/players`));
-        const players = snap.val();
-        let enCok = 0, aday = null;
-        Object.entries(players).forEach(([k, p]) => {
-            if(p.votes > enCok) { enCok = p.votes; aday = k; }
+    async function oylariHesapla() {
+        const s = await get(ref(db, `rooms/${mevcutOda}/players`));
+        const oyuncular = s.val(); let enCok = 0, adaylar = [];
+        Object.entries(oyuncular).forEach(([k, p]) => {
+            if(p.votes > enCok) { enCok = p.votes; adaylar = [k]; }
+            else if(p.votes === enCok && enCok > 0) adaylar.push(k);
             update(ref(db, `rooms/${mevcutOda}/players/${k}`), { votes: 0 });
         });
-        if(aday) await update(ref(db, `rooms/${mevcutOda}/players/${aday}`), { status: 'dead' });
+        if(adaylar.length === 1) {
+            await update(ref(db, `rooms/${mevcutOda}/players/${adaylar[0]}`), { status: 'dead' });
+            await update(ref(db, `rooms/${mevcutOda}`), { deathEvent: oyuncular[adaylar[0]].ad + " oylama sonucu asıldı!" });
+        }
     }
 
     async function kazananKontrol() {
         const s = await get(ref(db, `rooms/${mevcutOda}/players`));
-        const pArr = Object.values(s.val());
-        const vLive = pArr.some(p => p.rol === 'VAMPİR' && p.status === 'alive');
-        const kLive = pArr.filter(p => p.rol === 'KÖYLÜ' && p.status === 'alive').length;
-        
-        if(!vLive) { await update(ref(db, `rooms/${mevcutOda}`), { winner: 'KÖYLÜLER KAZANDI' }); return true; }
-        if(kLive <= 0) { await update(ref(db, `rooms/${mevcutOda}`), { winner: 'VAMPİR KAZANDI' }); return true; }
+        const pArr = Object.values(s.val() || {});
+        const vA = pArr.some(p => p.rol === 'VAMPİR' && p.status === 'alive');
+        const kA = pArr.filter(p => p.rol !== 'VAMPİR' && p.status === 'alive').length;
+        if(!vA) { await update(ref(db, `rooms/${mevcutOda}`), { winner: 'KÖYLÜLER KAZANDI' }); return true; }
+        if(kA <= 1) { await update(ref(db, `rooms/${mevcutOda}`), { winner: 'VAMPİR KAZANDI' }); return true; }
         return false;
     }
 
-    function katmaniGoster(e, b, a, f) {
+    function katmaniGoster(emoji, baslik, alt, fin = false) {
         document.getElementById('durumKatmani').style.display = 'flex';
-        document.getElementById('katmanEmoji').textContent = e;
-        document.getElementById('katmanBaslik').textContent = b;
-        document.getElementById('katmanAltMetin').textContent = a;
+        document.getElementById('katmanEmoji').textContent = emoji;
+        document.getElementById('katmanBaslik').textContent = baslik;
+        document.getElementById('katmanAltMetin').textContent = alt;
+        document.getElementById('katmanButon').onclick = fin ? () => location.reload() : katmaniKapat;
     }
     window.katmaniKapat = () => document.getElementById('durumKatmani').style.display = 'none';
-    renkPaletiOlustur(); avatarCiz(avatarSecim, "girisAvatar");
+    window.mesajGonder = () => {
+        const i = document.getElementById('chatInput'); if(!i.value.trim()) return;
+        push(ref(db, `rooms/${mevcutOda}/chat`), { gonderen: benimAdim, metin: i.value }); i.value = "";
+    };
+    function qrOlustur(kod) { 
+        document.getElementById('qrcode').innerHTML = ""; 
+        const link = window.location.origin + window.location.pathname + "?room=" + kod;
+        new QRCode(document.getElementById("qrcode"), { text: link, width: 120, height: 120, colorDark : "#000000", colorLight : "#ffffff" }); 
+        document.getElementById('qr-kapsayici').style.display = 'block'; 
+    }
+    window.koduKopyala = () => { navigator.clipboard.writeText(document.getElementById('odaKoduGoster').textContent).then(() => alert("Kodu kopyaladın!")); };
 </script>
 </body>
 </html>
